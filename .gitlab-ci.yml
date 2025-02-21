@@ -5,6 +5,6 @@ railway-deploy:
   stage: deploy
   image: ghcr.io/railwayapp/cli:latest
   script:
-    - railway up --project=${RAILWAY_PROJECT_ID} --service=${RAILWAY_SERVICE_ID}
+    - railway up --service=${RAILWAY_SERVICE_ID}
   only:
     - main
