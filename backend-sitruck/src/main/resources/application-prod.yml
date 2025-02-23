@@ -1,10 +1,8 @@
 spring:
     application:
-        name: backend-sitrack
-    profiles:
-        active: ${SPRING_PROFILES_ACTIVE:dev}
+        name: manpromanpro
     datasource:
-        url: ${DATABASE_URL}
+        url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
         username: ${PGUSER}
         password: ${PGPASSWORD}
     jpa:
