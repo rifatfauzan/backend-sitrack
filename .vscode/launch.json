@@ -19,6 +19,16 @@
             "projectName": "backend-sitrack-backend-sitruck",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-BackendSitrackApplication<backend-sitrack>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "be_sitruck.backend_sitruck.BackendSitrackApplication",
+            "projectName": "backend-sitrack",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
