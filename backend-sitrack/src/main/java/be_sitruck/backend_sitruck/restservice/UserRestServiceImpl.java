@@ -10,6 +10,8 @@ import be_sitruck.backend_sitruck.repository.UserDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateUserRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateUserResponseDTO;
 
+import java.util.*;
+
 @Service
 public class UserRestServiceImpl implements UserRestService {
     @Autowired
@@ -42,6 +44,16 @@ public class UserRestServiceImpl implements UserRestService {
         } catch (Exception e) {
             throw new RuntimeException("Gagal membuat user: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<CreateUserResponseDTO> getAllUsers(){
+        List<UserModel> users = userDb.findAll();
+        List<CreateUserResponseDTO> responseDTOs = new ArrayList<>();
+        for (UserModel user : users) {
+            responseDTOs.add(new CreateUserResponseDTO(user.getId(), user.getUsername(), user.getRole().getRole()));
+        }
+        return responseDTOs;
     }
 
 

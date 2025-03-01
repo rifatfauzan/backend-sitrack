@@ -1,7 +1,6 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
-import be_sitruck.backend_sitruck.model.UserModel;
-import be_sitruck.backend_sitruck.repository.UserDb;
+
 import be_sitruck.backend_sitruck.restdto.request.LoginJwtRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.LoginJwtResponseDTO;
@@ -13,11 +12,6 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

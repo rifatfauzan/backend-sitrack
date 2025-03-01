@@ -19,5 +19,5 @@ public class BaseResponseDTO<T> {
   private Date timestamp;
 
   private T data;
-  private List<T> dataList;
+
 }
