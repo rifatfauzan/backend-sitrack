@@ -8,4 +8,5 @@ import be_sitruck.backend_sitruck.model.UserModel;
 @Repository
 public interface UserDb extends JpaRepository<UserModel, Long> {
     UserModel findByUsername(String username);
+    Boolean existsByUsername(String username);
 }
