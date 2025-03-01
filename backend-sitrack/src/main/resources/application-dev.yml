@@ -2,9 +2,9 @@ spring:
     application:
         name: backend-sitrack
     datasource:
-        url: ${DATABASE_URL}
-        username: ${PGUSER}
-        password: ${PGPASSWORD}
+        url: ${DATABASE_URL_DEV}
+        username: ${DEV_USERNAME}
+        password: ${DEV_PASSWORD}
     jpa:
         properties:
             hibernate:
