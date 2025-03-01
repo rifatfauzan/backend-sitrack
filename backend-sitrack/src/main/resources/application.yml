@@ -1,5 +1,12 @@
 spring:
+    main:
+        allow-circular-references: true
     application:
         name: backend-sitrack
     profiles:
         active: ${SPRING_PROFILES_ACTIVE:dev}
+
+backend-sitrack:
+  app:
+    jwtSecret: "${JWT_SECRET_KEY}"
+    jwtExpirationMs: 86400000
