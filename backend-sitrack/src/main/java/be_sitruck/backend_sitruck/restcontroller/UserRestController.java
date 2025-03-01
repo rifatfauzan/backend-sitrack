@@ -3,6 +3,7 @@ package be_sitruck.backend_sitruck.restcontroller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,5 +46,19 @@ public class UserRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                .body(baseResponseDTO);
         }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllUsers(){
+        var baseResponseDTO = new BaseResponseDTO<List<CreateUserResponseDTO>>();
+        List<CreateUserResponseDTO> listUser = userRestService.getAllUsers();
+
+        baseResponseDTO.setStatus(HttpStatus.OK.value());
+        baseResponseDTO.setData(listUser);
+        baseResponseDTO.setMessage(String.format("List user berhasil ditemukan sebanyak %d user", listUser.size()));
+        baseResponseDTO.setTimestamp(new Date());
+
+        return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
+
     }
 }
