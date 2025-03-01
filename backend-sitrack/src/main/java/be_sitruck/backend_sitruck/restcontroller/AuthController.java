@@ -3,7 +3,9 @@ package be_sitruck.backend_sitruck.restcontroller;
 import be_sitruck.backend_sitruck.model.UserModel;
 import be_sitruck.backend_sitruck.repository.UserDb;
 import be_sitruck.backend_sitruck.restdto.request.LoginJwtRequestDTO;
+import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.LoginJwtResponseDTO;
+import be_sitruck.backend_sitruck.restservice.UserRestService;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
 
 import java.util.*;
@@ -21,37 +23,47 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
-    private UserDb userDb;
+    UserRestService userRestService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginJwtRequestDTO loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginJwtRequestDTO request) {
+        var baseResponseDTO = new BaseResponseDTO<LoginJwtResponseDTO>();
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-    
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserModel user = userDb.findByUsername(loginRequest.getUsername());
-            String jwt = jwtUtils.generateJwtToken(user);
+            var user = userRestService.authenticateWithUsername(request.getUsername(), request.getPassword());
             
-            return ResponseEntity.ok(new LoginJwtResponseDTO(jwt));
+            String token = jwtUtils.generateJwtToken(user);
+
+            var loginResponse = new LoginJwtResponseDTO(
+                token
+            );
+
+            baseResponseDTO.setStatus(HttpStatus.OK.value());
+            baseResponseDTO.setMessage("Login berhasil!");
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(loginResponse);
+            
+            return ResponseEntity.ok(baseResponseDTO);
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Username atau password salah!");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            baseResponseDTO.setStatus(HttpStatus.UNAUTHORIZED.value());
+            baseResponseDTO.setMessage("Username atau Password salah!");
+            baseResponseDTO.setTimestamp(new Date());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(baseResponseDTO);
         }
     }
+
     
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser() {
-        SecurityContextHolder.clearContext();
-        return ResponseEntity.ok("Logout berhasil");
+    public ResponseEntity<?> logout() {
+        var baseResponseDTO = new BaseResponseDTO<>();
+        baseResponseDTO.setStatus(HttpStatus.OK.value());
+        baseResponseDTO.setMessage("Logout berhasil!");
+        baseResponseDTO.setTimestamp(new Date());
+        return ResponseEntity.ok(baseResponseDTO);
     }
 }
 
