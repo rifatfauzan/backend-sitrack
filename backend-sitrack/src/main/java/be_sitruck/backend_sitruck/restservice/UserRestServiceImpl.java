@@ -8,6 +8,7 @@ import be_sitruck.backend_sitruck.model.Role;
 import be_sitruck.backend_sitruck.model.UserModel;
 import be_sitruck.backend_sitruck.repository.UserDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateUserRequestDTO;
+import be_sitruck.backend_sitruck.restdto.request.UpdateUserRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateUserResponseDTO;
 
 import java.util.*;
@@ -43,6 +44,70 @@ public class UserRestServiceImpl implements UserRestService {
 
         } catch (Exception e) {
             throw new RuntimeException("Gagal membuat user: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public CreateUserResponseDTO getUserById(Long id) {
+        UserModel user = userDb.findById(id).orElse(null);
+        if (user == null) {
+            throw new RuntimeException("User tidak ditemukan!");
+        }
+        return new CreateUserResponseDTO(user.getId(), user.getUsername(), user.getRole().getRole());
+    }
+
+    @Override
+    public CreateUserResponseDTO updateUser(Long id, UpdateUserRequestDTO requestDTO) {
+        try {
+            UserModel existingUser = userDb.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User dengan ID " + id + " tidak ditemukan!"));
+            
+            if (!existingUser.getUsername().equals(requestDTO.getUsername()) && 
+                userDb.existsByUsername(requestDTO.getUsername())) {
+                throw new IllegalArgumentException("Username " + requestDTO.getUsername() + " sudah terdaftar!");
+            }
+            
+            existingUser.setUsername(requestDTO.getUsername());
+            
+            if (requestDTO.getPassword() != null && !requestDTO.getPassword().isEmpty()) {
+                existingUser.setPassword(hashPassword(requestDTO.getPassword()));
+            }
+            
+            if (requestDTO.getRole() != null && !requestDTO.getRole().isEmpty()) {
+                Role role = roleService.getRoleByRoleName(requestDTO.getRole());
+                if (role == null) {
+                    throw new IllegalArgumentException("Role tidak ditemukan");
+                }
+                existingUser.setRole(role);
+            }
+            
+            UserModel updatedUser = userDb.save(existingUser);
+            
+            return new CreateUserResponseDTO(
+                updatedUser.getId(),
+                updatedUser.getUsername(),
+                updatedUser.getRole().getRole()
+            );
+        } catch (NoSuchElementException | IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal memperbarui user: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteUserById(Long id){
+        try{
+            UserModel user = userDb.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("User dengan ID " + id + " tidak ditemukan!"));
+
+            if (user.getRole().getRole().equals("Admin")) {
+                throw new IllegalArgumentException("User dengan role Admin tidak dapat dihapus!");
+            }
+
+            userDb.deleteById(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal menghapus user: " + e.getMessage());
         }
     }
 
