@@ -92,4 +92,29 @@ public class ChassisRestServiceImpl implements ChassisRestService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public CreateChassisRequestDTO getChassisById(String chassisId) {
+        Chassis chassis = chassisDb.findByChassisId(chassisId);
+
+        if (chassis == null) {
+            throw new ValidationException("Chassis dengan ID " + chassisId + " tidak ditemukan!");
+        }
+
+        return new CreateChassisRequestDTO(
+                chassis.getChassisId(),
+                chassis.getChassisSize(),
+                chassis.getChassisYear(),
+                chassis.getChassisNumber(),
+                chassis.getChassisAxle(),
+                chassis.getChassisKIRNo(),
+                chassis.getChassisKIRDate(),
+                chassis.getChassisType(),
+                chassis.getInsertedBy(),
+                chassis.getInsertedDate(),
+                chassis.getUpdatedBy(),
+                chassis.getUpdatedDate(),
+                chassis.getSiteId()
+        );
+    }
+
 }

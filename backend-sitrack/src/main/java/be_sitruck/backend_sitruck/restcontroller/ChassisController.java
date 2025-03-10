@@ -47,7 +47,7 @@ public class ChassisController {
     }
 
      @GetMapping("/all")
-    public ResponseEntity<?> getAllUsers(){
+    public ResponseEntity<?> getAllChassis(){
         var baseResponseDTO = new BaseResponseDTO<List<CreateChassisRequestDTO>>();
         List<CreateChassisRequestDTO> listChassis = chassisRestService.getAllChassis();
 
@@ -58,6 +58,28 @@ public class ChassisController {
 
         return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
 
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<?> getChassisById(@RequestParam("id") String chassisId) {
+        var baseResponseDTO = new BaseResponseDTO<CreateChassisRequestDTO>();
+        try {
+            CreateChassisRequestDTO chassisRequestDTO = chassisRestService.getChassisById(chassisId);
+            baseResponseDTO.setStatus(HttpStatus.OK.value());
+            baseResponseDTO.setMessage("Chassis berhasil ditemukan!");
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(chassisRequestDTO);
+            return ResponseEntity.ok(baseResponseDTO);
+
+        } catch (Exception e) {
+            baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            baseResponseDTO.setMessage(e.getMessage());
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(null);
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                               .body(baseResponseDTO);
+        }   
     }
    
 }
