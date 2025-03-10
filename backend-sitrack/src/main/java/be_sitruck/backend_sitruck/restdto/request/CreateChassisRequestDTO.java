@@ -20,5 +20,9 @@ public class CreateChassisRequestDTO {
     private String chassisKIRNo;
     private Date chassisKIRDate;
     private String chassisType;
+    private String insertedBy;
+    private Date insertedDate;
+    private String updatedBy;
+    private Date updatedDate;
     private String siteId;
 }

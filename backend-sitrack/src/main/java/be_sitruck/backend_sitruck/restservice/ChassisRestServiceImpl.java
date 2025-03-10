@@ -1,15 +1,20 @@
 package be_sitruck.backend_sitruck.restservice;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import be_sitruck.backend_sitruck.model.Chassis;
+import be_sitruck.backend_sitruck.model.UserModel;
 import be_sitruck.backend_sitruck.repository.ChassisDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateChassisRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateChassisResponseDTO;
+import be_sitruck.backend_sitruck.restdto.response.CreateUserResponseDTO;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
 import jakarta.validation.ValidationException;
 
@@ -64,4 +69,27 @@ public class ChassisRestServiceImpl implements ChassisRestService {
 
         return new CreateChassisResponseDTO("Chassis berhasil ditambahkan!", chassis.getChassisId());
     }
+
+    @Override
+    public List<CreateChassisRequestDTO> getAllChassis() {
+        List<Chassis> allChassis = chassisDb.findAll();
+        return allChassis.stream()
+                .map(chassis -> new CreateChassisRequestDTO(
+                        chassis.getChassisId(),
+                        chassis.getChassisSize(),
+                        chassis.getChassisYear(),
+                        chassis.getChassisNumber(),
+                        chassis.getChassisAxle(),
+                        chassis.getChassisKIRNo(),
+                        chassis.getChassisKIRDate(),
+                        chassis.getChassisType(),
+                        chassis.getInsertedBy(),
+                        chassis.getInsertedDate(),
+                        chassis.getUpdatedBy(),
+                        chassis.getUpdatedDate(),
+                        chassis.getSiteId()
+                ))
+                .collect(Collectors.toList());
+    }
+
 }
