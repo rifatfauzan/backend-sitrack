@@ -10,4 +10,5 @@ public interface ChassisRestService {
     CreateChassisResponseDTO addChassis(CreateChassisRequestDTO createChassisRequestDTO);
     List<CreateChassisRequestDTO> getAllChassis();
     CreateChassisRequestDTO getChassisById(String chassisId);
+    CreateChassisResponseDTO updateChassis(String chassisId, CreateChassisRequestDTO updateRequest);
 }

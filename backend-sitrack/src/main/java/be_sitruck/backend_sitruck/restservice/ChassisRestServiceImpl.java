@@ -72,23 +72,8 @@ public class ChassisRestServiceImpl implements ChassisRestService {
 
     @Override
     public List<CreateChassisRequestDTO> getAllChassis() {
-        List<Chassis> allChassis = chassisDb.findAll();
-        return allChassis.stream()
-                .map(chassis -> new CreateChassisRequestDTO(
-                        chassis.getChassisId(),
-                        chassis.getChassisSize(),
-                        chassis.getChassisYear(),
-                        chassis.getChassisNumber(),
-                        chassis.getChassisAxle(),
-                        chassis.getChassisKIRNo(),
-                        chassis.getChassisKIRDate(),
-                        chassis.getChassisType(),
-                        chassis.getInsertedBy(),
-                        chassis.getInsertedDate(),
-                        chassis.getUpdatedBy(),
-                        chassis.getUpdatedDate(),
-                        chassis.getSiteId()
-                ))
+        return chassisDb.findAll().stream()
+                .map(this::convertToChassisDTO)
                 .collect(Collectors.toList());
     }
 
@@ -100,6 +85,10 @@ public class ChassisRestServiceImpl implements ChassisRestService {
             throw new ValidationException("Chassis dengan ID " + chassisId + " tidak ditemukan!");
         }
 
+        return convertToChassisDTO(chassis);
+    }
+
+    private CreateChassisRequestDTO convertToChassisDTO(Chassis chassis) {
         return new CreateChassisRequestDTO(
                 chassis.getChassisId(),
                 chassis.getChassisSize(),
@@ -116,5 +105,46 @@ public class ChassisRestServiceImpl implements ChassisRestService {
                 chassis.getSiteId()
         );
     }
+
+    @Transactional
+    @Override
+    public CreateChassisResponseDTO updateChassis(String chassisId, CreateChassisRequestDTO updateRequest) {
+        Chassis existingChassis = chassisDb.findByChassisId(chassisId);
+        
+        if (existingChassis == null) {
+            throw new ValidationException("Chassis dengan ID " + chassisId + " tidak ditemukan!");
+        }
+
+        Chassis duplicateChassis = chassisDb.findByChassisKIRNo(updateRequest.getChassisKIRNo());
+        if (duplicateChassis != null && !duplicateChassis.getChassisId().equals(chassisId)) {
+            throw new ValidationException("Nomor KIR sudah terdaftar dalam sistem!");
+        }
+
+        if (updateRequest.getChassisSize().length() > 2) {
+            throw new ValidationException("Ukuran chassis tidak boleh lebih dari 2 karakter!");
+        }
+        if (updateRequest.getChassisNumber().length() > 6) {
+            throw new ValidationException("Nomor chassis tidak boleh lebih dari 6 karakter!");
+        }
+        
+        existingChassis.setChassisSize(updateRequest.getChassisSize());
+        existingChassis.setChassisYear(updateRequest.getChassisYear());
+        existingChassis.setChassisNumber(updateRequest.getChassisNumber());
+        existingChassis.setChassisAxle(updateRequest.getChassisAxle());
+        existingChassis.setChassisKIRNo(updateRequest.getChassisKIRNo());
+        existingChassis.setChassisKIRDate(updateRequest.getChassisKIRDate());
+        existingChassis.setChassisType(updateRequest.getChassisType());
+
+        existingChassis.setUpdatedBy(jwtUtils.getCurrentUsername());
+        existingChassis.setUpdatedDate(new Date());
+        
+        existingChassis.setSiteId(updateRequest.getSiteId());
+
+        chassisDb.save(existingChassis);
+
+        return new CreateChassisResponseDTO("Chassis berhasil diperbarui!", existingChassis.getChassisId());
+    }
+
+
 
 }

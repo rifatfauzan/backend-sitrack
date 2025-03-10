@@ -6,6 +6,8 @@ import be_sitruck.backend_sitruck.restdto.response.CreateChassisResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateUserResponseDTO;
 import be_sitruck.backend_sitruck.restservice.ChassisRestService;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 
 import java.util.*;
 
@@ -46,7 +48,7 @@ public class ChassisController {
         }
     }
 
-     @GetMapping("/all")
+    @GetMapping("/all")
     public ResponseEntity<?> getAllChassis(){
         var baseResponseDTO = new BaseResponseDTO<List<CreateChassisRequestDTO>>();
         List<CreateChassisRequestDTO> listChassis = chassisRestService.getAllChassis();
@@ -81,6 +83,33 @@ public class ChassisController {
                                .body(baseResponseDTO);
         }   
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateChassis(@RequestParam("id") String chassisId, 
+                                        @Valid @RequestBody CreateChassisRequestDTO updateRequest) {
+        var baseResponseDTO = new BaseResponseDTO<CreateChassisResponseDTO>();
+        try {
+            CreateChassisResponseDTO chassisResponseDTO = chassisRestService.updateChassis(chassisId, updateRequest);
+            baseResponseDTO.setStatus(HttpStatus.OK.value());
+            baseResponseDTO.setMessage("Chassis berhasil di-update!");
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(chassisResponseDTO);
+            return ResponseEntity.ok(baseResponseDTO);
+        } catch (ValidationException e) {
+            baseResponseDTO.setStatus(HttpStatus.BAD_REQUEST.value());
+            baseResponseDTO.setMessage(e.getMessage());
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(baseResponseDTO);
+        } catch (Exception e) {
+            baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            baseResponseDTO.setMessage("Terjadi kesalahan sistem!");
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
+        }
+    }
+
    
 }
 
