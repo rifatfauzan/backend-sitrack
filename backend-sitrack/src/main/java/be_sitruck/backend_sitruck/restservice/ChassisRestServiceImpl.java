@@ -27,27 +27,13 @@ public class ChassisRestServiceImpl implements ChassisRestService {
     @Autowired
     private JwtUtils jwtUtils;
     
-    @Transactional
+   @Transactional
     @Override
     public CreateChassisResponseDTO addChassis(CreateChassisRequestDTO createChassisRequestDTO) {
-
-        // ID creation not handled
 
         Chassis existingChassis = chassisDb.findByChassisKIRNo(createChassisRequestDTO.getChassisKIRNo());
         if (existingChassis != null) {
             throw new ValidationException("Nomor KIR sudah terdaftar dalam sistem!");
-        }
-
-        if (createChassisRequestDTO.getChassisId() == null || createChassisRequestDTO.getChassisId().isEmpty()) {
-            throw new ValidationException("ID tidak boleh kosong!");
-        }
-
-        if (createChassisRequestDTO.getChassisSize() == null || createChassisRequestDTO.getChassisSize().isEmpty()) {
-            throw new ValidationException("Size tidak boleh kosong!");
-        }
-
-        if (createChassisRequestDTO.getChassisKIRNo() == null || createChassisRequestDTO.getChassisKIRNo().isEmpty()) {
-            throw new ValidationException("Nomor KIR tidak boleh kosong!");
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
@@ -61,8 +47,12 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         chassis.setChassisKIRNo(createChassisRequestDTO.getChassisKIRNo());
         chassis.setChassisKIRDate(createChassisRequestDTO.getChassisKIRDate());
         chassis.setChassisType(createChassisRequestDTO.getChassisType());
+        chassis.setChassisRemarks(createChassisRequestDTO.getChassisRemarks());
         chassis.setInsertedBy(currentUser);
         chassis.setInsertedDate(new Date());
+        chassis.setDivision(createChassisRequestDTO.getDivision());
+        chassis.setDept(createChassisRequestDTO.getDept());
+        chassis.setRowStatus(createChassisRequestDTO.getRowStatus());
         chassis.setSiteId(createChassisRequestDTO.getSiteId());
 
         chassisDb.save(chassis);
@@ -98,19 +88,24 @@ public class ChassisRestServiceImpl implements ChassisRestService {
                 chassis.getChassisKIRNo(),
                 chassis.getChassisKIRDate(),
                 chassis.getChassisType(),
+                chassis.getChassisRemarks(),
                 chassis.getInsertedBy(),
                 chassis.getInsertedDate(),
                 chassis.getUpdatedBy(),
                 chassis.getUpdatedDate(),
+                chassis.getDivision(),
+                chassis.getDept(),
+                chassis.getRowStatus(),
                 chassis.getSiteId()
         );
     }
+    
 
     @Transactional
     @Override
     public CreateChassisResponseDTO updateChassis(String chassisId, CreateChassisRequestDTO updateRequest) {
         Chassis existingChassis = chassisDb.findByChassisId(chassisId);
-        
+
         if (existingChassis == null) {
             throw new ValidationException("Chassis dengan ID " + chassisId + " tidak ditemukan!");
         }
@@ -120,13 +115,6 @@ public class ChassisRestServiceImpl implements ChassisRestService {
             throw new ValidationException("Nomor KIR sudah terdaftar dalam sistem!");
         }
 
-        if (updateRequest.getChassisSize().length() > 2) {
-            throw new ValidationException("Ukuran chassis tidak boleh lebih dari 2 karakter!");
-        }
-        if (updateRequest.getChassisNumber().length() > 6) {
-            throw new ValidationException("Nomor chassis tidak boleh lebih dari 6 karakter!");
-        }
-        
         existingChassis.setChassisSize(updateRequest.getChassisSize());
         existingChassis.setChassisYear(updateRequest.getChassisYear());
         existingChassis.setChassisNumber(updateRequest.getChassisNumber());
@@ -134,16 +122,18 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         existingChassis.setChassisKIRNo(updateRequest.getChassisKIRNo());
         existingChassis.setChassisKIRDate(updateRequest.getChassisKIRDate());
         existingChassis.setChassisType(updateRequest.getChassisType());
-
+        existingChassis.setChassisRemarks(updateRequest.getChassisRemarks());
+        existingChassis.setDivision(updateRequest.getDivision());
+        existingChassis.setDept(updateRequest.getDept());
+        existingChassis.setRowStatus(updateRequest.getRowStatus());
         existingChassis.setUpdatedBy(jwtUtils.getCurrentUsername());
         existingChassis.setUpdatedDate(new Date());
-        
-        existingChassis.setSiteId(updateRequest.getSiteId());
 
         chassisDb.save(existingChassis);
 
         return new CreateChassisResponseDTO("Chassis berhasil diperbarui!", existingChassis.getChassisId());
     }
+
 
 
 

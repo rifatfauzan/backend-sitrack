@@ -36,7 +36,6 @@ public class ChassisController {
             baseResponseDTO.setTimestamp(new Date());
             baseResponseDTO.setData(chassisResponseDTO);
             return ResponseEntity.ok(baseResponseDTO);
-
         } catch (Exception e) {
             baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             baseResponseDTO.setMessage(e.getMessage());
@@ -94,7 +93,7 @@ public class ChassisController {
             baseResponseDTO.setMessage("Chassis berhasil di-update!");
             baseResponseDTO.setTimestamp(new Date());
             baseResponseDTO.setData(chassisResponseDTO);
-            return ResponseEntity.ok(baseResponseDTO);
+            return ResponseEntity.ok(baseResponseDTO);  
         } catch (ValidationException e) {
             baseResponseDTO.setStatus(HttpStatus.BAD_REQUEST.value());
             baseResponseDTO.setMessage(e.getMessage());

@@ -33,15 +33,18 @@ public class Chassis implements Serializable {
     @Column(name = "chassis_axle", length = 2)
     private String chassisAxle;
 
-    @Column(name = "chassis_KIR_No", length = 20)
+    @Column(name = "chassis_KIR_No", length = 20, nullable = false)
     private String chassisKIRNo;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "chassis_KIR_date")
+    @Column(name = "chassis_KIR_date", nullable = false)
     private Date chassisKIRDate;
 
     @Column(name = "chassis_type", length = 1)
     private String chassisType;
+
+    @Column(name = "chassis_remarks", length = 300)
+    private String chassisRemarks;
 
     @Column(name = "inserted_by", length = 20)
     private String insertedBy;
@@ -57,6 +60,15 @@ public class Chassis implements Serializable {
     @Column(name = "updated_date")
     private Date updatedDate;
 
-    @Column(name = "site_id", length = 3, nullable = false, columnDefinition = "CHAR(3) DEFAULT 'JKT'")
+    @Column(name = "division", length = 2, nullable = false)
+    private String division;
+
+    @Column(name = "dept", length = 2, columnDefinition = "CHAR(2) DEFAULT 'TR'")
+    private String dept = "TR";
+
+    @Column(name = "row_status", length = 1, columnDefinition = "CHAR(1) DEFAULT 'A'")
+    private String rowStatus = "A";
+
+    @Column(name = "site_id", length = 3, columnDefinition = "CHAR(3) DEFAULT 'JKT'")
     private String siteId = "JKT";
 }

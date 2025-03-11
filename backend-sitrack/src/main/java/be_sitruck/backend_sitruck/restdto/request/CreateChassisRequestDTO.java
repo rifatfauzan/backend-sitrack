@@ -14,26 +14,17 @@ import java.util.Date;
 @AllArgsConstructor
 public class CreateChassisRequestDTO {
 
-    @NotBlank(message = "ID chassis tidak boleh kosong!")
     @Size(max = 8, message = "ID chassis maksimal 8 karakter!")
     private String chassisId;
 
-    @NotBlank(message = "Ukuran chassis tidak boleh kosong!")
     @Size(max = 2, message = "Ukuran chassis maksimal 2 karakter!")
-    @Pattern(regexp = "^(20|40)$", message = "Ukuran chassis harus 20 atau 40!")
     private String chassisSize;
 
-    @NotNull(message = "Tahun chassis tidak boleh kosong!")
     @Pattern(regexp = "^[0-9]{4}$", message = "Tahun chassis harus 4 digit angka!")
     private String chassisYear;
 
-    @NotBlank(message = "Nomor chassis tidak boleh kosong!")
-    @Size(max = 6, message = "Nomor chassis maksimal 6 karakter!")
     private String chassisNumber;
-
-    @NotNull(message = "Jumlah axle tidak boleh kosong!")
-    @Min(value = 1, message = "Jumlah axle minimal 1!")
-    @Max(value = 99, message = "Jumlah axle maksimal 99!")
+    
     private String chassisAxle;
 
     @NotBlank(message = "Nomor KIR tidak boleh kosong!")
@@ -48,13 +39,20 @@ public class CreateChassisRequestDTO {
     @Pattern(regexp = "^[FT]$", message = "Tipe chassis harus F (Flatbed) atau T (Trailer)!")
     private String chassisType;
 
+    private String chassisRemarks;
+
     private String insertedBy;
     private Date insertedDate;
-
     private String updatedBy;
     private Date updatedDate;
 
-    @NotBlank(message = "Site ID tidak boleh kosong!")
+    @NotBlank(message = "Divisi tidak boleh kosong!")
+    @Size(max = 2, message = "Divisi maksimal 2 karakter!")
+    private String division;
+
+    private String dept = "TR";
+    private String rowStatus = "A";
+
     @Size(max = 3, message = "Site ID maksimal 3 karakter!")
     private String siteId;
 }
