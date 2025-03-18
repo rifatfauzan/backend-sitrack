@@ -78,14 +78,14 @@ public class Truck {
     @Column(name = "dept", length = 2, columnDefinition = "CHAR(2) DEFAULT 'TR'")
     private String dept = "TR";
 
+    @Column(name = "record_status", length = 1, columnDefinition = "CHAR(1) DEFAULT 'A'")
+    private String recordStatus = "A";
+
     @Column(name = "row_status", length = 1, columnDefinition = "CHAR(1) DEFAULT 'A'")
     private String rowStatus = "A";
     
     @Column(name = "Vehicle_Number", length = 6)
     private String vehicleNumber;
-    
-    // @Column(name = "Vehicle_Fuel_Consumption", precision = 3, scale = 1, columnDefinition = "decimal(3,1) default 0.0")
-    // private Double vehicleFuelConsumption;
     
     @Column(name = "Inserted_By", length = 20)
     private String insertedBy;

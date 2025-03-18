@@ -64,9 +64,9 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        // truck.setRowStatus(request.getRowStatus());
-        // truck.setDept(request.getDept());
-        // truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption()!= null ? request.getVehicleFuelConsumption() : 0,0); // Default ke 'JKT');
+        truck.setRowStatus(request.getRowStatus());
+        truck.setRecordStatus(request.getRecordStatus());
+        truck.setDept(request.getDept());
         truck.setInsertedBy(currentUser);
         truck.setInsertedDate(new Date());
 
@@ -120,6 +120,7 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleType(),
             truck.getDivision(), 
             truck.getDept(), 
+            truck.getRecordStatus(),
             truck.getRowStatus(), 
             truck.getVehicleNumber(),
             truck.getInsertedBy(),
@@ -176,8 +177,9 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        // truck.setRowStatus(request.getRowStatus());
-        // truck.setDept(request.getDept());
+        truck.setRowStatus(request.getRowStatus());
+        truck.setDept(request.getDept());
+        truck.setRecordStatus(request.getRecordStatus());
 
         // Simpan perubahan
         truckDb.save(truck);

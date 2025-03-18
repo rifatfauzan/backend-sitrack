@@ -49,9 +49,9 @@ public class UpdateTruckRequestDTO {
     private String vehicleType;
     private String division;
     private String dept = "TR";
+    private String recordStatus = "A";
     private String rowStatus = "A";
     private String vehicleNumber;
-    // private Double vehicleFuelConsumption;
     private String updatedBy;
     private Date updatedDate;
 
