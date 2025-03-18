@@ -8,6 +8,8 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,34 +19,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Customer {
     
     @Id
-    @Column(name = "customer_id", nullable = false)
+    @Column(name = "customer_id", nullable = false, length = 8)
     private String id;
 
-    @Column(name = "site_id", nullable = false)
+    @Column(name = "site_id", nullable = false, length = 3)
     private String siteId;
 
-    @Column(name = "customer_name", nullable = false)
+    @Column(name = "customer_name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "customer_address")
+    @Column(name = "customer_address", length = 100)
     private String address;
 
-    @Column(name = "contract_no")
+    @Column(name = "contract_no", length = 20)
     private String contractNo;
 
-    @Column(name = "city_id")
-    private String cityId;
-
-    @Column(name = "city_origin")
+    @Column(name = "city_origin", length = 100)
     private String cityOrigin;
 
-    @Column(name = "city_destination")
+    @Column(name = "city_destination", length = 100)
     private String cityDestination;
 
-    @Column(name = "commodity")
+    @Column(name = "commodity", length = 50)
     private String commodity;
 
-    @Column(name = "move_type")
+    @Column(name = "move_type", length = 10)
     private String moveType;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -54,7 +53,8 @@ public class Customer {
     private String insertedBy;
 
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "inserted_date", nullable = false)
     private Date insertedDate;
 
@@ -62,7 +62,8 @@ public class Customer {
     private String updatedBy;
 
     @UpdateTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "updated_date", nullable = false)
     private Date updatedDate;
 }

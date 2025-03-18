@@ -17,7 +17,6 @@ public class CustomerResponseDTO {
     private String name;
     private String address;
     private String contractNo;
-    private String cityId;
     private String cityOrigin;
     private String cityDestination;
     private String commodity;

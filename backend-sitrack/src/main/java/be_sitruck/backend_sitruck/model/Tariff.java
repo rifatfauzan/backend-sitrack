@@ -12,7 +12,7 @@ import lombok.*;
 public class Tariff {
 
     @Id
-    @Column(name = "tariff_id", nullable = false)
+    @Column(name = "tariff_id", nullable = false, length = 18)
     private String tariffId;
 
     @ManyToOne
@@ -34,8 +34,8 @@ public class Tariff {
     @Column(name = "police")
     private int police;
 
-    @Column(name = "LOLO")
-    private int LOLO;
+    @Column(name = "lolo")
+    private int lolo;
 
     @Column(name = "others")
     private int others;

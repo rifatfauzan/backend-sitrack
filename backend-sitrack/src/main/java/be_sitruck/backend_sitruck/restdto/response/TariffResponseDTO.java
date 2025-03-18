@@ -13,7 +13,7 @@ public class TariffResponseDTO {
     private int insurance;
     private int tips;
     private int police;
-    private int LOLO;
+    private int lolo;
     private int others;
     private int totalTariff;
 }

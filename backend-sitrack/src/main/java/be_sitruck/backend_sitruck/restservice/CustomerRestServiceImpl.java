@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,26 @@ public class CustomerRestServiceImpl implements CustomerRestService{
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    private String generateCustomerId(String siteId) {
+        List<Customer> customers = customerDb.findBySiteIdOrderByIdDesc(siteId);
+    
+        if (!customers.isEmpty()) {
+            String lastCustomerId = customers.get(0).getId();
+            String lastNumberPart = lastCustomerId.substring(siteId.length());
+            int lastNumber = Integer.parseInt(lastNumberPart);
+            lastNumber++;
+    
+            return siteId + String.format("%05d", lastNumber);
+        } else {
+            return siteId + "00001";
+        }
+    }
+    
+
+    private String generateTariffId(String customerId, String type) {
+        return customerId + "-" + type;
+    }
 
     @Override
     public List<CustomerResponseDTO> getAllCustomer() {
@@ -67,14 +86,17 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             throw new RuntimeException("Customer dengan nama '" + customerDTO.getName() + "' dan destinasi '" 
                                        + customerDTO.getCityDestination() + "' sudah ada!");
         }
+
+        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getAddress().isEmpty() || customerDTO.getSiteId().isEmpty()) {
+            throw new RuntimeException("Nama customer, kota tujuan, alamat, dan Site ID wajib diisi.");
+        }        
         
         var customer = new Customer();
-        customer.setId(UUID.randomUUID().toString().substring(0, 8));
+        customer.setId(generateCustomerId(customerDTO.getSiteId()));
         customer.setSiteId(customerDTO.getSiteId());
         customer.setName(customerDTO.getName());
         customer.setAddress(customerDTO.getAddress());
         customer.setContractNo(customerDTO.getContractNo());
-        customer.setCityId(customerDTO.getCityId());
         customer.setCityOrigin(customerDTO.getCityOrigin());
         customer.setCityDestination(customerDTO.getCityDestination());
         customer.setCommodity(customerDTO.getCommodity());
@@ -94,11 +116,25 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         String currentUser = jwtUtils.getCurrentUsername();        
         var customer = customerDb.findById(id).orElseThrow(() -> new RuntimeException("Customer tidak ditemukan"));
 
+        Optional<Customer> existingCustomer = customerDb.findAll().stream()
+            .filter(c -> !c.getId().equals(id))
+            .filter(c -> c.getName().equalsIgnoreCase(customerDTO.getName()) &&
+                        c.getCityDestination().equalsIgnoreCase(customerDTO.getCityDestination()))
+            .findFirst();
+
+        if (existingCustomer.isPresent()) {
+            throw new RuntimeException("Customer dengan nama '" + customerDTO.getName() + "' dan destinasi '" 
+                                    + customerDTO.getCityDestination() + "' sudah ada!");
+        }
+
+        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getAddress().isEmpty() || customerDTO.getSiteId().isEmpty()) {
+            throw new RuntimeException("Nama customer, kota tujuan, alamat, dan Site ID wajib diisi.");
+        }    
+
         customer.setSiteId(customerDTO.getSiteId());
         customer.setName(customerDTO.getName());
         customer.setAddress(customerDTO.getAddress());
         customer.setContractNo(customerDTO.getContractNo());
-        customer.setCityId(customerDTO.getCityId());
         customer.setCityOrigin(customerDTO.getCityOrigin());
         customer.setCityDestination(customerDTO.getCityDestination());
         customer.setCommodity(customerDTO.getCommodity());
@@ -108,59 +144,69 @@ public class CustomerRestServiceImpl implements CustomerRestService{
 
         List<Tariff> existingTariffs = tariffDb.findByCustomerId(id);
         List<String> receivedTariffIds = new ArrayList<>();
+        List<String> existingTariffTypes = new ArrayList<>();
+        
+        existingTariffs.forEach(tariff -> existingTariffTypes.add(tariff.getType()));
 
-        for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
-            if (existingTariffs.stream().anyMatch(t -> t.getType().equalsIgnoreCase(tariffDTO.getType())
-                    && (tariffDTO.getTariffId() == null || !t.getTariffId().equals(tariffDTO.getTariffId())))) {
-                throw new RuntimeException("Customer dengan nama " + customerDTO.getName() + " dan destinasi " + customerDTO.getCityDestination() + " sudah memiliki tarif untuk chassis type: " + tariffDTO.getType());
+        if (customerDTO.getTariffs().isEmpty()) {
+            tariffDb.deleteAll(existingTariffs);
+            customer.setTariffs(new ArrayList<>());
+        } else {
+            for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
+                String tariffId = generateTariffId(customer.getId(), tariffDTO.getType());
+                if (tariffDTO.getTariffId() != null) {
+                    Tariff tariff = existingTariffs.stream()
+                        .filter(t -> t.getTariffId().equals(tariffDTO.getTariffId()))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Tariff tidak ditemukan"));
+                    
+                    if (!tariff.getType().equals(tariffDTO.getType()) && existingTariffTypes.contains(tariffDTO.getType())) {
+                        throw new RuntimeException("Tipe tarif '" + tariffDTO.getType() + "' sudah ada untuk customer ini.");
+                    }
+
+                    tariff.setType(tariffDTO.getType());
+                    tariff.setStdTariff(tariffDTO.getStdTariff());
+                    tariff.setInsurance(tariffDTO.getInsurance());
+                    tariff.setTips(tariffDTO.getTips());
+                    tariff.setPolice(tariffDTO.getPolice());
+                    tariff.setLolo(tariffDTO.getLolo());
+                    tariff.setOthers(tariffDTO.getOthers());
+                    tariff.setTotalTariff(
+                        tariffDTO.getStdTariff() + tariffDTO.getInsurance() + tariffDTO.getTips() +
+                        tariffDTO.getPolice() + tariffDTO.getLolo() + tariffDTO.getOthers()
+                    );
+                    receivedTariffIds.add(tariff.getTariffId());
+                } else {
+                    if (existingTariffTypes.contains(tariffDTO.getType())) {
+                        throw new RuntimeException("Tipe tarif '" + tariffDTO.getType() + "' sudah ada untuk customer ini.");
+                    }
+
+                    Tariff newTariff = new Tariff();
+                    newTariff.setTariffId(tariffId);
+                    newTariff.setCustomer(customer);
+                    newTariff.setType(tariffDTO.getType());
+                    newTariff.setStdTariff(tariffDTO.getStdTariff());
+                    newTariff.setInsurance(tariffDTO.getInsurance());
+                    newTariff.setTips(tariffDTO.getTips());
+                    newTariff.setPolice(tariffDTO.getPolice());
+                    newTariff.setLolo(tariffDTO.getLolo());
+                    newTariff.setOthers(tariffDTO.getOthers());
+                    newTariff.setTotalTariff(
+                        tariffDTO.getStdTariff() + tariffDTO.getInsurance() + tariffDTO.getTips() +
+                        tariffDTO.getPolice() + tariffDTO.getLolo() + tariffDTO.getOthers()
+                    );
+
+                    customer.getTariffs().add(newTariff);
+                    receivedTariffIds.add(newTariff.getTariffId());
+                }
             }
 
-            if (tariffDTO.getTariffId() != null) {
-                // kalo tariff udah ada, update aja
-                Tariff tariff = existingTariffs.stream()
-                    .filter(t -> t.getTariffId().equals(tariffDTO.getTariffId()))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Tariff tidak ditemukan"));
-
-                tariff.setType(tariffDTO.getType());
-                tariff.setStdTariff(tariffDTO.getStdTariff());
-                tariff.setInsurance(tariffDTO.getInsurance());
-                tariff.setTips(tariffDTO.getTips());
-                tariff.setPolice(tariffDTO.getPolice());
-                tariff.setLOLO(tariffDTO.getLOLO());
-                tariff.setOthers(tariffDTO.getOthers());
-                tariff.setTotalTariff(
-                    tariffDTO.getStdTariff() + tariffDTO.getInsurance() + tariffDTO.getTips() +
-                    tariffDTO.getPolice() + tariffDTO.getLOLO() + tariffDTO.getOthers()
-                );
-                receivedTariffIds.add(tariff.getTariffId());
-            } else {
-                // kalo tariff belum ada, tambahin
-                Tariff newTariff = new Tariff();
-                newTariff.setTariffId(UUID.randomUUID().toString().substring(0, 8));
-                newTariff.setCustomer(customer);
-                newTariff.setType(tariffDTO.getType());
-                newTariff.setStdTariff(tariffDTO.getStdTariff());
-                newTariff.setInsurance(tariffDTO.getInsurance());
-                newTariff.setTips(tariffDTO.getTips());
-                newTariff.setPolice(tariffDTO.getPolice());
-                newTariff.setLOLO(tariffDTO.getLOLO());
-                newTariff.setOthers(tariffDTO.getOthers());
-                newTariff.setTotalTariff(
-                    tariffDTO.getStdTariff() + tariffDTO.getInsurance() + tariffDTO.getTips() +
-                    tariffDTO.getPolice() + tariffDTO.getLOLO() + tariffDTO.getOthers()
-                );
-
-                customer.getTariffs().add(newTariff);
-                receivedTariffIds.add(newTariff.getTariffId());
-            }
+            existingTariffs.stream()
+                .filter(t -> !receivedTariffIds.contains(t.getTariffId()))
+                .forEach(tariffDb::delete);
         }
 
-        // hapus tariff yang gaada di request
-        customer.getTariffs().removeIf(t -> !receivedTariffIds.contains(t.getTariffId()));
         customerDb.save(customer);
-        customer = customerDb.findById(id).orElseThrow(() -> new RuntimeException("Customer tidak ditemukan"));
-
         return CustomerToCustomerResponseDTO(customer);
     }
 
@@ -172,7 +218,6 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customerDTO.setName(customer.getName());
         customerDTO.setAddress(customer.getAddress());
         customerDTO.setContractNo(customer.getContractNo());
-        customerDTO.setCityId(customer.getCityId());
         customerDTO.setCityOrigin(customer.getCityOrigin());
         customerDTO.setCityDestination(customer.getCityDestination());
         customerDTO.setCommodity(customer.getCommodity());
@@ -188,7 +233,7 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             tariffResponse.setInsurance(tariff.getInsurance());
             tariffResponse.setTips(tariff.getTips());
             tariffResponse.setPolice(tariff.getPolice());
-            tariffResponse.setLOLO(tariff.getLOLO());
+            tariffResponse.setLolo(tariff.getLolo());
             tariffResponse.setOthers(tariff.getOthers());
             tariffResponse.setTotalTariff(tariff.getTotalTariff());
             listTariffResponse.add(tariffResponse);
