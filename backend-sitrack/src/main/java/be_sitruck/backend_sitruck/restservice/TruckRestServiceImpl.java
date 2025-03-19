@@ -39,6 +39,21 @@ public class TruckRestServiceImpl implements TruckRestService {
             throw new IllegalArgumentException("KIR terdaftar di truck lain!");
         }
 
+        // Validasi Business License Number
+        if (request.getVehicleBizLicenseNo() != null && truckDb.existsByVehicleBizLicenseNo(request.getVehicleBizLicenseNo())) {
+            throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
+        }
+
+        // Validasi Dispensation Number
+        if (request.getVehicleDispensationNo() != null && truckDb.existsByVehicleDispensationNo(request.getVehicleDispensationNo())) {
+            throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
+        }
+
+        // Validasi Vehicle Number
+        if (request.getVehicleNumber() != null && truckDb.existsByVehicleNumber(request.getVehicleNumber())) {
+            throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
+        }
+
         String currentUser = jwtUtils.getCurrentUsername();
 
         String maxVehicleId = truckDb.findMaxVehicleId();
@@ -101,7 +116,7 @@ public class TruckRestServiceImpl implements TruckRestService {
 
     @Override
     public List<CreateTruckRequestDTO> getAllTruck() {
-        return truckDb.findAll().stream()
+        return truckDb.findAllOrdered().stream()
                 .map(this::convertToTruckDTO)
                 .collect(Collectors.toList());
     }
@@ -163,12 +178,33 @@ public class TruckRestServiceImpl implements TruckRestService {
         // Validasi STNK dan KIR tidak boleh digunakan oleh truk lain
         if (!truck.getVehiclePlateNo().equals(request.getVehiclePlateNo()) &&
             truckDb.existsByVehiclePlateNo(request.getVehiclePlateNo())) {
-            throw new IllegalArgumentException("Vehicle plate number already exists!");
+            throw new IllegalArgumentException("Plat Nomor terdaftar di truck lain!");
         }
 
         if (!truck.getVehicleKIRNo().equals(request.getVehicleKIRNo()) &&
             truckDb.existsByVehicleKIRNo(request.getVehicleKIRNo())) {
-            throw new IllegalArgumentException("Vehicle KIR number already exists!");
+            throw new IllegalArgumentException("KIR terdaftar di truck lain!");
+        }
+
+        // Validasi Business License Number
+        if (request.getVehicleBizLicenseNo() != null &&
+            !request.getVehicleBizLicenseNo().equals(truck.getVehicleBizLicenseNo()) &&
+            truckDb.existsByVehicleBizLicenseNo(request.getVehicleBizLicenseNo())) {
+            throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
+        }
+
+        // Validasi Dispensation Number
+        if (request.getVehicleDispensationNo() != null &&
+            !request.getVehicleDispensationNo().equals(truck.getVehicleDispensationNo()) &&
+            truckDb.existsByVehicleDispensationNo(request.getVehicleDispensationNo())) {
+            throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
+        }
+
+        // Validasi Vehicle Number
+        if (request.getVehicleNumber() != null &&
+            !request.getVehicleNumber().equals(truck.getVehicleNumber()) &&
+            truckDb.existsByVehicleNumber(request.getVehicleNumber())) {
+            throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
