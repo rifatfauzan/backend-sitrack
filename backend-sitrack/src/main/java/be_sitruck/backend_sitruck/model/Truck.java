@@ -86,6 +86,12 @@ public class Truck {
     
     @Column(name = "Vehicle_Number", length = 6)
     private String vehicleNumber;
+
+    @Column(name = "Vehicle_Fuel_Consumption", columnDefinition = "decimal(3,1) default 0.0")
+    private Double vehicleFuelConsumption = 0.0;
+
+    @Column(name = "Vehicle_Group", length = 1)
+    private String vehicleGroup;
     
     @Column(name = "Inserted_By", length = 20)
     private String insertedBy;

@@ -32,18 +32,33 @@ public class TruckRestServiceImpl implements TruckRestService {
     public CreateTruckResponseDTO createTruck(CreateTruckRequestDTO request) {
         // Validasi STNK dan KIR tidak boleh duplikat
         if (truckDb.existsByVehiclePlateNo(request.getVehiclePlateNo())) {
-            throw new IllegalArgumentException("Vehicle plate number already exists!");
+            throw new IllegalArgumentException("Plat Nomor terdaftar di truck lain!");
         }
 
         if (truckDb.existsByVehicleKIRNo(request.getVehicleKIRNo())) {
-            throw new IllegalArgumentException("KIR sudah terdaftar!");
+            throw new IllegalArgumentException("KIR terdaftar di truck lain!");
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
 
+        String maxVehicleId = truckDb.findMaxVehicleId();
+
+        int nextNumber = 1;
+        if (maxVehicleId != null && maxVehicleId.length() > 3) {
+            String numberPart = maxVehicleId.substring(maxVehicleId.length() - 5);
+            try {
+                nextNumber = Integer.parseInt(numberPart) + 1;
+            } catch (NumberFormatException e) {
+                nextNumber = 1;
+            }
+        }
+    
+        String paddedNumber = String.format("%05d", nextNumber);
+        String generatedVehicleId = request.getSiteId() + paddedNumber;
+
         // Buat objek Truck baru
         Truck truck = new Truck();
-        truck.setVehicleId(request.getVehicleId()); 
+        truck.setVehicleId(generatedVehicleId); 
         truck.setVehicleBrand(request.getVehicleBrand());
         truck.setVehicleYear(request.getVehicleYear());
         truck.setVehiclePlateNo(request.getVehiclePlateNo());
@@ -67,6 +82,9 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setRowStatus(request.getRowStatus());
         truck.setRecordStatus(request.getRecordStatus());
         truck.setDept(request.getDept());
+        truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
+        truck.setVehicleGroup(request.getVehicleGroup());
+
         truck.setInsertedBy(currentUser);
         truck.setInsertedDate(new Date());
 
@@ -108,6 +126,7 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleSTNKDate(),
             truck.getVehicleKIRNo(),
             truck.getVehicleKIRDate(),
+            truck.getDivision(), 
             truck.getVehicleCylinder(),
             truck.getVehicleChassisNo(),
             truck.getVehicleEngineNo(),
@@ -118,11 +137,12 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleRemarks(),
             truck.getSiteId(),
             truck.getVehicleType(),
-            truck.getDivision(), 
             truck.getDept(), 
             truck.getRecordStatus(),
             truck.getRowStatus(), 
             truck.getVehicleNumber(),
+            truck.getVehicleFuelConsumption(),
+            truck.getVehicleGroup(),
             truck.getInsertedBy(),
             truck.getInsertedDate(),
             truck.getUpdatedBy(),
@@ -180,6 +200,8 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setRowStatus(request.getRowStatus());
         truck.setDept(request.getDept());
         truck.setRecordStatus(request.getRecordStatus());
+        truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
+        truck.setVehicleGroup(request.getVehicleGroup());
 
         // Simpan perubahan
         truckDb.save(truck);

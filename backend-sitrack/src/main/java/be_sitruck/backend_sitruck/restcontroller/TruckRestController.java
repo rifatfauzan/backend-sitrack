@@ -96,9 +96,6 @@ public class TruckRestController {
                                          @Valid @RequestBody UpdateTruckRequestDTO request) {
         var baseResponseDTO = new BaseResponseDTO<UpdateTruckResponseDTO>();
     
-        System.out.println("📌 Truck ID yang diterima: " + vehicleId);
-        System.out.println("📦 Data request: " + request.toString());
-    
         try {
             UpdateTruckResponseDTO response = truckRestService.updateTruck(vehicleId, request);
             baseResponseDTO.setStatus(HttpStatus.OK.value());
@@ -107,12 +104,10 @@ public class TruckRestController {
             baseResponseDTO.setData(response);
             return ResponseEntity.ok(baseResponseDTO);
         } catch (ValidationException e) {
-            System.out.println("🚨 Validasi gagal: " + e.getMessage());
             baseResponseDTO.setStatus(HttpStatus.BAD_REQUEST.value());
             baseResponseDTO.setMessage("Validasi gagal: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(baseResponseDTO);
         } catch (Exception e) {
-            System.out.println("🚨 ERROR: " + e.getMessage());
             e.printStackTrace();
             baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             baseResponseDTO.setMessage("Terjadi kesalahan saat memperbarui truck");
