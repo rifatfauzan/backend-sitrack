@@ -121,7 +121,7 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         existingChassis.setChassisAxle(updateRequest.getChassisAxle());
         existingChassis.setChassisKIRNo(updateRequest.getChassisKIRNo());
         existingChassis.setChassisKIRDate(updateRequest.getChassisKIRDate());
-        existingChassis.setChassisType(updateRequest.getChassisType());
+        // existingChassis.setChassisType(updateRequest.getChassisType());
         existingChassis.setChassisRemarks(updateRequest.getChassisRemarks());
         existingChassis.setDivision(updateRequest.getDivision());
         existingChassis.setDept(updateRequest.getDept());
