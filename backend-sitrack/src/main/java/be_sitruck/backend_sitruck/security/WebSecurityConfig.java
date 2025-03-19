@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/user/**").hasAuthority("Admin")
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/customer/**").hasAuthority("Supervisor")
+                .requestMatchers("/api/customer/**").hasAnyAuthority("Supervisor", "Manager")
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
