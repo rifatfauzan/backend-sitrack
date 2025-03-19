@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class CreateChassisRequestDTO {
 
-    @Size(max = 8, message = "ID chassis maksimal 8 karakter!")
+    // @Size(max = 8, message = "ID chassis maksimal 8 karakter!")
     private String chassisId;
 
     @Size(max = 2, message = "Ukuran chassis maksimal 2 karakter!")

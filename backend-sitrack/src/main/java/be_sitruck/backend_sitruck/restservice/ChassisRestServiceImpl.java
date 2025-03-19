@@ -27,19 +27,19 @@ public class ChassisRestServiceImpl implements ChassisRestService {
     @Autowired
     private JwtUtils jwtUtils;
     
-   @Transactional
+    @Transactional
     @Override
     public CreateChassisResponseDTO addChassis(CreateChassisRequestDTO createChassisRequestDTO) {
-
         Chassis existingChassis = chassisDb.findByChassisKIRNo(createChassisRequestDTO.getChassisKIRNo());
         if (existingChassis != null) {
             throw new ValidationException("Nomor KIR sudah terdaftar dalam sistem!");
         }
-
+    
         String currentUser = jwtUtils.getCurrentUsername();
-
+        String chassisId = generateChassisId(createChassisRequestDTO.getSiteId());
+    
         Chassis chassis = new Chassis();
-        chassis.setChassisId(createChassisRequestDTO.getChassisId());
+        chassis.setChassisId(chassisId);
         chassis.setChassisSize(createChassisRequestDTO.getChassisSize());
         chassis.setChassisYear(createChassisRequestDTO.getChassisYear());
         chassis.setChassisNumber(createChassisRequestDTO.getChassisNumber());
@@ -54,9 +54,9 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         chassis.setDept(createChassisRequestDTO.getDept());
         chassis.setRowStatus(createChassisRequestDTO.getRowStatus());
         chassis.setSiteId(createChassisRequestDTO.getSiteId());
-
+    
         chassisDb.save(chassis);
-
+    
         return new CreateChassisResponseDTO("Chassis berhasil ditambahkan!", chassis.getChassisId());
     }
 
@@ -135,6 +135,17 @@ public class ChassisRestServiceImpl implements ChassisRestService {
     }
 
 
-
+    private String generateChassisId(String siteId) {
+        Chassis lastChassis = chassisDb.findTopByChassisIdStartingWithOrderByChassisIdDesc(siteId);
+    
+        int nextNumber = 1;
+        if (lastChassis != null) {
+            String lastChassisId = lastChassis.getChassisId();
+            String numberPart = lastChassisId.substring(siteId.length());
+            nextNumber = Integer.parseInt(numberPart) + 1;
+        }
+    
+        return String.format("%s%05d", siteId, nextNumber);
+    }
 
 }
