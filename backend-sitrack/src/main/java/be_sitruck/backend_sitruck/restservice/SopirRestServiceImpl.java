@@ -14,16 +14,21 @@ import be_sitruck.backend_sitruck.model.SopirModel;
 import be_sitruck.backend_sitruck.repository.SopirDb;
 import be_sitruck.backend_sitruck.restdto.response.CreateSopirResponseDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateSopirRequestDTO;
+import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
 
 @Service
 @Transactional
 public class SopirRestServiceImpl implements SopirRestService {
 
     @Autowired
+    private JwtUtils  jwtUtils;
+
+    @Autowired
     SopirDb sopirDb;
 
     @Override
     public CreateSopirResponseDTO addSopir(CreateSopirRequestDTO sopirDTO) {
+        String currentUser = jwtUtils.getCurrentUsername();
         SopirModel existingSopir = sopirDb.findByDriverKTPNo(sopirDTO.getDriver_KTP_No());
 
         if(existingSopir != null){
@@ -66,7 +71,7 @@ public class SopirRestServiceImpl implements SopirRestService {
         sopir.setDriverType(sopirDTO.getDriverType());
         sopir.setDriverJoinDate(sopirDTO.getDriverJoinDate());
         sopir.setCreatedDate(Date.from(Instant.now()));
-        sopir.setCreatedBy(null);
+        sopir.setCreatedBy(currentUser);
         sopir.setUpdatedBy(null);
         sopir.setUpdatedDate(null);
 
@@ -150,7 +155,7 @@ public class SopirRestServiceImpl implements SopirRestService {
         existingSopir.setDriverType(sopirDTO.getDriverType());
         existingSopir.setDriverJoinDate(sopirDTO.getDriverJoinDate());
         existingSopir.setUpdatedDate(Date.from(Instant.now()));
-        // existingSopir.setUpdatedBy(sopirDTO.getUpdatedBy());
+        existingSopir.setUpdatedBy(jwtUtils.getCurrentUsername());
         existingSopir.setRowStatus(sopirDTO.getRowStatus());
 
         sopirDb.save(existingSopir);
