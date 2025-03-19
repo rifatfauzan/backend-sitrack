@@ -13,6 +13,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -31,30 +33,30 @@ public class SopirModel {
     @Id
     private String driverId ;
 
-    // @NotNull
+    @NotNull
     @Size(max = 50)
     @Column(name = "driver_name")
     private String driverName;
 
-    // @NotNull
-    @Size(max = 19)
+    @NotNull
+    @Size(min = 16, max = 16)
     @Column(name = "driver_ktp_no")
     private String driver_KTP_No;
 
     // @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     @Column(name = "driver_ktp_date", columnDefinition = "DATE")
-    private Date driver_KTP_date;
+    private Date driver_KTP_Date;
 
-    // @NotNull
-    @Size(max = 13)
+    @NotNull
+    @Size(min = 13, max = 13)
     @Column(name = "driver_sim_no")
     private String driver_SIM_No;
 
     // @NotNull
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     @Column(name = "driver_sim_date", columnDefinition = "DATE")
-    private Date driver_SIM_date;
+    private Date driver_SIM_Date;
 
     // @NotNull
     @Size(max = 300)
@@ -73,11 +75,11 @@ public class SopirModel {
 
     // @NotNull
     @Size(max = 3)
-    @Column(name = "site_id")
+    @Column(name = "siteId")
     private String SiteId;
 
     // @NotNull
-    // @Size(max = 6)
+    @Size(max = 6)
     @Column(name = "driver_number")
     private String driverNumber;
 
@@ -93,25 +95,25 @@ public class SopirModel {
     @Column(name = "driver_type")
     private String driverType;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     @Column(name = "driver_join_date", columnDefinition = "DATE")
     private Date driverJoinDate;
 
     @Size(max=1)
-    @Column(name = "row_status")
+    @Column(name = "rowStatus")
     private String rowStatus;
 
     @Column(name = "created_by")
     private String createdBy;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     @Column(name = "created_date", columnDefinition = "DATE")
     private Date createdDate;
 
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Temporal(TemporalType.DATE)
     @Column(name = "updated_date", columnDefinition = "DATE")
     private Date updatedDate;
 }

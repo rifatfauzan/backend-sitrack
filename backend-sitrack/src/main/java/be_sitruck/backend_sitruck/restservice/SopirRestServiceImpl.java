@@ -1,6 +1,8 @@
 package be_sitruck.backend_sitruck.restservice;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,28 +24,51 @@ public class SopirRestServiceImpl implements SopirRestService {
 
     @Override
     public CreateSopirResponseDTO addSopir(CreateSopirRequestDTO sopirDTO) {
+        SopirModel existingSopir = sopirDb.findByDriverKTPNo(sopirDTO.getDriver_KTP_No());
+
+        if(existingSopir != null){
+            throw new IllegalArgumentException("Sopir dengan NIK tersebut sudah ada");
+        }
+
         SopirModel sopir = new SopirModel();
-        var driverId = UUID.randomUUID().toString();
+        var driverId = generateId(sopirDTO);
 
         sopir.setDriverId(driverId);
         sopir.setDriverName(sopirDTO.getDriverName());
         sopir.setDriver_KTP_No(sopirDTO.getDriver_KTP_No());
-        sopir.setDriver_KTP_date(sopirDTO.getDriver_KTP_date());
+        sopir.setDriver_KTP_Date(sopirDTO.getDriver_KTP_Date());
         sopir.setDriver_SIM_No(sopirDTO.getDriver_SIM_No());
-        sopir.setDriver_SIM_date(sopirDTO.getDriver_SIM_date());
+        sopir.setDriver_SIM_Date(sopirDTO.getDriver_SIM_Date());
         sopir.setDriverContact(sopirDTO.getDriverContact());
         sopir.setDriverCo(sopirDTO.getDriverCo());
         sopir.setDriverCoContact(sopirDTO.getDriverCoContact());
-        sopir.setSiteId(sopirDTO.getSiteId());
+
+        if (sopirDTO.getSiteId() != null) {
+            sopir.setSiteId(sopirDTO.getSiteId());
+        } else {
+            sopir.setSiteId("JKT");
+        }
+
+        if (sopirDTO.getRecordStatus() != null) {
+            sopir.setRecordStatus(sopirDTO.getRecordStatus());
+        } else {
+            sopir.setRecordStatus("A");
+        }
+
+        if (sopirDTO.getRowStatus() != null) {
+            sopir.setRowStatus(sopirDTO.getRowStatus());
+        } else {
+            sopir.setRowStatus("A");
+        }
+
         sopir.setDriverNumber(sopirDTO.getDriverNumber());
         sopir.setDriverRemarks(sopirDTO.getDriverRemarks());
-        sopir.setRecordStatus(sopirDTO.getRecordStatus());
         sopir.setDriverType(sopirDTO.getDriverType());
         sopir.setDriverJoinDate(sopirDTO.getDriverJoinDate());
-        // sopir.setCreatedBy(sopirDTO.getCreatedBy());
-        // sopir.setCreatedDate(sopirDTO.getCreatedDate());
-        // sopir.setUpdatedBy(sopirDTO.getUpdatedBy());
-        // sopir.setUpdatedDate(sopirDTO.getUpdatedDate());
+        sopir.setCreatedDate(Date.from(Instant.now()));
+        sopir.setCreatedBy(null);
+        sopir.setUpdatedBy(null);
+        sopir.setUpdatedDate(null);
 
         var newSopir = sopirDb.save(sopir);
         return sopirToSopirResponseDTO(newSopir);
@@ -56,9 +81,9 @@ public class SopirRestServiceImpl implements SopirRestService {
         sopirResponseDTO.setDriverId(sopir.getDriverId());
         sopirResponseDTO.setDriverName(sopir.getDriverName());
         sopirResponseDTO.setDriver_KTP_No(sopir.getDriver_KTP_No());
-        sopirResponseDTO.setDriver_KTP_date(sopir.getDriver_KTP_date());
+        sopirResponseDTO.setDriver_KTP_Date(sopir.getDriver_KTP_Date());
         sopirResponseDTO.setDriver_SIM_No(sopir.getDriver_SIM_No());
-        sopirResponseDTO.setDriver_SIM_date(sopir.getDriver_SIM_date());
+        sopirResponseDTO.setDriver_SIM_Date(sopir.getDriver_SIM_Date());
         sopirResponseDTO.setDriverContact(sopir.getDriverContact());
         sopirResponseDTO.setDriverCo(sopir.getDriverCo());
         sopirResponseDTO.setDriverCoContact(sopir.getDriverCoContact());
@@ -72,6 +97,7 @@ public class SopirRestServiceImpl implements SopirRestService {
         sopirResponseDTO.setCreatedDate(sopir.getCreatedDate());
         sopirResponseDTO.setUpdatedBy(sopir.getUpdatedBy());
         sopirResponseDTO.setUpdatedDate(sopir.getUpdatedDate());
+        sopirResponseDTO.setRowStatus(sopir.getRowStatus());
 
         return sopirResponseDTO;
     }
@@ -111,9 +137,9 @@ public class SopirRestServiceImpl implements SopirRestService {
         }
         existingSopir.setDriverName(sopirDTO.getDriverName());
         existingSopir.setDriver_KTP_No(sopirDTO.getDriver_KTP_No());
-        existingSopir.setDriver_KTP_date(sopirDTO.getDriver_KTP_date());
+        existingSopir.setDriver_KTP_Date(sopirDTO.getDriver_KTP_Date());
         existingSopir.setDriver_SIM_No(sopirDTO.getDriver_SIM_No());
-        existingSopir.setDriver_SIM_date(sopirDTO.getDriver_SIM_date());
+        existingSopir.setDriver_SIM_Date(sopirDTO.getDriver_SIM_Date());
         existingSopir.setDriverContact(sopirDTO.getDriverContact());
         existingSopir.setDriverCo(sopirDTO.getDriverCo());
         existingSopir.setDriverCoContact(sopirDTO.getDriverCoContact());
@@ -123,16 +149,22 @@ public class SopirRestServiceImpl implements SopirRestService {
         existingSopir.setRecordStatus(sopirDTO.getRecordStatus());
         existingSopir.setDriverType(sopirDTO.getDriverType());
         existingSopir.setDriverJoinDate(sopirDTO.getDriverJoinDate());
-        // existingSopir.setCreatedBy(sopirDTO.getCreatedBy());
-        // existingSopir.setCreatedDate(sopirDTO.getCreatedDate());
+        existingSopir.setUpdatedDate(Date.from(Instant.now()));
         // existingSopir.setUpdatedBy(sopirDTO.getUpdatedBy());
-        // existingSopir.setUpdatedDate(sopirDTO.getUpdatedDate());
+        existingSopir.setRowStatus(sopirDTO.getRowStatus());
 
         sopirDb.save(existingSopir);
         return sopirToSopirResponseDTO(existingSopir);
 
     }
 
+    @Override
+    public String generateId(CreateSopirRequestDTO sopirDTO) {
+       String namaDriver = sopirDTO.getDriverName().substring(0,3).toUpperCase();
+       long totalSopir = sopirDb.count();
+       String increment = String.format("%05d", totalSopir + 1);
+        return namaDriver + increment;
+    }
 
 
 

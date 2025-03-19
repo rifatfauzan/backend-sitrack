@@ -12,4 +12,5 @@ public interface SopirRestService {
     List<CreateSopirResponseDTO> viewAllSopir();
     CreateSopirResponseDTO viewSopirById(String driverId);
     CreateSopirResponseDTO updateSopir(String driverId, CreateSopirRequestDTO sopirDTO);
+    String generateId (CreateSopirRequestDTO sopirDTO);
 }

@@ -14,9 +14,9 @@ public class CreateSopirResponseDTO {
     private String driverId;
     private String driverName;
     private String driver_KTP_No;
-    private Date driver_KTP_date;
+    private Date driver_KTP_Date;
     private String driver_SIM_No;
-    private Date driver_SIM_date;
+    private Date driver_SIM_Date;
     private String driverContact;
     private String driverCo;
     private String driverCoContact;
