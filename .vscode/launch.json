@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "BackendSitrackApplication",
+            "request": "launch",
+            "mainClass": "be_sitruck.backend_sitruck.BackendSitrackApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-BackendSitrackApplication<backend-sitrack-backend-sitrack>",
             "request": "launch",
             "cwd": "${workspaceFolder}",
