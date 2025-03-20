@@ -103,9 +103,7 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customer.setMoveType(customerDTO.getMoveType());
         customer.setTariffs(new ArrayList<>());
         customer.setInsertedBy(currentUser);
-        customer.setUpdatedBy(currentUser);
         customer.setInsertedDate(new Date());
-        customer.setUpdatedDate(new Date());
         customerDb.save(customer);
 
         return CustomerToCustomerResponseDTO(customer);
