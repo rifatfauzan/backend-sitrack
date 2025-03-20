@@ -50,6 +50,8 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/user/**").hasAuthority("Admin")
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
+                .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .anyRequest().authenticated()    
             )
