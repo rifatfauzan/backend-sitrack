@@ -21,7 +21,7 @@ public class BackendSitrackApplication {
 
 	@Bean
 	@Transactional
-	CommandLineRunner run(RoleDb roleDb, UserDb userDb, UserRestService userService){
+	CommandLineRunner run(RoleDb roleDb, UserDb userDb, UserRestService userService){	
 		return args -> {
 			UserModel user;
 
