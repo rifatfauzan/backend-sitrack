@@ -5,9 +5,6 @@ import lombok.*;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Getter
@@ -52,19 +49,17 @@ public class Customer {
     @Column(name = "inserted_by", nullable = false)
     private String insertedBy;
 
-    @CreationTimestamp
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "inserted_date", nullable = false)
     private Date insertedDate;
 
-    @Column(name = "updated_by", nullable = false)
+    @Column(name = "updated_by")
     private String updatedBy;
 
-    @UpdateTimestamp
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Column(name = "updated_date", nullable = false)
+    @Column(name = "updated_date")
     private Date updatedDate;
 }
 
