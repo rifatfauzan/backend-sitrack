@@ -5,6 +5,8 @@ import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import be_sitruck.backend_sitruck.model.UserModel;
@@ -61,5 +63,13 @@ public class JwtUtils {
             logger.error("JWT token is unsupported: {}", e.getMessage());
         }
         return false;
+    }
+
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof org.springframework.security.core.userdetails.User) {
+            return ((org.springframework.security.core.userdetails.User) authentication.getPrincipal()).getUsername();
+        }
+        return null;
     }
 }
