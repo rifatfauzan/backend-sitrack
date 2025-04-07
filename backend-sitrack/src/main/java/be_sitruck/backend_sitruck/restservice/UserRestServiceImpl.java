@@ -24,7 +24,7 @@ public class UserRestServiceImpl implements UserRestService {
     @Override
     public CreateUserResponseDTO addUser(CreateUserRequestDTO requestDTO) {
         try {
-            if (userDb.existsByUsername(requestDTO.getUsername())) {
+            if (userDb.existsByUsernameIgnoreCase(requestDTO.getUsername())) {
                 throw new RuntimeException("Username " + requestDTO.getUsername() + " sudah terdaftar!");
             }
             
@@ -34,7 +34,7 @@ public class UserRestServiceImpl implements UserRestService {
             }
             
             UserModel user = new UserModel();
-            user.setUsername(requestDTO.getUsername());
+            user.setUsername(requestDTO.getUsername().toLowerCase());
             user.setPassword(hashPassword(requestDTO.getPassword()));
             user.setRole(role);
             
@@ -62,8 +62,8 @@ public class UserRestServiceImpl implements UserRestService {
             UserModel existingUser = userDb.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("User dengan ID " + id + " tidak ditemukan!"));
             
-            if (!existingUser.getUsername().equals(requestDTO.getUsername()) && 
-                userDb.existsByUsername(requestDTO.getUsername())) {
+            if (!existingUser.getUsername().equalsIgnoreCase(requestDTO.getUsername()) && 
+                userDb.existsByUsernameIgnoreCase(requestDTO.getUsername())) {
                 throw new IllegalArgumentException("Username " + requestDTO.getUsername() + " sudah terdaftar!");
             }
             
@@ -130,7 +130,7 @@ public class UserRestServiceImpl implements UserRestService {
 
     @Override
     public UserModel authenticateWithUsername(String username, String password) throws Exception {
-        UserModel user = userDb.findByUsername(username);
+        UserModel user = userDb.findByUsernameIgnoreCase(username);
         if (user == null) {
             throw new Exception("User tidak ditemukan!");
         }
