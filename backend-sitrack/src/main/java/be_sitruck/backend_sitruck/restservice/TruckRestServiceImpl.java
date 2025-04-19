@@ -69,7 +69,7 @@ public class TruckRestServiceImpl implements TruckRestService {
         String maxVehicleId = truckDb.findMaxVehicleId();
 
         int nextNumber = 1;
-        if (maxVehicleId != null && maxVehicleId.length() > 3) {
+        if (maxVehicleId != null && maxVehicleId.length() > 2) {
             String numberPart = maxVehicleId.substring(maxVehicleId.length() - 5);
             try {
                 nextNumber = Integer.parseInt(numberPart) + 1;

@@ -16,7 +16,7 @@ public interface TruckDb extends JpaRepository<Truck, String> {
     boolean existsByVehicleKIRNo(String vehicleKIRNo);
     @Query(value = "SELECT vehicle_id FROM truck ORDER BY CAST(SUBSTRING(vehicle_id, LENGTH(vehicle_id) - 4, 5) AS INTEGER) DESC LIMIT 1", nativeQuery = true)
     String findMaxVehicleId();
-    @Query("SELECT t FROM Truck t ORDER BY CAST(SUBSTRING(t.vehicleId, 4) AS int) ASC")
+    @Query("SELECT t FROM Truck t ORDER BY CAST(SUBSTRING(t.vehicleId, 3) AS int) ASC")
     List<Truck> findAllOrdered();
     Truck findByVehicleBizLicenseNo(String vehicleBizLicenseNo);
     Truck findByVehicleDispensationNo(String vehicleDispensationNo);
