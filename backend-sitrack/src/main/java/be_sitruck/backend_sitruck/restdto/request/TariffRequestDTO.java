@@ -12,7 +12,10 @@ public class TariffRequestDTO {
     private String tariffId;  // bisa null kalo baru ditambahin
 
     @NotBlank(message = "Tipe chassis tidak boleh kosong.")
-    private String type;
+    private String chassisType;
+
+    @NotBlank(message = "Move type tidak boleh kosong.")
+    private String moveType;
 
     @NotBlank(message = "Standard Tariff tidak boleh kosong.")
     private int stdTariff;
