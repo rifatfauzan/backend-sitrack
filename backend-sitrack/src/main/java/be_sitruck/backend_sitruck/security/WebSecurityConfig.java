@@ -24,6 +24,9 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import be_sitruck.backend_sitruck.security.jwt.JwtTokenFilter;
 import jakarta.servlet.ServletException;
@@ -49,6 +52,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/user/**").hasAuthority("Admin")
+                .requestMatchers("/api/chassis/**").hasAnyAuthority("Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
@@ -111,5 +115,17 @@ public class WebSecurityConfig {
     public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception{
         auth.userDetailsService(userDetailsService).passwordEncoder(encoder());
     }
-}
 
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOriginPattern("https://sitrack.up.railway.app");
+        config.addAllowedOriginPattern("http://localhost:*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
+}
