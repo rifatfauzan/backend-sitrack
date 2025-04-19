@@ -45,8 +45,8 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         }
     }    
 
-    private String generateTariffId(String customerId, String type) {
-        return customerId + "-" + type;
+    private String generateTariffId(String customerId, String chassisType, String moveType) {
+        return customerId + "-" + chassisType + "-" + moveType;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customer.setCityOrigin(customerDTO.getCityOrigin().toUpperCase());
         customer.setCityDestination(customerDTO.getCityDestination().toUpperCase());
         customer.setCommodity(customerDTO.getCommodity().toUpperCase());
-        customer.setMoveType(customerDTO.getMoveType().toUpperCase());
+        customer.setCommission(customerDTO.getCommission());
         customer.setTariffs(new ArrayList<>());
         customer.setInsertedBy(currentUser);
         customer.setInsertedDate(new Date());
@@ -134,7 +134,7 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customer.setCityOrigin(customerDTO.getCityOrigin().toUpperCase());
         customer.setCityDestination(customerDTO.getCityDestination().toUpperCase());
         customer.setCommodity(customerDTO.getCommodity().toUpperCase());
-        customer.setMoveType(customerDTO.getMoveType().toUpperCase());
+        customer.setCommission(customerDTO.getCommission());
         customer.setUpdatedBy(currentUser);
         customer.setUpdatedDate(new Date());
 
@@ -144,11 +144,14 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             tariffDb.deleteAll(existingTariffs);
             customer.setTariffs(new ArrayList<>());
         } else {
-            Set<String> seenTypes = new HashSet<>();
+            Set<String> seenCombinations = new HashSet<>();
             for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
-                String typeUpper = tariffDTO.getType().toUpperCase();
-                if (!seenTypes.add(typeUpper)) {
-                    throw new RuntimeException("Tipe tarif '" + typeUpper + "' tidak boleh duplikat.");
+                String chassisTypeUpper = tariffDTO.getChassisType().toUpperCase();
+                String moveTypeUpper = tariffDTO.getMoveType().toUpperCase();
+                String combinationKey = chassisTypeUpper + "-" + moveTypeUpper;
+
+                if (!seenCombinations.add(combinationKey)) {
+                    throw new RuntimeException("Kombinasi chasis type '" + chassisTypeUpper + "' dan move type '" + moveTypeUpper + "' tidak boleh duplikat.");
                 }
             }
     
@@ -156,9 +159,10 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             List<Tariff> newTariffs = new ArrayList<>();
             for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
                 Tariff newTariff = new Tariff();
-                newTariff.setTariffId(generateTariffId(customer.getId(), tariffDTO.getType().toUpperCase()));
+                newTariff.setTariffId(generateTariffId(customer.getId(), tariffDTO.getChassisType().toUpperCase(), tariffDTO.getMoveType().toUpperCase()));
                 newTariff.setCustomer(customer);
-                newTariff.setType(tariffDTO.getType().toUpperCase());
+                newTariff.setChassisType(tariffDTO.getChassisType().toUpperCase());
+                newTariff.setMoveType(tariffDTO.getMoveType().toUpperCase());
                 newTariff.setStdTariff(tariffDTO.getStdTariff());
                 newTariff.setInsurance(tariffDTO.getInsurance());
                 newTariff.setTips(tariffDTO.getTips());
@@ -190,14 +194,15 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customerDTO.setCityOrigin(customer.getCityOrigin());
         customerDTO.setCityDestination(customer.getCityDestination());
         customerDTO.setCommodity(customer.getCommodity());
-        customerDTO.setMoveType(customer.getMoveType());
+        customerDTO.setCommission(customer.getCommission());
 
         List<TariffResponseDTO> listTariffResponse = new ArrayList<>();
         for (Tariff tariff : customer.getTariffs()) {
             var tariffResponse = new TariffResponseDTO();
             tariffResponse.setTariffId(tariff.getTariffId());
             tariffResponse.setCustomerId(tariff.getCustomer().getId());
-            tariffResponse.setType(tariff.getType());
+            tariffResponse.setChassisType(tariff.getChassisType());
+            tariffResponse.setMoveType(tariff.getMoveType());
             tariffResponse.setStdTariff(tariff.getStdTariff());
             tariffResponse.setInsurance(tariff.getInsurance());
             tariffResponse.setTips(tariff.getTips());
