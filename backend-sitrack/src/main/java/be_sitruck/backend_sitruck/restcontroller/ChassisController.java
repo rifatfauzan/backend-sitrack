@@ -14,6 +14,7 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,8 +27,26 @@ public class ChassisController {
     @Autowired
     private ChassisRestService chassisRestService;
 
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseResponseDTO<?>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+
+        BaseResponseDTO<Object> resp = new BaseResponseDTO<>();
+        String msg = ex.getBindingResult()
+                       .getFieldError()
+                       .getDefaultMessage();  
+
+        resp.setStatus(HttpStatus.BAD_REQUEST.value());
+        resp.setMessage("Gagal menambah chassis: " + msg);
+        resp.setTimestamp(new Date());
+        resp.setData(null);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(resp);
+    }
+
     @PostMapping("/add")
-    public ResponseEntity<?> addUser(@RequestBody CreateChassisRequestDTO chassisRequestDTO){
+    public ResponseEntity<?> addChassis(@Valid @RequestBody CreateChassisRequestDTO chassisRequestDTO){
         var baseResponseDTO = new BaseResponseDTO<CreateChassisResponseDTO>();
         try {
             CreateChassisResponseDTO chassisResponseDTO = chassisRestService.addChassis(chassisRequestDTO);
@@ -84,7 +103,7 @@ public class ChassisController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<?> updateChassis(@RequestParam("id") String chassisId, 
+    public ResponseEntity<?> updateChassis(@Valid @RequestParam("id") String chassisId, 
                                         @Valid @RequestBody CreateChassisRequestDTO updateRequest) {
         var baseResponseDTO = new BaseResponseDTO<CreateChassisResponseDTO>();
         try {
