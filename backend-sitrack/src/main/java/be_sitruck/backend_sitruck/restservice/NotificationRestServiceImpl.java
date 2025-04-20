@@ -1,0 +1,215 @@
+package be_sitruck.backend_sitruck.restservice;
+
+import be_sitruck.backend_sitruck.model.Notification;
+import be_sitruck.backend_sitruck.model.NotificationCategory;
+import be_sitruck.backend_sitruck.repository.NotificationDb;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+@Service
+public class NotificationRestServiceImpl implements NotificationRestService {
+
+    @Autowired
+    private NotificationDb notificationDb;
+
+    @Autowired
+    private TruckRestService truckRestService;
+
+    @Autowired
+    private SopirRestService sopirRestService;
+
+    @Autowired
+    private ChassisRestService chassisRestService;
+
+    @Override
+    public List<Notification> getAllNotifications() {
+        return notificationDb.findByIsActiveTrue();
+    }
+
+    @Override
+    public Notification getNotificationById(Long id) {
+        return notificationDb.findById(id)
+                .orElseThrow(() -> new RuntimeException("Notification not found"));
+    }
+
+    @Override
+    public List<Notification> getNotificationsByCategory(NotificationCategory category) {
+        return notificationDb.findByCategoryAndIsActiveTrue(category);
+    }
+
+    @Override
+    public List<Notification> getNotificationsByReferenceType(String referenceType) {
+        return notificationDb.findByReferenceTypeAndIsActiveTrue(referenceType);
+    }
+
+    @Override
+    public Notification markAsRead(Long id) {
+        Notification notification = getNotificationById(id);
+        notification.setIsRead(true);
+        return notificationDb.save(notification);
+    }
+
+    @Override
+    public void deleteNotification(Long id) {
+        Notification notification = getNotificationById(id);
+        notification.setIsActive(false);
+        notificationDb.save(notification);
+    }
+
+    @Override
+    public Notification createOrUpdateNotification(String title, String message, 
+                                                  NotificationCategory category,
+                                                  String referenceId, String referenceType, 
+                                                  Date expiryDate, Integer daysRemaining) {
+        
+        Optional<Notification> existingNotification = 
+            notificationDb.findByCategoryAndReferenceTypeAndReferenceId(
+                category, 
+                referenceType.toUpperCase(), 
+                referenceId
+            );
+
+        if (existingNotification.isPresent()) {
+            Notification notification = existingNotification.get();
+            notification.setTitle(title);
+            notification.setMessage(message);
+            notification.setExpiryDate(expiryDate);
+            notification.setDaysRemaining(daysRemaining);
+            notification.setIsActive(true);
+            return notificationDb.save(notification);
+        } else {
+            Notification notification = new Notification();
+            notification.setTitle(title);
+            notification.setMessage(message);
+            notification.setCategory(category);
+            notification.setReferenceId(referenceId);
+            notification.setReferenceType(referenceType.toUpperCase());
+            notification.setExpiryDate(expiryDate);
+            notification.setCreatedDate(new Date());
+            notification.setIsRead(false);
+            notification.setIsActive(true);
+            notification.setDaysRemaining(daysRemaining);
+            notification.setRedirectEndpoint(generateRedirectEndpoint(referenceType, referenceId));
+            return notificationDb.save(notification);
+        }
+    }
+
+    private String generateRedirectEndpoint(String referenceType, String referenceId) {
+        return switch (referenceType.toUpperCase()) {
+            case "TRUCK" -> "/trucks/detail?id=" + referenceId;
+            case "CHASSIS" -> "/chassis/detail?id=" + referenceId;
+            case "SOPIR" -> "/sopir/" + referenceId;
+            default -> "#";
+        };
+    }
+
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkExpiringDocuments() {
+        Date today = new Date();
+        
+        processTruckDocuments(today);
+        processChassisDocuments(today);
+        processDriverDocuments(today);
+    }
+
+    private void processTruckDocuments(Date today) {
+        truckRestService.getAllTruck().forEach(truck -> {
+            processDocument(
+                truck.getVehicleSTNKDate(), 
+                "STNK", 
+                "Truck", 
+                truck.getVehicleId(), 
+                NotificationCategory.VEHICLE_STNK_EXPIRY, 
+                today
+            );
+            processDocument(
+                truck.getVehicleKIRDate(), 
+                "KIR", 
+                "Truck", 
+                truck.getVehicleId(), 
+                NotificationCategory.VEHICLE_KIR_EXPIRY, 
+                today
+            );
+        });
+    }
+
+    private void processChassisDocuments(Date today) {
+        chassisRestService.getAllChassis().forEach(chassis -> {
+            processDocument(
+                chassis.getChassisKIRDate(), 
+                "KIR", 
+                "Chassis", 
+                chassis.getChassisId(), 
+                NotificationCategory.CHASSIS_KIR_EXPIRY, 
+                today
+            );
+        });
+    }
+
+    private void processDriverDocuments(Date today) {
+        sopirRestService.viewAllSopir().forEach(driver -> {
+            processDocument(
+                driver.getDriver_SIM_Date(), 
+                "SIM", 
+                "SOPIR", 
+                driver.getDriverId(), 
+                NotificationCategory.DRIVER_SIM_EXPIRY, 
+                today
+            );
+        });
+    }
+
+    private void processDocument(Date expiryDate, String docType, String referenceType,
+                                String referenceId, NotificationCategory category,
+                                Date today) {
+        if (expiryDate == null) return;
+
+        long diff = expiryDate.getTime() - today.getTime();
+        long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+        boolean isExpired = days < 0;
+
+        String title;
+        String message;
+        int daysRemaining;
+
+        if (isExpired) {
+            title = docType + " Expired";
+            message = docType + " pada " + referenceType + " " + referenceId + 
+                    " sudah expired sejak " + Math.abs(days) + " hari yang lalu";
+            daysRemaining = 0;
+        } else if (days <= 30) {
+            title = docType + " Akan Expired";
+            message = docType + " pada " + referenceType + " " + referenceId + 
+                    " akan expired dalam " + (days + 1) + " hari";
+            daysRemaining = (int) days + 1;
+        } else {
+            deactivateNotification(category, referenceType, referenceId);
+            return;
+        }
+
+        createOrUpdateNotification(
+            title,
+            message,
+            category,
+            referenceId,
+            referenceType,
+            expiryDate,
+            daysRemaining
+        );
+    }
+
+    private void deactivateNotification(NotificationCategory category, 
+                                       String referenceType, String referenceId) {
+        notificationDb.findByCategoryAndReferenceTypeAndReferenceId(
+            category, referenceType, referenceId
+        ).ifPresent(notification -> {
+            notification.setIsActive(false);
+            notificationDb.save(notification);
+        });
+    }
+}
