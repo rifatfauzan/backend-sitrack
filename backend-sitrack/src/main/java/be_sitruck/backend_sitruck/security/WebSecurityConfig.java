@@ -57,6 +57,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
+                .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional")
+
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

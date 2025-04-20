@@ -111,7 +111,6 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     @Scheduled(cron = "0 0 0 * * ?")
     public void checkExpiringDocuments() {
         Date today = new Date();
-        
         processTruckDocuments(today);
         processChassisDocuments(today);
         processDriverDocuments(today);
@@ -188,9 +187,11 @@ public class NotificationRestServiceImpl implements NotificationRestService {
                     " akan expired dalam " + (days + 1) + " hari";
             daysRemaining = (int) days + 1;
         } else {
-            deactivateNotification(category, referenceType, referenceId);
             return;
         }
+        //     deactivateNotification(category, referenceType, referenceId);
+        //     return;
+        // }
 
         createOrUpdateNotification(
             title,
@@ -203,13 +204,13 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         );
     }
 
-    private void deactivateNotification(NotificationCategory category, 
-                                       String referenceType, String referenceId) {
-        notificationDb.findByCategoryAndReferenceTypeAndReferenceId(
-            category, referenceType, referenceId
-        ).ifPresent(notification -> {
-            notification.setIsActive(false);
-            notificationDb.save(notification);
-        });
-    }
+    // private void deactivateNotification(NotificationCategory category, 
+    //                                    String referenceType, String referenceId) {
+    //     notificationDb.findByCategoryAndReferenceTypeAndReferenceId(
+    //         category, referenceType, referenceId
+    //     ).ifPresent(notification -> {
+    //         notification.setIsActive(false);
+    //         notificationDb.save(notification);
+    //     });
+    // }
 }
