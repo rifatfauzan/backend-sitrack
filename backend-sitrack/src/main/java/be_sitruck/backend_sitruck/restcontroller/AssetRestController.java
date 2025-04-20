@@ -2,6 +2,7 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
 import be_sitruck.backend_sitruck.restdto.request.CreateAssetRequestDTO;
+import be_sitruck.backend_sitruck.restdto.request.CreateSopirRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateAssetResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restservice.AssetRestService;
@@ -63,6 +64,41 @@ public class AssetRestController {
         }
     }
 
+    @GetMapping("/{assetId}")
+    public ResponseEntity<?> viewAssetById(@PathVariable("assetId") String assetId){
+        try{
+            var response = new BaseResponseDTO<>();
+            response.setData(assetRestService.getAssetById(assetId));
+            response.setMessage("Data asset berhasil ditampilkan");
+            response.setTimestamp(new Date());
+            response.setStatus(200);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e){
+            var response = new BaseResponseDTO<>();
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setStatus(400);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/update/{assetId}")
+    public ResponseEntity<?> updateAsset(@PathVariable("assetId") String assetId, @RequestBody CreateAssetRequestDTO requestDTO){
+        try{
+            var response = new BaseResponseDTO<>();
+            response.setData(assetRestService.updateAsset(assetId, requestDTO));
+            response.setMessage("Data Asset berhasil diupdate");
+            response.setTimestamp(new Date());
+            response.setStatus(200);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e){
+            var response = new BaseResponseDTO<>();
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setStatus(400);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
     // //Get Asset by ID
     // @GetMapping("/detail")
     // public ResponseEntity<?> getAssetById(@RequestParam("id") String assetId) {
