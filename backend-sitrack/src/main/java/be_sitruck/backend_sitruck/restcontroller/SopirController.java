@@ -50,7 +50,7 @@ public class SopirController {
         }
     }
 
-    @GetMapping("/viewall")
+    @GetMapping("/all")
     public ResponseEntity<?> viewAllSopir(){
         var response = new BaseResponseDTO<>();
         response.setData(sopirRestService.viewAllSopir());
@@ -60,7 +60,7 @@ public class SopirController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/{driverId}")
+    @GetMapping("/detail/{driverId}")
     public ResponseEntity<?> viewSopirById(@PathVariable("driverId") String driverId){
         try{
             var response = new BaseResponseDTO<>();
