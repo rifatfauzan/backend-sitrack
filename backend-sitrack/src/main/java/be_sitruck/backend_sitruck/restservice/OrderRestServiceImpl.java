@@ -46,7 +46,9 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setCustomer(customer);
         order.setQtyChassis20(request.getQtyChassis20());
         order.setQtyChassis40(request.getQtyChassis40());
-        order.setSiteId(request.getSiteId());
+
+        order.setSiteId(customer.getSiteId());
+        
         order.setRemarksOperasional(request.getRemarksOperasional());
         order.setMoveType(request.getMoveType());
         order.setDownPayment(request.getDownPayment());

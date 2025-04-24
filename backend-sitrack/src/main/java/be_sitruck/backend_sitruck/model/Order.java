@@ -39,7 +39,7 @@ public class Order implements Serializable{
     private Integer qtyChassis40;
 
     @Column(name = "site_id", length = 3, columnDefinition = "CHAR(3) DEFAULT 'JKT'")
-    private String siteId = "JKT";
+    private String siteId;
 
     @Column(name = "remarks_operasional")
     private String remarksOperasional;
