@@ -30,12 +30,21 @@ public class AssetRestServiceImpl implements AssetRestService {
             throw new ValidationException("Jenis Asset harus diisi");
         }
 
-        if (request.getJumlahStok() == null || request.getJumlahStok() < 0) {
+        try{
+            Integer.valueOf(request.getJumlahStok());
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Jumlah Stok harus berupa angka");
+        }
+
+        if (request.getJumlahStok() == null || request.getJumlahStok() < 0 ) {
             throw new ValidationException("Jumlah Stok harus diisi dan tidak boleh negatif");
         }
 
         if (request.getBrand() == null || request.getBrand().isBlank()) {
             throw new ValidationException("Brand harus diisi");
+        }
+        if(request.getBrand().matches("[0-9]+")){
+            throw new ValidationException("Brand tidak boleh berupa angka");
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
@@ -60,7 +69,7 @@ public class AssetRestServiceImpl implements AssetRestService {
         asset.setJumlahStok(request.getJumlahStok());
         asset.setBrand(request.getBrand());
         asset.setAssetRemark(request.getAssetRemark());
-        asset.setRequestedStok(0); // Requested stok default 0 saat create
+        asset.setRequestedStok(10); // Requested stok default 0 saat create
         asset.setCreatedBy(currentUser);
         asset.setCreatedDate(new Date());
 
@@ -109,11 +118,33 @@ public class AssetRestServiceImpl implements AssetRestService {
         if (asset == null) {
             throw new IllegalArgumentException("Asset dengan ID: " + assetId + " tidak ditemukan"); 
         }
+        if (assetDTO.getJenisAsset() == null || assetDTO.getJenisAsset().isBlank()) {
+            throw new ValidationException("Jenis Asset harus diisi");
+        }
+
+        if (assetDTO.getJumlahStok() == null || assetDTO.getJumlahStok() < 0 ) {
+            throw new ValidationException("Jumlah Stok harus diisi dan tidak boleh negatif");
+        }
+
+        if (assetDTO.getBrand() == null || assetDTO.getBrand().isBlank()) {
+            throw new ValidationException("Brand harus diisi");
+        }
+
+        if(assetDTO.getBrand().matches("[0-9]+")){
+            throw new ValidationException("Brand tidak boleh berupa angka");
+        }
+        try{
+            Integer.valueOf(assetDTO.getJumlahStok());
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Jumlah Stok harus berupa angka");
+        }  
+
 
             asset.setJenisAsset(assetDTO.getJenisAsset());
             asset.setJumlahStok(assetDTO.getJumlahStok());
             asset.setBrand(assetDTO.getBrand());
             asset.setAssetRemark(assetDTO.getAssetRemark());
+            asset.setRequestedStok(assetDTO.getRequestedStok());
 
         asset.setUpdatedBy(jwtUtils.getCurrentUsername());
         asset.setUpdatedDate(new Date());
