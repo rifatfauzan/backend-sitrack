@@ -89,17 +89,31 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     @Override
     public void updateRequestAssetStatus(String requestAssetId, UpdateRequestAssetStatusDTO request) {
         RequestAsset requestAsset = requestAssetDb.findById(requestAssetId)
-                .orElseThrow(() -> new ValidationException("Request Asset tidak ditemukan"));
-
+            .orElseThrow(() -> new ValidationException("Request Asset tidak ditemukan"));
+    
         requestAsset.setStatus(request.getStatus());
         requestAsset.setRequestRemark(request.getRequestRemark());
         requestAsset.setUpdatedBy(jwtUtils.getCurrentUsername());
         requestAsset.setUpdatedDate(new Date());
         requestAsset.setApprovalBy(jwtUtils.getCurrentUsername());
         requestAsset.setApprovalDate(new Date());
-
+    
+        //Jika status APPROVED (1), tambah requestedstok dari asset terkait
+        if (request.getStatus() == 1) {
+            List<RequestAssetItem> requestItems = requestAssetItemDb.findByRequestAssetRequestAssetId(requestAsset.getRequestAssetId());
+            for (RequestAssetItem item : requestItems) {
+                Asset asset = assetDb.findByAssetId(item.getAssetId());
+                if (asset != null) {
+                    int currentStok = asset.getRequestedStok() != null ? asset.getRequestedStok() : 0;
+                    asset.setRequestedStok(currentStok + item.getRequestedQuantity());
+                    assetDb.save(asset);
+                }
+            }
+        }
+    
         requestAssetDb.save(requestAsset);
     }
+    
 
     @Override
     public CreateRequestAssetRequestDTO getRequestAssetById(String requestAssetId) {

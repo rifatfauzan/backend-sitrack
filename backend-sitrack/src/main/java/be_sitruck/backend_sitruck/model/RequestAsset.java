@@ -47,15 +47,6 @@ public class RequestAsset {
     @Column(name = "approval_date")
     private Date approvalDate;
 
-    public static String getStatusName(Integer status) {
-        return switch (status) {
-            case 0 -> "Pending";
-            case 1 -> "Approved";
-            case 2 -> "Butuh Revisi";
-            case 3 -> "Ditolak";
-            default -> "Unknown";
-        };
-    }
 }
 
 
