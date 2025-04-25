@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class UpdateRequestAssetStatusDTO {
     private Integer status;
     private String requestRemark;
+    private String updatedBy;
+    private Date updatedDate;
     private String approvalBy;
     private Date approvalDate;
 }

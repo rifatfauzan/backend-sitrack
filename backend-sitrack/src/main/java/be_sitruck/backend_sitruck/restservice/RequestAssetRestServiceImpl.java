@@ -90,16 +90,18 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     public void updateRequestAssetStatus(String requestAssetId, UpdateRequestAssetStatusDTO request) {
         RequestAsset requestAsset = requestAssetDb.findById(requestAssetId)
             .orElseThrow(() -> new ValidationException("Request Asset tidak ditemukan"));
+        
+        String currentUser = jwtUtils.getCurrentUsername();
     
         requestAsset.setStatus(request.getStatus());
         requestAsset.setRequestRemark(request.getRequestRemark());
-        requestAsset.setUpdatedBy(jwtUtils.getCurrentUsername());
+        requestAsset.setUpdatedBy(currentUser);
         requestAsset.setUpdatedDate(new Date());
-        requestAsset.setApprovalBy(jwtUtils.getCurrentUsername());
-        requestAsset.setApprovalDate(new Date());
     
         //Jika status APPROVED (1), tambah requestedstok dari asset terkait
         if (request.getStatus() == 1) {
+            requestAsset.setApprovalBy(currentUser);
+            requestAsset.setApprovalDate(new Date());
             List<RequestAssetItem> requestItems = requestAssetItemDb.findByRequestAssetRequestAssetId(requestAsset.getRequestAssetId());
             for (RequestAssetItem item : requestItems) {
                 Asset asset = assetDb.findByAssetId(item.getAssetId());
@@ -130,6 +132,10 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
         dto.setStatus(requestAsset.getStatus());
         dto.setCreatedBy(requestAsset.getCreatedBy());
         dto.setCreatedDate(requestAsset.getCreatedDate());
+        dto.setUpdatedBy(requestAsset.getUpdatedBy());
+        dto.setUpdatedDate(requestAsset.getUpdatedDate());
+        dto.setApprovalBy(requestAsset.getApprovalBy());
+        dto.setApprovalDate(requestAsset.getApprovalDate());
 
         List<RequestAssetItemDTO> itemDTOs = requestAsset.getItems().stream()
             .map(this::convertToRequestAssetItemDTO)
