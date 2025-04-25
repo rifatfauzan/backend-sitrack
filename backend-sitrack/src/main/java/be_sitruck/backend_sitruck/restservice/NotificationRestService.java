@@ -16,4 +16,8 @@ public interface NotificationRestService {
     Notification createOrUpdateNotification(String title, String message, NotificationCategory category,
                                    String referenceId, String referenceType, Date expiryDate, Integer daysRemaining);
     void checkExpiringDocuments();
+    void createOrderNotification(String orderId, String title, String message);
+    void createOrderApprovalNotification(String orderId);
+    void createOrderStatusNotification(String orderId, int status);
+
 }

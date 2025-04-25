@@ -3,6 +3,8 @@ package be_sitruck.backend_sitruck.restservice;
 import be_sitruck.backend_sitruck.model.Notification;
 import be_sitruck.backend_sitruck.model.NotificationCategory;
 import be_sitruck.backend_sitruck.repository.NotificationDb;
+import be_sitruck.backend_sitruck.repository.OrderDb;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class NotificationRestServiceImpl implements NotificationRestService {
 
     @Autowired
     private ChassisRestService chassisRestService;
+
+    @Autowired
+    private OrderDb orderDb;
 
     @Override
     public List<Notification> getAllNotifications() {
@@ -103,6 +108,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             case "TRUCK" -> "/trucks/detail?id=" + referenceId;
             case "CHASSIS" -> "/chassis/detail?id=" + referenceId;
             case "SOPIR" -> "/sopir/" + referenceId;
+            case "ORDER" -> "/order/detail?id=" + referenceId;
             default -> "#";
         };
     }
@@ -189,9 +195,6 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         } else {
             return;
         }
-        //     deactivateNotification(category, referenceType, referenceId);
-        //     return;
-        // }
 
         createOrUpdateNotification(
             title,
@@ -204,13 +207,51 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         );
     }
 
-    // private void deactivateNotification(NotificationCategory category, 
-    //                                    String referenceType, String referenceId) {
-    //     notificationDb.findByCategoryAndReferenceTypeAndReferenceId(
-    //         category, referenceType, referenceId
-    //     ).ifPresent(notification -> {
-    //         notification.setIsActive(false);
-    //         notificationDb.save(notification);
-    //     });
-    // }
+    @Override
+    public void createOrderNotification(String orderId, String title, String message) {
+        this.createOrUpdateNotification(
+            title,
+            message,
+            NotificationCategory.ORDER_UPDATE, // Kategori sama untuk semua notifikasi order
+            orderId,
+            "ORDER",
+            null,
+            null
+        );
+    }
+
+    @Override
+    public void createOrderApprovalNotification(String orderId) {
+        String title = "Persetujuan Order Diperlukan";
+        String message = String.format(
+            "Order dengan ID %s memerlukan persetujuan", 
+            orderId
+        );
+        
+        createOrderNotification(orderId, title, message);
+    }
+
+    @Override
+    public void createOrderStatusNotification(String orderId, int status) {
+        String statusLabel = getStatusLabel(status);
+        String title = "Status Order Diperbarui";
+        String message = String.format(
+            "Order dengan ID %s telah berubah status menjadi: %s", 
+            orderId, 
+            statusLabel
+        );
+        
+        createOrderNotification(orderId, title, message);
+    }
+
+    private static String getStatusLabel(int status) {
+        switch (status) {
+        case 0: return "Rejected";
+        case 1: return "Pending Approval";
+        case 2: return "Needs Revision";
+        case 3: return "Ongoing";
+        case 4: return "Done";
+        default: return "Unknown";
+        }
+    }
 }

@@ -29,6 +29,9 @@ public class OrderRestServiceImpl implements OrderRestService {
     private CustomerDb customerDb;
 
     @Autowired
+    private NotificationRestService notificationRestService;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Transactional
@@ -73,6 +76,8 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setQtyCh140fl(request.getQtyCh140fl());
 
         orderDb.save(order);
+
+        notificationRestService.createOrderApprovalNotification(orderId);
 
         return new CreateOrderResponseDTO(orderId, "Order berhasil ditambahkan!");
     }
@@ -146,6 +151,11 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setApprovedDate(new Date());
 
         orderDb.save(order);
+
+        notificationRestService.createOrderStatusNotification(
+            order.getOrderId(), 
+            request.getOrderStatus()
+        );
 
         return new CreateOrderResponseDTO(orderId, "Approval dari order berhasil diubah!");
     }
