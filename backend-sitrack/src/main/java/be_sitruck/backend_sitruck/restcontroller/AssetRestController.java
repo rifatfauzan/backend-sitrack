@@ -99,29 +99,5 @@ public class AssetRestController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
-    // //Get Asset by ID
-    // @GetMapping("/detail")
-    // public ResponseEntity<?> getAssetById(@RequestParam("id") String assetId) {
-    //     var baseResponseDTO = new BaseResponseDTO<CreateAssetRequestDTO>();
-    //     try {
-    //         CreateAssetRequestDTO asset = assetRestService.getAssetById(assetId);
-    //         baseResponseDTO.setStatus(HttpStatus.OK.value());
-    //         baseResponseDTO.setMessage("Asset berhasil ditemukan!");
-    //         baseResponseDTO.setTimestamp(new Date());
-    //         baseResponseDTO.setData(asset);
-    //         return ResponseEntity.ok(baseResponseDTO);
-    //     } catch (ValidationException e) {
-    //         baseResponseDTO.setStatus(HttpStatus.BAD_REQUEST.value());
-    //         baseResponseDTO.setMessage("Asset tidak ditemukan dengan ID: " + assetId);
-    //         baseResponseDTO.setTimestamp(new Date());
-    //         baseResponseDTO.setData(null);
-    //         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(baseResponseDTO);
-    //     } catch (Exception e) {
-    //         baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-    //         baseResponseDTO.setMessage("Terjadi kesalahan saat mengambil asset: " + e.getMessage());
-    //         baseResponseDTO.setTimestamp(new Date());
-    //         baseResponseDTO.setData(null);
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
-    //     }
-    // }
+
 }
