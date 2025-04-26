@@ -2,11 +2,14 @@ package be_sitruck.backend_sitruck.restcontroller;
 
 import be_sitruck.backend_sitruck.model.Notification;
 import be_sitruck.backend_sitruck.model.NotificationCategory;
+import be_sitruck.backend_sitruck.model.UserModel;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restservice.ChassisRestService;
 import be_sitruck.backend_sitruck.restservice.NotificationRestService;
 import be_sitruck.backend_sitruck.restservice.SopirRestService;
 import be_sitruck.backend_sitruck.restservice.TruckRestService;
+import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
+import be_sitruck.backend_sitruck.repository.UserDb;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,47 +37,37 @@ public class NotificationRestController {
     @Autowired
     private ChassisRestService chassisRestService;
 
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private UserDb userDb;
+
     @GetMapping
-    public ResponseEntity<BaseResponseDTO<List<Notification>>> getAllNotifications() {
+    public ResponseEntity<BaseResponseDTO<List<Notification>>> getUserNotifications(
+        @RequestHeader("Authorization") String token
+    ) {
+        UserModel currentUser = getUserFromToken(token);
+        List<Notification> notifications = notificationService.getAllNotificationsForUser(currentUser);
+        
         BaseResponseDTO<List<Notification>> response = new BaseResponseDTO<>();
-        response.setData(notificationService.getAllNotifications());
-        response.setMessage("Berhasil mendapatkan semua notifikasi");
-        response.setTimestamp(new Date());
-        response.setStatus(HttpStatus.OK.value());
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/category/{category}")
-    public ResponseEntity<BaseResponseDTO<List<Notification>>> getByCategory(
-            @PathVariable NotificationCategory category) {
-        BaseResponseDTO<List<Notification>> response = new BaseResponseDTO<>();
-        response.setData(notificationService.getNotificationsByCategory(category));
-        response.setMessage("Berhasil mendapatkan notifikasi berdasarkan kategori");
-        response.setTimestamp(new Date());
-        response.setStatus(HttpStatus.OK.value());
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/{id}/details")
-    public ResponseEntity<BaseResponseDTO<Map<String, Object>>> getNotificationDetails(
-            @PathVariable Long id) {
-        Notification notification = notificationService.getNotificationById(id);
-        Map<String, Object> data = new HashMap<>();
-        data.put("notification", notification);
-        data.put("referenceData", getReferenceData(notification));
-
-        BaseResponseDTO<Map<String, Object>> response = new BaseResponseDTO<>();
-        response.setData(data);
-        response.setMessage("Detail notifikasi beserta data referensi");
+        response.setData(notifications);
+        response.setMessage("Berhasil mendapatkan notifikasi");
         response.setTimestamp(new Date());
         response.setStatus(HttpStatus.OK.value());
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<BaseResponseDTO<Notification>> markAsRead(@PathVariable Long id) {
+    public ResponseEntity<BaseResponseDTO<Notification>> markAsRead(
+        @PathVariable Long id,
+        @RequestHeader("Authorization") String token
+    ) {
+        UserModel currentUser = getUserFromToken(token);
+        Notification notification = notificationService.markAsRead(id, currentUser);
+        
         BaseResponseDTO<Notification> response = new BaseResponseDTO<>();
-        response.setData(notificationService.markAsRead(id));
+        response.setData(notification);
         response.setMessage("Notifikasi berhasil ditandai sebagai telah dibaca");
         response.setTimestamp(new Date());
         response.setStatus(HttpStatus.OK.value());
@@ -82,13 +75,27 @@ public class NotificationRestController {
     }
 
     @PostMapping("/bulk-delete")
-    public ResponseEntity<BaseResponseDTO<String>> bulkDeleteNotifications(@RequestBody List<Long> ids) {
-        notificationService.bulkDeleteNotifications(ids);
+    public ResponseEntity<BaseResponseDTO<String>> bulkDeleteNotifications(
+        @RequestBody List<Long> ids,
+        @RequestHeader("Authorization") String token
+    ) {
+        UserModel currentUser = getUserFromToken(token);
+        notificationService.bulkDeleteNotifications(ids, currentUser);
+        
         BaseResponseDTO<String> response = new BaseResponseDTO<>();
         response.setMessage("Notifikasi berhasil dihapus");
         response.setTimestamp(new Date());
         response.setStatus(HttpStatus.OK.value());
         return ResponseEntity.ok(response);
+    }
+
+    private UserModel getUserFromToken(String token) {
+        String username = jwtUtils.getUsernameFromJwtToken(token.replace("Bearer ", ""));
+        UserModel user = userDb.findByUsernameIgnoreCase(username);
+        if (user == null) {
+            throw new RuntimeException("User tidak ditemukan");
+        }
+        return user;
     }
 
     @PostMapping("/trigger-check")

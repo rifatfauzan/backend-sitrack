@@ -17,6 +17,7 @@ import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,7 +77,8 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
 
         requestAssetItemDb.saveAll(items);
 
-        notificationRestService.createRequestAssetApprovalNotification(requestAsset.getRequestAssetId());
+        notificationRestService.createRequestAssetApprovalNotification(requestAsset.getRequestAssetId(), Arrays.asList(1L, 2L, 3L, 5L)
+        );
 
         return new CreateRequestAssetResponseDTO(
                 requestAsset.getRequestAssetId(),
@@ -122,7 +124,7 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
         notificationRestService.createRequestAssetStatusNotification(
             requestAssetId, 
             request.getStatus(),
-            "Mekanik"
+            Arrays.asList(1L, 2L, 3L, 5L)
         );
     
         requestAssetDb.save(requestAsset);

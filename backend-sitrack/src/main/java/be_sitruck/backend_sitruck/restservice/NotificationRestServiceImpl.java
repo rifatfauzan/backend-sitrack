@@ -2,9 +2,10 @@ package be_sitruck.backend_sitruck.restservice;
 
 import be_sitruck.backend_sitruck.model.Notification;
 import be_sitruck.backend_sitruck.model.NotificationCategory;
+import be_sitruck.backend_sitruck.model.UserModel;
 import be_sitruck.backend_sitruck.repository.NotificationDb;
 import be_sitruck.backend_sitruck.repository.OrderDb;
-
+import be_sitruck.backend_sitruck.repository.UserDb;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -30,56 +31,45 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     @Autowired
     private OrderDb orderDb;
 
+    @Autowired
+    private UserDb userDb;
+
     @Override
-    public List<Notification> getAllNotifications() {
-        return notificationDb.findByIsActiveTrue();
+    public List<Notification> getAllNotificationsForUser(UserModel user) {
+        return notificationDb.findByUserAndIsActiveTrue(user);
     }
 
     @Override
-    public Notification getNotificationById(Long id) {
-        return notificationDb.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found"));
+    public Notification getNotificationByIdAndUser(Long id, UserModel user) {
+        return notificationDb.findByIdAndUser(id, user)
+            .orElseThrow(() -> new RuntimeException("Notification not found"));
     }
 
     @Override
-    public List<Notification> getNotificationsByCategory(NotificationCategory category) {
-        return notificationDb.findByCategoryAndIsActiveTrue(category);
-    }
-
-    @Override
-    public List<Notification> getNotificationsByReferenceType(String referenceType) {
-        return notificationDb.findByReferenceTypeAndIsActiveTrue(referenceType);
-    }
-
-    @Override
-    public Notification markAsRead(Long id) {
-        Notification notification = getNotificationById(id);
+    public Notification markAsRead(Long id, UserModel user) {
+        Notification notification = getNotificationByIdAndUser(id, user);
         notification.setIsRead(true);
         return notificationDb.save(notification);
     }
 
     @Override
-    public void bulkDeleteNotifications(List<Long> ids) {
-        for (Long id: ids){
-            Notification notification = getNotificationById(id);
-            if (Boolean.TRUE.equals(notification.getIsRead())) {
-                notification.setIsActive(false);
-                notificationDb.save(notification);
-            }
-        }
+    public void bulkDeleteNotifications(List<Long> ids, UserModel user) {
+        List<Notification> notifications = notificationDb.findAllByIdAndUser(ids, user);
+        notifications.forEach(notif -> {
+            notif.setIsActive(false);
+            notificationDb.save(notif);
+        });
     }
 
     @Override
-    public Notification createOrUpdateNotification(String title, String message, 
-                                                  NotificationCategory category,
-                                                  String referenceId, String referenceType, 
-                                                  Date expiryDate, Integer daysRemaining) {
-        
+    public Notification createOrUpdateNotification(
+        String title, String message, NotificationCategory category,
+        String referenceId, String referenceType, Date expiryDate,
+        Integer daysRemaining, UserModel user
+    ) {
         Optional<Notification> existingNotification = 
-            notificationDb.findByCategoryAndReferenceTypeAndReferenceId(
-                category, 
-                referenceType.toUpperCase(), 
-                referenceId
+            notificationDb.findByCategoryAndReferenceTypeAndReferenceIdAndUser(
+                category, referenceType.toUpperCase(), referenceId, user
             );
 
         if (existingNotification.isPresent()) {
@@ -104,8 +94,24 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             notification.setIsActive(true);
             notification.setDaysRemaining(daysRemaining);
             notification.setRedirectEndpoint(generateRedirectEndpoint(referenceType, referenceId));
+            notification.setUser(user);
             return notificationDb.save(notification);
         }
+    }
+
+    public void createNotificationForRoles(
+        String title, String message, NotificationCategory category,
+        String referenceId, String referenceType, Date expiryDate,
+        Integer daysRemaining, List<Long> roleIds
+    ) {
+        List<UserModel> users = userDb.findByRole_IdIn(roleIds);
+        users.forEach(user -> {
+            createOrUpdateNotification(
+                title, message, category,
+                referenceId, referenceType, expiryDate,
+                daysRemaining, user
+            );
+        });
     }
 
     private String generateRedirectEndpoint(String referenceType, String referenceId) {
@@ -131,20 +137,12 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     private void processTruckDocuments(Date today) {
         truckRestService.getAllTruck().forEach(truck -> {
             processDocument(
-                truck.getVehicleSTNKDate(), 
-                "STNK", 
-                "Truck", 
-                truck.getVehicleId(), 
-                NotificationCategory.VEHICLE_STNK_EXPIRY, 
-                today
+                truck.getVehicleSTNKDate(), "STNK", "TRUCK", truck.getVehicleId(),
+                NotificationCategory.VEHICLE_STNK_EXPIRY, today
             );
             processDocument(
-                truck.getVehicleKIRDate(), 
-                "KIR", 
-                "Truck", 
-                truck.getVehicleId(), 
-                NotificationCategory.VEHICLE_KIR_EXPIRY, 
-                today
+                truck.getVehicleKIRDate(), "KIR", "TRUCK", truck.getVehicleId(),
+                NotificationCategory.VEHICLE_KIR_EXPIRY, today
             );
         });
     }
@@ -152,12 +150,8 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     private void processChassisDocuments(Date today) {
         chassisRestService.getAllChassis().forEach(chassis -> {
             processDocument(
-                chassis.getChassisKIRDate(), 
-                "KIR", 
-                "Chassis", 
-                chassis.getChassisId(), 
-                NotificationCategory.CHASSIS_KIR_EXPIRY, 
-                today
+                chassis.getChassisKIRDate(), "KIR", "CHASSIS", chassis.getChassisId(),
+                NotificationCategory.CHASSIS_KIR_EXPIRY, today
             );
         });
     }
@@ -165,12 +159,8 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     private void processDriverDocuments(Date today) {
         sopirRestService.viewAllSopir().forEach(driver -> {
             processDocument(
-                driver.getDriver_SIM_Date(), 
-                "SIM", 
-                "SOPIR", 
-                driver.getDriverId(), 
-                NotificationCategory.DRIVER_SIM_EXPIRY, 
-                today
+                driver.getDriver_SIM_Date(), "SIM", "SOPIR", driver.getDriverId(),
+                NotificationCategory.DRIVER_SIM_EXPIRY, today
             );
         });
     }
@@ -202,106 +192,87 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             return;
         }
 
-        createOrUpdateNotification(
-            title,
-            message,
-            category,
-            referenceId,
-            referenceType,
-            expiryDate,
-            daysRemaining
+        createNotificationForRoles(
+            title, message, category,
+            referenceId, referenceType, expiryDate,
+            daysRemaining, Arrays.asList(1L, 2L, 3L, 4L, 5L)
         );
     }
 
     @Override
-    public void createOrderNotification(String orderId, String title, String message) {
-        this.createOrUpdateNotification(
-            title,
-            message,
-            NotificationCategory.ORDER_UPDATE,
-            orderId,
-            "ORDER",
-            null,
-            null
-        );
-    }
-
-    @Override
-    public void createOrderApprovalNotification(String orderId) {
+    public void createOrderApprovalNotification(String orderId, List<Long> roleIds) {
         String title = "Persetujuan Order Diperlukan";
-        String message = String.format(
-            "Order dengan ID %s memerlukan persetujuan", 
-            orderId
+        String message = String.format("Order dengan ID %s memerlukan persetujuan", orderId);
+        createNotificationForRoles(
+            title, message, NotificationCategory.ORDER_UPDATE,
+            orderId, "ORDER", null, null, Arrays.asList(1L, 2L, 3L)
         );
-        
-        createOrderNotification(orderId, title, message);
     }
 
     @Override
-    public void createOrderStatusNotification(String orderId, int status) {
+    public void createOrderStatusNotification(String orderId, int status, List<Long> roleIds) {
         String statusLabel = getStatusLabel(status);
         String title = "Status Order Diperbarui";
-        String message = String.format(
-            "Order dengan ID %s telah berubah status menjadi: %s", 
-            orderId, 
-            statusLabel
+        String message = String.format("Order dengan ID %s telah berubah status menjadi: %s", orderId, statusLabel);
+        createNotificationForRoles(
+            title, message, NotificationCategory.ORDER_UPDATE,
+            orderId, "ORDER", null, null, Arrays.asList(4L)
         );
-        
-        createOrderNotification(orderId, title, message);
     }
 
     @Override
-    public void createRequestAssetNotification(String requestAssetId, String title, String message) {
-        this.createOrUpdateNotification(
+    public void createRequestAssetApprovalNotification(String requestAssetId, List<Long> roleIds) {
+        String title = "Persetujuan Request Asset Diperlukan";
+        String message = String.format("Request Asset dengan ID %s memerlukan persetujuan", requestAssetId);
+        createNotificationForRoles(
+            title, message, NotificationCategory.REQUEST_ASSET_UPDATE,
+            requestAssetId, "REQUEST_ASSET", null, null, Arrays.asList(1L, 2L, 3L)
+        );
+    }
+
+    @Override
+    public void createRequestAssetStatusNotification(
+        String requestAssetId, 
+        int status, 
+        List<Long> roleIds
+    ) {
+        String statusLabel = getRequestAssetStatusLabel(status);
+        String title = "Status Request Asset Diperbarui";
+        String message = String.format(
+            "Request Asset dengan ID %s telah diproses ke status: %s", 
+            requestAssetId, 
+            statusLabel
+        );
+        createNotificationForRoles(
             title,
             message,
             NotificationCategory.REQUEST_ASSET_UPDATE,
             requestAssetId,
             "REQUEST_ASSET",
             null,
-            null
+            null,
+            roleIds
         );
-    }
-
-    @Override
-    public void createRequestAssetApprovalNotification(String requestAssetId) {
-        String title = "Persetujuan Request Asset Diperlukan";
-        String message = String.format(
-            "Request Asset dengan ID %s memerlukan persetujuan",
-            requestAssetId
-        );
-        createRequestAssetNotification(requestAssetId, title, message);
-    }
-
-    @Override
-    public void createRequestAssetStatusNotification(String requestAssetId, int status, String role) {
-        String statusLabel = getRequestAssetStatusLabel(status);
-        String title = "Status Request Asset Diperbarui";
-        String message = role.equals("OPERASIONAL") 
-            ? String.format("Request Asset dengan ID %s telah %s", requestAssetId, statusLabel)
-            : String.format("Request Asset dengan ID %s telah diproses ke status: %s", requestAssetId, statusLabel);
-        
-        createRequestAssetNotification(requestAssetId, title, message);
     }
 
     private String getRequestAssetStatusLabel(int status) {
-        switch (status) {
-            case 0: return "Pending";
-            case 1: return "Approved";
-            case 2: return "Needs Revision";
-            case 3: return "Rejected";
-            default: return "Unknown";
-        }
+        return switch (status) {
+            case 0 -> "Pending";
+            case 1 -> "Approved";
+            case 2 -> "Needs Revision";
+            case 3 -> "Rejected";
+            default -> "Unknown";
+        };
     }
 
-    private static String getStatusLabel(int status) {
-        switch (status) {
-        case 0: return "Rejected";
-        case 1: return "Pending Approval";
-        case 2: return "Needs Revision";
-        case 3: return "Ongoing";
-        case 4: return "Done";
-        default: return "Unknown";
-        }
+    private String getStatusLabel(int status) {
+        return switch (status) {
+            case 0 -> "Rejected";
+            case 1 -> "Pending Approval";
+            case 2 -> "Needs Revision";
+            case 3 -> "Ongoing";
+            case 4 -> "Done";
+            default -> "Unknown";
+        };
     }
 }
