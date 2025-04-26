@@ -11,8 +11,8 @@ public interface NotificationRestService {
     Notification getNotificationById(Long id);
     List<Notification> getNotificationsByCategory(NotificationCategory category);
     List<Notification> getNotificationsByReferenceType(String referenceType);
+    void bulkDeleteNotifications(List<Long> ids);
     Notification markAsRead(Long id);
-    void deleteNotification(Long id);
     Notification createOrUpdateNotification(String title, String message, NotificationCategory category,
                                    String referenceId, String referenceType, Date expiryDate, Integer daysRemaining);
     void checkExpiringDocuments();

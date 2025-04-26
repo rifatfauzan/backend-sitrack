@@ -59,10 +59,14 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     }
 
     @Override
-    public void deleteNotification(Long id) {
-        Notification notification = getNotificationById(id);
-        notification.setIsActive(false);
-        notificationDb.save(notification);
+    public void bulkDeleteNotifications(List<Long> ids) {
+        for (Long id: ids){
+            Notification notification = getNotificationById(id);
+            if (Boolean.TRUE.equals(notification.getIsRead())) {
+                notification.setIsActive(false);
+                notificationDb.save(notification);
+            }
+        }
     }
 
     @Override
@@ -212,7 +216,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         this.createOrUpdateNotification(
             title,
             message,
-            NotificationCategory.ORDER_UPDATE, // Kategori sama untuk semua notifikasi order
+            NotificationCategory.ORDER_UPDATE,
             orderId,
             "ORDER",
             null,

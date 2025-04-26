@@ -81,9 +81,9 @@ public class NotificationRestController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<BaseResponseDTO<String>> deleteNotification(@PathVariable Long id) {
-        notificationService.deleteNotification(id);
+    @PostMapping("/bulk-delete")
+    public ResponseEntity<BaseResponseDTO<String>> bulkDeleteNotifications(@RequestBody List<Long> ids) {
+        notificationService.bulkDeleteNotifications(ids);
         BaseResponseDTO<String> response = new BaseResponseDTO<>();
         response.setMessage("Notifikasi berhasil dihapus");
         response.setTimestamp(new Date());
