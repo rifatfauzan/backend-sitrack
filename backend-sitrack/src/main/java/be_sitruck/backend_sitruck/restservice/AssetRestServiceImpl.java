@@ -93,4 +93,33 @@ public class AssetRestServiceImpl implements AssetRestService {
         dto.setUpdatedDate(asset.getUpdatedDate());
         return dto;
     }
+
+    @Override
+    public CreateAssetRequestDTO getAssetById(String assetId) {
+        Asset asset = assetDb.findById(assetId).orElse(null);
+        if (asset == null) {
+            return null; 
+        }
+        return convertToAssetDTO(asset);
+    }
+
+    @Override
+    public CreateAssetRequestDTO updateAsset(String assetId, CreateAssetRequestDTO assetDTO) {
+        Asset asset = assetDb.findById(assetId).orElse(null);
+        if (asset == null) {
+            throw new IllegalArgumentException("Asset dengan ID: " + assetId + " tidak ditemukan"); 
+        }
+
+            asset.setJenisAsset(assetDTO.getJenisAsset());
+            asset.setJumlahStok(assetDTO.getJumlahStok());
+            asset.setBrand(assetDTO.getBrand());
+            asset.setAssetRemark(assetDTO.getAssetRemark());
+
+        asset.setUpdatedBy(jwtUtils.getCurrentUsername());
+        asset.setUpdatedDate(new Date());
+
+        assetDb.save(asset);
+
+        return convertToAssetDTO(asset);
+    }
 }
