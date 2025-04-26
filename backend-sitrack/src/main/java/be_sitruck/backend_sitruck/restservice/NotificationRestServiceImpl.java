@@ -55,9 +55,12 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     @Override
     public void bulkDeleteNotifications(List<Long> ids, UserModel user) {
         List<Notification> notifications = notificationDb.findAllByIdAndUser(ids, user);
+        
         notifications.forEach(notif -> {
-            notif.setIsActive(false);
-            notificationDb.save(notif);
+            if (notif.getIsRead()) {
+                notif.setIsActive(false);
+                notificationDb.save(notif);
+            }
         });
     }
 
