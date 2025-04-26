@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,7 @@ import be_sitruck.backend_sitruck.restdto.response.CreateOrderResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.OrderDetailResponseDTO;
 import be_sitruck.backend_sitruck.restservice.OrderRestService;
 import jakarta.validation.Valid;
+import lombok.experimental.var;
 
 @RestController
 @RequestMapping("/api/order")
@@ -109,6 +111,24 @@ public class OrderController {
             response.setMessage(e.getMessage());
             response.setTimestamp(new Date());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/update/{orderId}")
+    public ResponseEntity<?> updateOrder(@PathVariable("orderId") String orderId, @RequestBody CreateOrderRequestDTO requestDTO) {
+        try {
+            var response = new BaseResponseDTO<>();
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Data Order berhasil diupdate!");
+            response.setTimestamp(new Date());
+            response.setData(orderRestService.updateOrder(orderId, requestDTO));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            var response = new BaseResponseDTO<>();
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
