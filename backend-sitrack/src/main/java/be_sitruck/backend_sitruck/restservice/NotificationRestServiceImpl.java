@@ -89,6 +89,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             notification.setExpiryDate(expiryDate);
             notification.setDaysRemaining(daysRemaining);
             notification.setIsActive(true);
+            notification.setIsRead(false);
             return notificationDb.save(notification);
         } else {
             Notification notification = new Notification();
@@ -113,6 +114,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             case "CHASSIS" -> "/chassis/detail?id=" + referenceId;
             case "SOPIR" -> "/sopir/" + referenceId;
             case "ORDER" -> "/order/detail?id=" + referenceId;
+            case "REQUEST_ASSET" -> "/request-assets/detail?id=" + referenceId;
             default -> "#";
         };
     }
@@ -246,6 +248,50 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         );
         
         createOrderNotification(orderId, title, message);
+    }
+
+    @Override
+    public void createRequestAssetNotification(String requestAssetId, String title, String message) {
+        this.createOrUpdateNotification(
+            title,
+            message,
+            NotificationCategory.REQUEST_ASSET_UPDATE,
+            requestAssetId,
+            "REQUEST_ASSET",
+            null,
+            null
+        );
+    }
+
+    @Override
+    public void createRequestAssetApprovalNotification(String requestAssetId) {
+        String title = "Persetujuan Request Asset Diperlukan";
+        String message = String.format(
+            "Request Asset dengan ID %s memerlukan persetujuan",
+            requestAssetId
+        );
+        createRequestAssetNotification(requestAssetId, title, message);
+    }
+
+    @Override
+    public void createRequestAssetStatusNotification(String requestAssetId, int status, String role) {
+        String statusLabel = getRequestAssetStatusLabel(status);
+        String title = "Status Request Asset Diperbarui";
+        String message = role.equals("OPERASIONAL") 
+            ? String.format("Request Asset dengan ID %s telah %s", requestAssetId, statusLabel)
+            : String.format("Request Asset dengan ID %s telah diproses ke status: %s", requestAssetId, statusLabel);
+        
+        createRequestAssetNotification(requestAssetId, title, message);
+    }
+
+    private String getRequestAssetStatusLabel(int status) {
+        switch (status) {
+            case 0: return "Pending";
+            case 1: return "Approved";
+            case 2: return "Needs Revision";
+            case 3: return "Rejected";
+            default: return "Unknown";
+        }
     }
 
     private static String getStatusLabel(int status) {

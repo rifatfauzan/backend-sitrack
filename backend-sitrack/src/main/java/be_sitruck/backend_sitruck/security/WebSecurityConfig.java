@@ -65,8 +65,8 @@ public class WebSecurityConfig {
                 // .requestMatchers("/api/sopir/all").hasAuthority("Operasional")
                 // .requestMatchers("/api/sopir/detail/**").hasAuthority("Operasional")
 
-                .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional")
-                
+                .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional", "Mekanik")
+
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .requestMatchers("/api/truck/all").hasAuthority("Operasional")
                 .requestMatchers("/api/truck/detail/**").hasAuthority("Operasional")

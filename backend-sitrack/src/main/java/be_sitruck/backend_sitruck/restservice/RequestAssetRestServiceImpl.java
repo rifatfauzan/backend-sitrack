@@ -35,6 +35,9 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     private RequestAssetItemDb requestAssetItemDb;
 
     @Autowired
+    private NotificationRestService notificationRestService;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Override
@@ -73,10 +76,13 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
 
         requestAssetItemDb.saveAll(items);
 
+        notificationRestService.createRequestAssetApprovalNotification(requestAsset.getRequestAssetId());
+
         return new CreateRequestAssetResponseDTO(
                 requestAsset.getRequestAssetId(),
                 "Request Asset berhasil dibuat!"
         );
+
     }
 
     @Override
@@ -112,6 +118,12 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
                 }
             }
         }
+
+        notificationRestService.createRequestAssetStatusNotification(
+            requestAssetId, 
+            request.getStatus(),
+            "Mekanik"
+        );
     
         requestAssetDb.save(requestAsset);
     }

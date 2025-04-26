@@ -19,5 +19,7 @@ public interface NotificationRestService {
     void createOrderNotification(String orderId, String title, String message);
     void createOrderApprovalNotification(String orderId);
     void createOrderStatusNotification(String orderId, int status);
-
+    void createRequestAssetApprovalNotification(String requestAssetId);
+    void createRequestAssetStatusNotification(String requestAssetId, int status, String role);
+    void createRequestAssetNotification(String requestAssetId, String title, String message);
 }

@@ -6,5 +6,6 @@ public enum NotificationCategory {
     CHASSIS_KIR_EXPIRY,
     DRIVER_SIM_EXPIRY,
     REFERENCE,
-    ORDER_UPDATE
+    ORDER_UPDATE,
+    REQUEST_ASSET_UPDATE
 }
