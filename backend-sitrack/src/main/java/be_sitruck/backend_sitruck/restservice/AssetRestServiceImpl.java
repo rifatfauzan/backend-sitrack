@@ -47,6 +47,10 @@ public class AssetRestServiceImpl implements AssetRestService {
             throw new ValidationException("Brand tidak boleh berupa angka");
         }
 
+        if(request.getAssetPrice() <= 0 || request.getAssetPrice() == null){
+            throw new ValidationException("Asset Price harus diisi dan tidak boleh negatif");
+        }
+
         String currentUser = jwtUtils.getCurrentUsername();
         String maxAssetId = assetDb.findMaxAssetId(); 
 
@@ -72,6 +76,7 @@ public class AssetRestServiceImpl implements AssetRestService {
         asset.setRequestedStok(10); // Requested stok default 0 saat create
         asset.setCreatedBy(currentUser);
         asset.setCreatedDate(new Date());
+        asset.setAssetPrice(request.getAssetPrice());
 
         assetDb.save(asset);
 
@@ -100,6 +105,7 @@ public class AssetRestServiceImpl implements AssetRestService {
         dto.setCreatedDate(asset.getCreatedDate());
         dto.setUpdatedBy(asset.getUpdatedBy());
         dto.setUpdatedDate(asset.getUpdatedDate());
+        dto.setAssetPrice(asset.getAssetPrice());
         return dto;
     }
 
@@ -132,12 +138,11 @@ public class AssetRestServiceImpl implements AssetRestService {
 
         if(assetDTO.getBrand().matches("[0-9]+")){
             throw new ValidationException("Brand tidak boleh berupa angka");
+        } 
+
+        if(assetDTO.getAssetPrice() <= 0 || assetDTO.getAssetPrice() == null){
+            throw new ValidationException("Asset Price harus diisi dan tidak boleh negatif");
         }
-        try{
-            Integer.valueOf(assetDTO.getJumlahStok());
-        } catch (NumberFormatException e) {
-            throw new ValidationException("Jumlah Stok harus berupa angka");
-        }  
 
 
             asset.setJenisAsset(assetDTO.getJenisAsset());
@@ -145,6 +150,7 @@ public class AssetRestServiceImpl implements AssetRestService {
             asset.setBrand(assetDTO.getBrand());
             asset.setAssetRemark(assetDTO.getAssetRemark());
             asset.setRequestedStok(assetDTO.getRequestedStok());
+            asset.setAssetPrice(assetDTO.getAssetPrice());
 
         asset.setUpdatedBy(jwtUtils.getCurrentUsername());
         asset.setUpdatedDate(new Date());
