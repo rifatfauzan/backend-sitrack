@@ -2,6 +2,7 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
 import be_sitruck.backend_sitruck.restdto.request.CreateAssetRequestDTO;
+import be_sitruck.backend_sitruck.restdto.request.CreateSopirRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateAssetResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restservice.AssetRestService;
@@ -63,29 +64,40 @@ public class AssetRestController {
         }
     }
 
-    // //Get Asset by ID
-    // @GetMapping("/detail")
-    // public ResponseEntity<?> getAssetById(@RequestParam("id") String assetId) {
-    //     var baseResponseDTO = new BaseResponseDTO<CreateAssetRequestDTO>();
-    //     try {
-    //         CreateAssetRequestDTO asset = assetRestService.getAssetById(assetId);
-    //         baseResponseDTO.setStatus(HttpStatus.OK.value());
-    //         baseResponseDTO.setMessage("Asset berhasil ditemukan!");
-    //         baseResponseDTO.setTimestamp(new Date());
-    //         baseResponseDTO.setData(asset);
-    //         return ResponseEntity.ok(baseResponseDTO);
-    //     } catch (ValidationException e) {
-    //         baseResponseDTO.setStatus(HttpStatus.BAD_REQUEST.value());
-    //         baseResponseDTO.setMessage("Asset tidak ditemukan dengan ID: " + assetId);
-    //         baseResponseDTO.setTimestamp(new Date());
-    //         baseResponseDTO.setData(null);
-    //         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(baseResponseDTO);
-    //     } catch (Exception e) {
-    //         baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-    //         baseResponseDTO.setMessage("Terjadi kesalahan saat mengambil asset: " + e.getMessage());
-    //         baseResponseDTO.setTimestamp(new Date());
-    //         baseResponseDTO.setData(null);
-    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
-    //     }
-    // }
+    @GetMapping("/{assetId}")
+    public ResponseEntity<?> viewAssetById(@PathVariable("assetId") String assetId){
+        try{
+            var response = new BaseResponseDTO<>();
+            response.setData(assetRestService.getAssetById(assetId));
+            response.setMessage("Data asset berhasil ditampilkan");
+            response.setTimestamp(new Date());
+            response.setStatus(200);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e){
+            var response = new BaseResponseDTO<>();
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setStatus(400);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/update/{assetId}")
+    public ResponseEntity<?> updateAsset(@PathVariable("assetId") String assetId, @RequestBody CreateAssetRequestDTO requestDTO){
+        try{
+            var response = new BaseResponseDTO<>();
+            response.setData(assetRestService.updateAsset(assetId, requestDTO));
+            response.setMessage("Data Asset berhasil diupdate");
+            response.setTimestamp(new Date());
+            response.setStatus(200);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e){
+            var response = new BaseResponseDTO<>();
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setStatus(400);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
