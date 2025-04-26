@@ -73,7 +73,7 @@ public class AssetRestServiceImpl implements AssetRestService {
         asset.setJumlahStok(request.getJumlahStok());
         asset.setBrand(request.getBrand());
         asset.setAssetRemark(request.getAssetRemark());
-        asset.setRequestedStok(10); // Requested stok default 0 saat create
+        asset.setRequestedStok(0); // Requested stok default 0 saat create
         asset.setCreatedBy(currentUser);
         asset.setCreatedDate(new Date());
         asset.setAssetPrice(request.getAssetPrice());
