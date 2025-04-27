@@ -29,43 +29,49 @@ public class AssetRestServiceImpl implements AssetRestService {
         if (request.getJenisAsset() == null || request.getJenisAsset().isBlank()) {
             throw new ValidationException("Jenis Asset harus diisi");
         }
-
+    
         if (request.getJumlahStok() == null || request.getJumlahStok() < 0) {
             throw new ValidationException("Jumlah Stok harus diisi dan tidak boleh negatif");
         }
-
+    
         if (request.getBrand() == null || request.getBrand().isBlank()) {
             throw new ValidationException("Brand harus diisi");
         }
-
+    
+        // Cek duplikat brand dan jenisAsset
+        List<Asset> existingAssets = assetDb.findByBrandAndJenisAsset(request.getBrand(), request.getJenisAsset());
+        if (!existingAssets.isEmpty()) {
+            throw new ValidationException("Asset dengan brand dan jenis tersebut sudah ada");
+        }
+    
         String currentUser = jwtUtils.getCurrentUsername();
         String maxAssetId = assetDb.findMaxAssetId(); 
-
+    
         int nextNumber = 1;
         if (maxAssetId != null && maxAssetId.length() > 2) {
-            String numberPart = maxAssetId.substring(2); // Ambil 5 digit terakhir
+            String numberPart = maxAssetId.substring(2);
             try {
                 nextNumber = Integer.parseInt(numberPart) + 1;
             } catch (NumberFormatException e) {
                 nextNumber = 1;
             }
         }
-
+    
         String paddedNumber = String.format("%05d", nextNumber);
         String generatedAssetId = "AS" + paddedNumber;
-
+    
         Asset asset = new Asset();
         asset.setAssetId(generatedAssetId);
         asset.setJenisAsset(request.getJenisAsset());
         asset.setJumlahStok(request.getJumlahStok());
         asset.setBrand(request.getBrand());
         asset.setAssetRemark(request.getAssetRemark());
-        asset.setRequestedStok(0); // Requested stok default 0 saat create
+        asset.setRequestedStok(0);
         asset.setCreatedBy(currentUser);
         asset.setCreatedDate(new Date());
-
+    
         assetDb.save(asset);
-
+    
         return new CreateAssetResponseDTO(
                 asset.getAssetId(),
                 "Asset berhasil ditambahkan"
@@ -108,6 +114,12 @@ public class AssetRestServiceImpl implements AssetRestService {
         Asset asset = assetDb.findById(assetId).orElse(null);
         if (asset == null) {
             throw new IllegalArgumentException("Asset dengan ID: " + assetId + " tidak ditemukan"); 
+        }
+
+        // Cek duplikat brand dan jenisAsset
+        List<Asset> existingAssets = assetDb.findByBrandAndJenisAsset(assetDTO.getBrand(), assetDTO.getJenisAsset());
+            if (!existingAssets.isEmpty()) {
+                throw new ValidationException("Asset dengan brand dan jenis tersebut sudah ada");
         }
 
             asset.setJenisAsset(assetDTO.getJenisAsset());
