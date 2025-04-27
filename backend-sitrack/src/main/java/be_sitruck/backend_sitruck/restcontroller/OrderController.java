@@ -67,7 +67,7 @@ public class OrderController {
 
         baseResponseDTO.setStatus(HttpStatus.OK.value());
         baseResponseDTO.setData(orders);
-        baseResponseDTO.setMessage(String.format("List chassis berhasil ditemukan sebanyak %d chassis", orders.size()));
+        baseResponseDTO.setMessage(String.format("List order berhasil ditemukan sebanyak %d chassis", orders.size()));
         baseResponseDTO.setTimestamp(new Date());
 
         return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
@@ -80,7 +80,7 @@ public class OrderController {
         try {
             OrderDetailResponseDTO orderDetail = orderRestService.getOrderById(orderId);
             baseResponseDTO.setStatus(HttpStatus.OK.value());
-            baseResponseDTO.setMessage("Chassis berhasil ditemukan!");
+            baseResponseDTO.setMessage("Order berhasil ditemukan!");
             baseResponseDTO.setTimestamp(new Date());
             baseResponseDTO.setData(orderDetail);
             return ResponseEntity.ok(baseResponseDTO);
