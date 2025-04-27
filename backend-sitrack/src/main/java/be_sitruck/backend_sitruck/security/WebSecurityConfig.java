@@ -73,6 +73,11 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/order/all").hasAuthority("Operasional")
                 .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
                 .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
+
+                .requestMatchers("/api/request-assets/**").hasAnyAuthority("Admin","Supervisor","Manager")
+                .requestMatchers("/api/request-assets/all").hasAuthority("Mekanik")
+                .requestMatchers("/api/request-assets/detail/**").hasAuthority("Mekanik")
+                // .requestMatchers("/api/request-assets/update/**").hasAuthority("Mekanik")
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

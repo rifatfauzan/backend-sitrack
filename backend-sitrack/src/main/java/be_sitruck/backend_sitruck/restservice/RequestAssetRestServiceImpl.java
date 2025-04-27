@@ -146,16 +146,17 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     }
 
     private RequestAssetItemDTO convertToRequestAssetItemDTO(RequestAssetItem item) {
-    RequestAssetItemDTO dto = new RequestAssetItemDTO();
-    dto.setAssetId(item.getAssetId());
-    dto.setRequestedQuantity(item.getRequestedQuantity());
+        RequestAssetItemDTO dto = new RequestAssetItemDTO();
+        dto.setAssetId(item.getAssetId());
+        dto.setRequestedQuantity(item.getRequestedQuantity());
 
-    Asset asset = assetDb.findByAssetId(item.getAssetId());
-    if (asset != null) {
-        dto.setJenisAsset(asset.getJenisAsset());
-        dto.setBrand(asset.getBrand());
+        Asset asset = assetDb.findByAssetId(item.getAssetId());
+        if (asset != null) {
+            dto.setJenisAsset(asset.getJenisAsset());
+            dto.setBrand(asset.getBrand());
+            dto.setAssetPrice(asset.getAssetPrice());
+        }
+
+        return dto;
     }
-
-    return dto;
-}
 }
