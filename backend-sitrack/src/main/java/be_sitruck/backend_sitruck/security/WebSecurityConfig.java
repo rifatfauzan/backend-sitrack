@@ -62,8 +62,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/customer/detail/**").hasAuthority("Operasional")
 
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
-                // .requestMatchers("/api/sopir/all").hasAuthority("Operasional")
-                // .requestMatchers("/api/sopir/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/sopir/all").hasAuthority("Operasional")
+                .requestMatchers("/api/sopir/detail/**").hasAuthority("Operasional")
 
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .requestMatchers("/api/truck/all").hasAuthority("Operasional")
@@ -73,6 +73,13 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/order/all").hasAuthority("Operasional")
                 .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
                 .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
+
+                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
+                .requestMatchers("/api/spj/add").hasAuthority("Operasional")
+                .requestMatchers("/api/spj/vehicle-out").hasAuthority("Operasional")
+                .requestMatchers("/api/spj/vehicle-in").hasAuthority("Operasional")
+                .requestMatchers("/api/spj/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/spj/update/**").hasAuthority("Operasional")
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
