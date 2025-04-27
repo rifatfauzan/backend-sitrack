@@ -31,6 +31,7 @@ import lombok.Setter;
 public class SopirModel {
 
     @Id
+    @Column(name = "driver_id")
     private String driverId ;
 
     @NotNull
