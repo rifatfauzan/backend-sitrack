@@ -41,6 +41,7 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     @Autowired
     private JwtUtils jwtUtils;
 
+    // create
     @Override
     public CreateRequestAssetResponseDTO createRequestAsset(CreateRequestAssetRequestDTO requestDTO) {
         String currentUser = jwtUtils.getCurrentUsername();
@@ -84,16 +85,17 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
                 requestAsset.getRequestAssetId(),
                 "Request Asset berhasil dibuat!"
         );
-
     }
 
+    // viewall
     @Override
     public List<CreateRequestAssetRequestDTO> getAllRequestAssets() {
-        return requestAssetDb.findAll().stream()
+        return requestAssetDb.findAllOrdered().stream()
                 .map(this::convertToRequestAssetDTO)
                 .collect(Collectors.toList());
     }
 
+    // approval
     @Override
     public void updateRequestAssetStatus(String requestAssetId, UpdateRequestAssetStatusDTO request) {
         RequestAsset requestAsset = requestAssetDb.findById(requestAssetId)
@@ -130,13 +132,50 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
         requestAssetDb.save(requestAsset);
     }
     
-
+    // detail
     @Override
     public CreateRequestAssetRequestDTO getRequestAssetById(String requestAssetId) {
         RequestAsset requestAsset = requestAssetDb.findById(requestAssetId)
             .orElseThrow(() -> new ValidationException("Request Asset tidak ditemukan"));
 
         return convertToRequestAssetDTO(requestAsset);
+    }
+
+    // edit
+    @Override
+    public CreateRequestAssetResponseDTO editRequestAsset(String requestAssetId, CreateRequestAssetRequestDTO requestDTO) {
+        RequestAsset requestAsset = requestAssetDb.findById(requestAssetId)
+            .orElseThrow(() -> new ValidationException("Request Asset tidak ditemukan"));
+
+        String currentUser = jwtUtils.getCurrentUsername();
+
+        // Update request asset (remark, updated info)
+        requestAsset.setRequestRemark(requestDTO.getRequestRemark());
+        requestAsset.setStatus(0);
+        requestAsset.setUpdatedBy(currentUser);
+        requestAsset.setUpdatedDate(new Date());
+        requestAssetDb.save(requestAsset);
+
+        // Hapus semua asset item lama
+        List<RequestAssetItem> existingItems = requestAssetItemDb.findByRequestAssetRequestAssetId(requestAssetId);
+        requestAssetItemDb.deleteAll(existingItems);
+
+        // Tambahkan asset item baru
+        List<RequestAssetItem> newItems = requestDTO.getAssets().stream()
+            .map(itemDTO -> {
+                RequestAssetItem item = new RequestAssetItem();
+                item.setRequestAsset(requestAsset);
+                item.setAssetId(itemDTO.getAssetId());
+                item.setRequestedQuantity(itemDTO.getRequestedQuantity());
+                return item;
+            }).collect(Collectors.toList());
+
+        requestAssetItemDb.saveAll(newItems);
+
+        return new CreateRequestAssetResponseDTO(
+            requestAsset.getRequestAssetId(),
+            "Request Asset berhasil diedit!"
+        );
     }
 
     private CreateRequestAssetRequestDTO convertToRequestAssetDTO(RequestAsset requestAsset) {
@@ -160,16 +199,17 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     }
 
     private RequestAssetItemDTO convertToRequestAssetItemDTO(RequestAssetItem item) {
-    RequestAssetItemDTO dto = new RequestAssetItemDTO();
-    dto.setAssetId(item.getAssetId());
-    dto.setRequestedQuantity(item.getRequestedQuantity());
+        RequestAssetItemDTO dto = new RequestAssetItemDTO();
+        dto.setAssetId(item.getAssetId());
+        dto.setRequestedQuantity(item.getRequestedQuantity());
 
-    Asset asset = assetDb.findByAssetId(item.getAssetId());
-    if (asset != null) {
-        dto.setJenisAsset(asset.getJenisAsset());
-        dto.setBrand(asset.getBrand());
+        Asset asset = assetDb.findByAssetId(item.getAssetId());
+        if (asset != null) {
+            dto.setJenisAsset(asset.getJenisAsset());
+            dto.setBrand(asset.getBrand());
+            dto.setAssetPrice(asset.getAssetPrice());
+        }
+
+        return dto;
     }
-
-    return dto;
-}
 }
