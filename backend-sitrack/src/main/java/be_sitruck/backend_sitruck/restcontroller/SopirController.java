@@ -2,6 +2,7 @@ package be_sitruck.backend_sitruck.restcontroller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import be_sitruck.backend_sitruck.model.SopirModel;
 import be_sitruck.backend_sitruck.restdto.request.CreateSopirRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateSopirResponseDTO;
@@ -9,6 +10,7 @@ import be_sitruck.backend_sitruck.restservice.SopirRestService;
 import jakarta.validation.Valid;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;

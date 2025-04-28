@@ -1,5 +1,6 @@
 package be_sitruck.backend_sitruck.restservice;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,9 @@ public class OrderRestServiceImpl implements OrderRestService {
 
     @Autowired
     private CustomerDb customerDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -73,6 +77,8 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setQtyCh140fl(request.getQtyCh140fl());
 
         orderDb.save(order);
+
+        notificationRestService.createOrderApprovalNotification(orderId, Arrays.asList(1L, 2L, 3L));;
 
         return new CreateOrderResponseDTO(orderId, "Order berhasil ditambahkan!");
     }
@@ -146,6 +152,12 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setApprovedDate(new Date());
 
         orderDb.save(order);
+
+        notificationRestService.createOrderStatusNotification(
+            order.getOrderId(), 
+            request.getOrderStatus(),
+            Arrays.asList(1L, 2L, 3L, 4L)
+        );
 
         return new CreateOrderResponseDTO(orderId, "Approval dari order berhasil diubah!");
     }

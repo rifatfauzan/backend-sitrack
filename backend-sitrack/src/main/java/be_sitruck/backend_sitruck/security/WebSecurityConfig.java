@@ -66,6 +66,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/sopir/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/sopir/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
 
+                .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional", "Mekanik")
+
                 .requestMatchers("/api/truck/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/truck/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
@@ -75,6 +77,16 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
+                .requestMatchers("/api/order/all").hasAuthority("Operasional")
+                .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
+
+                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
+                .requestMatchers("/api/spj/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/vehicle-out").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/vehicle-in").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

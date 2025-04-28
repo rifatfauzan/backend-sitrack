@@ -1,5 +1,6 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
+import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.restdto.request.CreateTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.UpdateTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
