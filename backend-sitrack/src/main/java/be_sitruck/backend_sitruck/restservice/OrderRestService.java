@@ -12,5 +12,6 @@ public interface OrderRestService {
     List<OrderDetailResponseDTO> getAllOrders();
     OrderDetailResponseDTO getOrderById(String orderId);
     CreateOrderResponseDTO approveOrder(ApproveOrderRequestDTO request);
+    CreateOrderRequestDTO updateOrder (String orderId, CreateOrderRequestDTO request);
 
 }

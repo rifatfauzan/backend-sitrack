@@ -1,6 +1,7 @@
 package be_sitruck.backend_sitruck.restservice;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,9 @@ public class SpjRestServiceImpl implements SpjRestService {
 
     @Autowired
     private TruckDb truckDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -155,6 +159,9 @@ public class SpjRestServiceImpl implements SpjRestService {
         Chassis chassis = chassisDb.findById(spjDTO.getChassisId()).orElse(null);
         SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
 
+        String spjId = generateSpjId();
+
+
         var spj = new Spj();
         spj.setId(generateSpjId());
         spj.setOrder(order);
@@ -192,6 +199,7 @@ public class SpjRestServiceImpl implements SpjRestService {
         
         spjDb.save(spj);
         
+        notificationRestService.createSpjApprovalNotification(spjId, Arrays.asList(1L, 2L, 3L));;
         return SpjToSpjResponseDTO(spj);
     }
 
@@ -237,6 +245,14 @@ public class SpjRestServiceImpl implements SpjRestService {
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
+
+        var driver = spj.getDriver();
+        var vehicle = spj.getVehicle();
+        var chassis = spj.getChassis();
+
+        driver.setRowStatus("A");
+        chassis.setRowStatus("A");
+        vehicle.setRowStatus("A");
 
         spj.setStatus(4);
         spj.setActualDateIn(new Date());

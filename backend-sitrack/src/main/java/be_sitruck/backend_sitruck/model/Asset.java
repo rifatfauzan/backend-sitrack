@@ -1,6 +1,8 @@
 package be_sitruck.backend_sitruck.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -48,4 +50,8 @@ public class Asset {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_date")
     private Date updatedDate;
+
+    @NotNull
+    @Column(name = "asset_price")
+    private Integer assetPrice;
 }
