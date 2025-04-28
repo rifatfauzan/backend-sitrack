@@ -171,6 +171,7 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
             }).collect(Collectors.toList());
 
         requestAssetItemDb.saveAll(newItems);
+        notificationRestService.createRequestAssetApprovalNotification(requestAsset.getRequestAssetId(), Arrays.asList(1L, 2L, 3L, 5L));
 
         return new CreateRequestAssetResponseDTO(
             requestAsset.getRequestAssetId(),
