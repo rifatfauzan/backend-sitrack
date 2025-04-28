@@ -40,32 +40,16 @@ public class SopirRestServiceImpl implements SopirRestService {
 
         sopir.setDriverId(driverId);
         sopir.setDriverName(sopirDTO.getDriverName());
-
-        if(!sopirDTO.getDriver_KTP_No().matches("[0-9]+")){
-            throw new IllegalArgumentException("Nomor KTP Driver (NIK) harus berupa angka");
-        }
         sopir.setDriver_KTP_No(sopirDTO.getDriver_KTP_No());
         sopir.setDriver_KTP_Date(sopirDTO.getDriver_KTP_Date());
-
-        if(!sopirDTO.getDriver_SIM_No().matches("[0-9]+")){
-            throw new IllegalArgumentException("Nomor SIM Driver harus berupa angka");
-        }
         sopir.setDriver_SIM_No(sopirDTO.getDriver_SIM_No());
         sopir.setDriver_SIM_Date(sopirDTO.getDriver_SIM_Date());
-
-        if(!sopirDTO.getDriverContact().matches("[0-9]+") & !sopirDTO.getDriverContact().isBlank()){
-            throw new IllegalArgumentException("Nomor Kontak Driver harus berupa angka");
-        }
         sopir.setDriverContact(sopirDTO.getDriverContact());
         sopir.setDriverCo(sopirDTO.getDriverCo());
-
-        if(!sopirDTO.getDriverCoContact().matches("[0-9]+") & !sopirDTO.getDriverCoContact().isBlank()){
-            throw new IllegalArgumentException("Nomor Kontak Co-Driver harus berupa angka");
-        }
         sopir.setDriverCoContact(sopirDTO.getDriverCoContact());
 
         if (sopirDTO.getSiteId() != null) {
-            sopir.setSiteId(sopirDTO.getSiteId().toUpperCase());
+            sopir.setSiteId(sopirDTO.getSiteId());
         } else {
             sopir.setSiteId("JKT");
         }
@@ -152,7 +136,6 @@ public class SopirRestServiceImpl implements SopirRestService {
     public CreateSopirResponseDTO updateSopir(String driverId, CreateSopirRequestDTO sopirDTO) {
         
        SopirModel existingSopir = sopirDb.findById(driverId).orElse(null);
-       Date today = new Date();
 
         if(existingSopir == null){
               throw new IllegalArgumentException("Sopir tidak ditemukan");
@@ -160,29 +143,12 @@ public class SopirRestServiceImpl implements SopirRestService {
         existingSopir.setDriverName(sopirDTO.getDriverName());
         existingSopir.setDriver_KTP_No(sopirDTO.getDriver_KTP_No());
         existingSopir.setDriver_KTP_Date(sopirDTO.getDriver_KTP_Date());
-
-        if(!sopirDTO.getDriver_SIM_No().matches("[0-9]+")){
-            throw new IllegalArgumentException("Nomor SIM Driver harus berupa angka");
-        }
         existingSopir.setDriver_SIM_No(sopirDTO.getDriver_SIM_No());
-
-        if (sopirDTO.getDriver_SIM_Date().before(today)) {
-            throw new IllegalArgumentException("Anda tidak bisa menginput tanggal SIM yang sudah lewat atau belum diperpanjang");
-        }
         existingSopir.setDriver_SIM_Date(sopirDTO.getDriver_SIM_Date());
-
-        if(!sopirDTO.getDriverContact().matches("[0-9]+") && !sopirDTO.getDriverContact().isBlank()){  
-            throw new IllegalArgumentException("Nomor Kontak Driver harus berupa angka");
-        }
         existingSopir.setDriverContact(sopirDTO.getDriverContact());
         existingSopir.setDriverCo(sopirDTO.getDriverCo());
-
-        if(!sopirDTO.getDriverCoContact().matches("[0-9]+") && !sopirDTO.getDriverCoContact().isBlank()){
-            throw new IllegalArgumentException("Nomor Kontak Co-Driver harus berupa angka");
-        }
         existingSopir.setDriverCoContact(sopirDTO.getDriverCoContact());
         existingSopir.setSiteId(sopirDTO.getSiteId());
-
         existingSopir.setDriverNumber(sopirDTO.getDriverNumber());
         existingSopir.setDriverRemarks(sopirDTO.getDriverRemarks());
         existingSopir.setRecordStatus(sopirDTO.getRecordStatus());
@@ -199,9 +165,9 @@ public class SopirRestServiceImpl implements SopirRestService {
 
     @Override
     public String generateId(CreateSopirRequestDTO sopirDTO) {
-       String namaDriver = "DR";
+       String namaDriver = sopirDTO.getDriverName().substring(0,3).toUpperCase();
        long totalSopir = sopirDb.count();
-       String increment = String.format("%06d", totalSopir + 1);
+       String increment = String.format("%05d", totalSopir + 1);
         return namaDriver + increment;
     }
 
