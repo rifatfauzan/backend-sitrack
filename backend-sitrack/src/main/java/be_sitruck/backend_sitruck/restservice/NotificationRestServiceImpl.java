@@ -199,7 +199,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         createNotificationForRoles(
             title, message, category,
             referenceId, referenceType, expiryDate,
-            daysRemaining, Arrays.asList(1L, 2L, 3L, 4L, 5L)
+            daysRemaining, Arrays.asList(1L, 2L, 3L)
         );
     }
 
