@@ -65,8 +65,6 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/sopir/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/sopir/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
-                .requestMatchers("/api/sopir/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
-                .requestMatchers("/api/sopir/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
 
                 .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional", "Mekanik")
 
@@ -83,7 +81,6 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
                 .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
 
-                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .requestMatchers("/api/spj/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/vehicle-out").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/vehicle-in").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
