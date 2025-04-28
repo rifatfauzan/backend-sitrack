@@ -49,7 +49,7 @@ public class CustomerRestController {
         }
     }
     
-    @PreAuthorize("hasAuthority('Operasional')")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("all")
     public ResponseEntity<?> getAllCustomers() {
         var baseResponseDTO = new BaseResponseDTO<List<CustomerResponseDTO>>();
@@ -69,8 +69,8 @@ public class CustomerRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
         }
     }
-    
-    @PreAuthorize("hasAuthority('Operasional')")
+    // hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("detail/{id}")
     public ResponseEntity<?> getDetailCustomer(@PathVariable("id") String id) {
         var baseResponseDTO = new BaseResponseDTO<CustomerResponseDTO>();

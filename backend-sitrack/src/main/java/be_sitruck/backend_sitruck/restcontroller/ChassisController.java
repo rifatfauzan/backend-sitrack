@@ -14,6 +14,7 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,7 +67,7 @@ public class ChassisController {
         }
     }
 
-    @PreAuthorize("hasAuthority('Operasional')")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllChassis(){
         var baseResponseDTO = new BaseResponseDTO<List<CreateChassisRequestDTO>>();
@@ -81,7 +82,7 @@ public class ChassisController {
 
     }
 
-    @PreAuthorize("hasAuthority('Operasional')")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/detail")
     public ResponseEntity<?> getChassisById(@RequestParam("id") String chassisId) {
         var baseResponseDTO = new BaseResponseDTO<CreateChassisRequestDTO>();

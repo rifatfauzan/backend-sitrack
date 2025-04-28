@@ -46,7 +46,7 @@ public class TruckRestController {
     }
 
     //Get All Trucks
-    @PreAuthorize("hasAuthority('Operasional')")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllTrucks() {
         var baseResponseDTO = new BaseResponseDTO<List<CreateTruckRequestDTO>>();
@@ -67,7 +67,7 @@ public class TruckRestController {
     }
 
     // Get Truck by ID
-    @PreAuthorize("hasAuthority('Operasional')")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/detail")
     public ResponseEntity<?> getTruckById(@RequestParam("id") String vehicleId) {
         var baseResponseDTO = new BaseResponseDTO<CreateTruckRequestDTO>();

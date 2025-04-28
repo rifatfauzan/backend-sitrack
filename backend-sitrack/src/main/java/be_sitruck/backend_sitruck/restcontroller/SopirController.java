@@ -50,8 +50,8 @@ public class SopirController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
-    
-    @PreAuthorize("hasAuthority('Operasional')")
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/all")
     public ResponseEntity<?> viewAllSopir(){
         var response = new BaseResponseDTO<>();
@@ -62,7 +62,7 @@ public class SopirController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('Operasional')")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/detail/{driverId}")
     public ResponseEntity<?> viewSopirById(@PathVariable("driverId") String driverId){
         try{

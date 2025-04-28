@@ -54,25 +54,25 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/user/**").hasAuthority("Admin")
 
-                .requestMatchers("/api/chassis/all").hasAuthority("Operasional")
-                .requestMatchers("/api/chassis/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/chassis/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/chassis/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/chassis/**").hasAnyAuthority("Admin", "Manager", "Supervisor")
 
-                .requestMatchers("/api/customer/all").hasAuthority("Operasional")
-                .requestMatchers("/api/customer/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/customer/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/customer/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
 
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
-                .requestMatchers("/api/sopir/all").hasAuthority("Operasional")
-                .requestMatchers("/api/sopir/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/sopir/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/sopir/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
 
-                .requestMatchers("/api/truck/all").hasAuthority("Operasional")
-                .requestMatchers("/api/truck/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/truck/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/truck/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
-                .requestMatchers("/api/order/all").hasAuthority("Operasional")
-                .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
-                .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
+                .requestMatchers("/api/order/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
                 .anyRequest().authenticated()    
