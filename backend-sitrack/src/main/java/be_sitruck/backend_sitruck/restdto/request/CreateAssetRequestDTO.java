@@ -15,6 +15,7 @@ public class CreateAssetRequestDTO {
     private Integer jumlahStok;
     private String brand;
     private String assetRemark;
+    private Integer assetPrice; 
     
     private Integer requestedStok = 0; // Default 0
 
