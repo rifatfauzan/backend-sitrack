@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,12 +61,12 @@ public class OrderController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllOrders(){
-        var baseResponseDTO = new BaseResponseDTO<List<OrderDetailResponseDTO>>();
+        BaseResponseDTO<List<OrderDetailResponseDTO>> baseResponseDTO = new BaseResponseDTO<List<OrderDetailResponseDTO>>();
         List<OrderDetailResponseDTO> orders = orderRestService.getAllOrders();
 
         baseResponseDTO.setStatus(HttpStatus.OK.value());
         baseResponseDTO.setData(orders);
-        baseResponseDTO.setMessage(String.format("List chassis berhasil ditemukan sebanyak %d chassis", orders.size()));
+        baseResponseDTO.setMessage(String.format("List order berhasil ditemukan sebanyak %d chassis", orders.size()));
         baseResponseDTO.setTimestamp(new Date());
 
         return new ResponseEntity<>(baseResponseDTO, HttpStatus.OK);
@@ -74,11 +75,11 @@ public class OrderController {
 
     @GetMapping("/detail")
     public ResponseEntity<?> getChassisById(@RequestParam("id") String orderId) {
-        var baseResponseDTO = new BaseResponseDTO<OrderDetailResponseDTO>();
+        BaseResponseDTO<OrderDetailResponseDTO> baseResponseDTO = new BaseResponseDTO<OrderDetailResponseDTO>();
         try {
             OrderDetailResponseDTO orderDetail = orderRestService.getOrderById(orderId);
             baseResponseDTO.setStatus(HttpStatus.OK.value());
-            baseResponseDTO.setMessage("Chassis berhasil ditemukan!");
+            baseResponseDTO.setMessage("Order berhasil ditemukan!");
             baseResponseDTO.setTimestamp(new Date());
             baseResponseDTO.setData(orderDetail);
             return ResponseEntity.ok(baseResponseDTO);
@@ -109,6 +110,24 @@ public class OrderController {
             response.setMessage(e.getMessage());
             response.setTimestamp(new Date());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/update/{orderId}")
+    public ResponseEntity<?> updateOrder(@PathVariable("orderId") String orderId, @RequestBody CreateOrderRequestDTO requestDTO) {
+        try {
+            BaseResponseDTO response = new BaseResponseDTO<>();
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Data Order berhasil diupdate!");
+            response.setTimestamp(new Date());
+            response.setData(orderRestService.updateOrder(orderId, requestDTO));
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            BaseResponseDTO response = new BaseResponseDTO<>();
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
