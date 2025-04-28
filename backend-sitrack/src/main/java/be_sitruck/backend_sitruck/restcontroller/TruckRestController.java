@@ -1,6 +1,5 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
-import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.restdto.request.CreateTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.UpdateTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
@@ -13,7 +12,6 @@ import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -47,7 +45,6 @@ public class TruckRestController {
     }
 
     //Get All Trucks
-    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllTrucks() {
         var baseResponseDTO = new BaseResponseDTO<List<CreateTruckRequestDTO>>();
@@ -68,7 +65,6 @@ public class TruckRestController {
     }
 
     // Get Truck by ID
-    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/detail")
     public ResponseEntity<?> getTruckById(@RequestParam("id") String vehicleId) {
         var baseResponseDTO = new BaseResponseDTO<CreateTruckRequestDTO>();

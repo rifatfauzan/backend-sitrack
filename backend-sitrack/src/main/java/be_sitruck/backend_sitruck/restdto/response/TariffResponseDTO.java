@@ -8,8 +8,7 @@ import lombok.*;
 public class TariffResponseDTO {
     private String tariffId;
     private String customerId;
-    private String chassisType;
-    private String moveType;
+    private String type;
     private int stdTariff;
     private int insurance;
     private int tips;
