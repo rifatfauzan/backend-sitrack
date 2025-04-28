@@ -7,5 +7,6 @@ public enum NotificationCategory {
     DRIVER_SIM_EXPIRY,
     REFERENCE,
     ORDER_UPDATE,
-    REQUEST_ASSET_UPDATE
+    REQUEST_ASSET_UPDATE,
+    SPJ_UPDATE
 }

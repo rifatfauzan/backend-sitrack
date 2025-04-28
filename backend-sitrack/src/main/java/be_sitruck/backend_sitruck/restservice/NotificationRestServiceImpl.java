@@ -124,6 +124,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             case "SOPIR" -> "/sopir/" + referenceId;
             case "ORDER" -> "/order/detail?id=" + referenceId;
             case "REQUEST_ASSET" -> "/request-assets/detail?id=" + referenceId;
+            case "SPJ" -> "spj/detail?id=" + referenceId;
             default -> "#";
         };
     }
@@ -257,6 +258,27 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             roleIds
         );
     }
+
+    @Override
+    public void createSpjApprovalNotification(String spjId, List<Long> roleIds) {
+        String title = "Persetujuan SPJ Diperlukan";
+        String message = String.format("SPJ dengan ID %s memerlukan persetujuan", spjId);
+        createNotificationForRoles(
+            title, message, NotificationCategory.SPJ_UPDATE,
+            spjId, "SPJ", null, null, Arrays.asList(1L, 2L, 3L)
+        );
+    }
+
+    // @Override
+    // public void createSpjStatusNotification(String spjId, int status, List<Long> roleIds) {
+    //     String statusLabel = getStatusLabel(status);
+    //     String title = "Status SPJ Diperbarui";
+    //     String message = String.format("SPJ dengan ID %s telah berubah status menjadi: %s", orderId, statusLabel);
+    //     createNotificationForRoles(
+    //         title, message, NotificationCategory.SPJ_UPDATE,
+    //         spjId, "SPJ", null, null, Arrays.asList(4L)
+    //     );
+    // }
 
     private String getRequestAssetStatusLabel(int status) {
         return switch (status) {
