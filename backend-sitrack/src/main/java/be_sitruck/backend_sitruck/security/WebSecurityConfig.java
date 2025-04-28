@@ -53,26 +53,28 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/user/**").hasAuthority("Admin")
-                .requestMatchers("/api/chassis/**").hasAnyAuthority("Admin", "Manager", "Supervisor")
+
                 .requestMatchers("/api/chassis/all").hasAuthority("Operasional")
                 .requestMatchers("/api/chassis/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/chassis/**").hasAnyAuthority("Admin", "Manager", "Supervisor")
 
-                .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
                 .requestMatchers("/api/customer/all").hasAuthority("Operasional")
                 .requestMatchers("/api/customer/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
 
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
-                // .requestMatchers("/api/sopir/all").hasAuthority("Operasional")
-                // .requestMatchers("/api/sopir/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/sopir/all").hasAuthority("Operasional")
+                .requestMatchers("/api/sopir/detail/**").hasAuthority("Operasional")
 
-                .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .requestMatchers("/api/truck/all").hasAuthority("Operasional")
                 .requestMatchers("/api/truck/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
-                .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .requestMatchers("/api/order/all").hasAuthority("Operasional")
                 .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
                 .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
+                .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
+
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

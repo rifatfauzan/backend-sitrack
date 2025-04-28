@@ -22,7 +22,6 @@ import be_sitruck.backend_sitruck.restdto.response.CreateOrderResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.OrderDetailResponseDTO;
 import be_sitruck.backend_sitruck.restservice.OrderRestService;
 import jakarta.validation.Valid;
-import lombok.experimental.var;
 
 @RestController
 @RequestMapping("/api/order")
@@ -62,7 +61,7 @@ public class OrderController {
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllOrders(){
-        var baseResponseDTO = new BaseResponseDTO<List<OrderDetailResponseDTO>>();
+        BaseResponseDTO<List<OrderDetailResponseDTO>> baseResponseDTO = new BaseResponseDTO<List<OrderDetailResponseDTO>>();
         List<OrderDetailResponseDTO> orders = orderRestService.getAllOrders();
 
         baseResponseDTO.setStatus(HttpStatus.OK.value());
@@ -76,7 +75,7 @@ public class OrderController {
 
     @GetMapping("/detail")
     public ResponseEntity<?> getChassisById(@RequestParam("id") String orderId) {
-        var baseResponseDTO = new BaseResponseDTO<OrderDetailResponseDTO>();
+        BaseResponseDTO<OrderDetailResponseDTO> baseResponseDTO = new BaseResponseDTO<OrderDetailResponseDTO>();
         try {
             OrderDetailResponseDTO orderDetail = orderRestService.getOrderById(orderId);
             baseResponseDTO.setStatus(HttpStatus.OK.value());
@@ -117,14 +116,14 @@ public class OrderController {
     @PutMapping("/update/{orderId}")
     public ResponseEntity<?> updateOrder(@PathVariable("orderId") String orderId, @RequestBody CreateOrderRequestDTO requestDTO) {
         try {
-            var response = new BaseResponseDTO<>();
+            BaseResponseDTO response = new BaseResponseDTO<>();
             response.setStatus(HttpStatus.OK.value());
             response.setMessage("Data Order berhasil diupdate!");
             response.setTimestamp(new Date());
             response.setData(orderRestService.updateOrder(orderId, requestDTO));
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            var response = new BaseResponseDTO<>();
+            BaseResponseDTO response = new BaseResponseDTO<>();
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
             response.setMessage(e.getMessage());
             response.setTimestamp(new Date());

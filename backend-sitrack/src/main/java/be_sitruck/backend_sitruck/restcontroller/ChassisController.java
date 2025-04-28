@@ -66,6 +66,7 @@ public class ChassisController {
         }
     }
 
+    @PreAuthorize("hasAuthority('Operasional')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllChassis(){
         var baseResponseDTO = new BaseResponseDTO<List<CreateChassisRequestDTO>>();
@@ -80,6 +81,7 @@ public class ChassisController {
 
     }
 
+    @PreAuthorize("hasAuthority('Operasional')")
     @GetMapping("/detail")
     public ResponseEntity<?> getChassisById(@RequestParam("id") String chassisId) {
         var baseResponseDTO = new BaseResponseDTO<CreateChassisRequestDTO>();
