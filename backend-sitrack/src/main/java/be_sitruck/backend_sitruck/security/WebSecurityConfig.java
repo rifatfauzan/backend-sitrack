@@ -51,12 +51,42 @@ public class WebSecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/user/**").hasAuthority("Admin")
-                .requestMatchers("/api/chassis/**").hasAnyAuthority("Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/user/**").hasAuthority("Admin")
+
+                .requestMatchers("/api/chassis/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/chassis/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/chassis/**").hasAnyAuthority("Admin", "Manager", "Supervisor")
+
+                .requestMatchers("/api/customer/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/customer/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
+
                 .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
+                .requestMatchers("/api/sopir/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/sopir/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+
+                .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional", "Mekanik")
+
+                .requestMatchers("/api/truck/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/truck/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/truck/**").hasAnyAuthority("Admin","Supervisor","Manager")
+
+                .requestMatchers("/api/order/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
+
+                .requestMatchers("/api/order/all").hasAuthority("Operasional")
+                .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
+                .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
+
+                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
+                .requestMatchers("/api/spj/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/vehicle-out").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/vehicle-in").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -122,6 +152,7 @@ public class WebSecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOriginPattern("https://sitrack.up.railway.app");
+        config.addAllowedOriginPattern("http://localhost:*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
