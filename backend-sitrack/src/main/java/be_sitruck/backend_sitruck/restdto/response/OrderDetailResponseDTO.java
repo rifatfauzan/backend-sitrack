@@ -23,7 +23,7 @@ public class OrderDetailResponseDTO {
     private String remarksOperasional;
     private String remarksSupervisor;
     private String moveType;
-    private Integer downPayment;
+    private Float downPayment;
     private Integer orderStatus;
 
     private Integer qty120mtfl;

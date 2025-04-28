@@ -62,9 +62,9 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/customer/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/customer/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
 
-                .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
                 .requestMatchers("/api/sopir/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/sopir/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/sopir/**").hasAnyAuthority("Admin", "Supervisor", "Manager")
 
                 .requestMatchers("/api/notifications/**").hasAnyAuthority("Admin", "Supervisor", "Manager", "Operasional", "Mekanik")
 
@@ -75,18 +75,16 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/order/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/order/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
-                .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
+                .requestMatchers("/api/order/**").hasAnyAuthority("Operasional", "Admin","Supervisor","Manager")
 
-                .requestMatchers("/api/order/all").hasAuthority("Operasional")
-                .requestMatchers("/api/order/detail/**").hasAuthority("Operasional")
-                .requestMatchers("/api/order/update/**").hasAuthority("Operasional")
-
-                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
                 .requestMatchers("/api/spj/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/available/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/vehicle-out").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/vehicle-in").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
+
                 .anyRequest().authenticated()    
             )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

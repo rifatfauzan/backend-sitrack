@@ -51,7 +51,7 @@ public class Order implements Serializable{
     private String moveType;
 
     @Column(name = "down_payment")
-    private Integer downPayment;
+    private Float downPayment;
 
     // @Column(name = "approval_status")
     // private Integer approvalStatus;
