@@ -1,12 +1,14 @@
-package be_sitruck.backend_sitruck.restdto.request;
+// Der ini gue comment dl soalnya gabisa run jd nunggu lu implementasi update spj
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+// package be_sitruck.backend_sitruck.restdto.request;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class UpdateSpjRequestDTO extends CreateSpjRequestDTO {
-    private String id;
-}
+// import lombok.AllArgsConstructor;
+// import lombok.Data;
+// import lombok.NoArgsConstructor;
+
+// @Data
+// @AllArgsConstructor
+// @NoArgsConstructor
+// public class UpdateSpjRequestDTO extends CreateSpjRequestDTO {
+//     private String id;
+// }
