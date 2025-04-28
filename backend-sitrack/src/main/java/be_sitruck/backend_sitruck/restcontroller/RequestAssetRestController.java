@@ -112,4 +112,20 @@ public class RequestAssetRestController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/edit")
+    public ResponseEntity<BaseResponseDTO<String>> editRequestAsset(
+        @RequestParam("id") String requestAssetId,
+        @Valid @RequestBody CreateRequestAssetRequestDTO requestDTO) {
+        
+        requestAssetRestService.editRequestAsset(requestAssetId, requestDTO);
+
+        BaseResponseDTO<String> response = new BaseResponseDTO<>();
+        response.setStatus(HttpStatus.OK.value());
+        response.setMessage("Request Asset berhasil diupdate");
+        response.setTimestamp(new Date());
+        response.setData("Success");
+
+        return ResponseEntity.ok(response);
+    }
+
 }

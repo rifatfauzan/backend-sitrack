@@ -14,5 +14,6 @@ public interface AssetDb extends JpaRepository<Asset, String> {
     String findMaxAssetId();
     @Query("SELECT a FROM Asset a ORDER BY CAST(SUBSTRING(a.assetId, 3) AS int) ASC")
     List<Asset> findAllOrdered();
+    List<Asset> findByBrandAndJenisAsset(String brand, String jenisAsset);
 }
 
