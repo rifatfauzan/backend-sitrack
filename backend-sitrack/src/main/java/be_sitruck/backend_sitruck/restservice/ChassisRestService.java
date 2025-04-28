@@ -2,7 +2,6 @@ package be_sitruck.backend_sitruck.restservice;
 
 import java.util.List;
 
-import be_sitruck.backend_sitruck.model.Chassis;
 import be_sitruck.backend_sitruck.restdto.request.CreateChassisRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateChassisResponseDTO;
 

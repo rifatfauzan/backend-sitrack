@@ -36,7 +36,7 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         }
     
         String currentUser = jwtUtils.getCurrentUsername();
-        String chassisId = generateChassisId();
+        String chassisId = generateChassisId(createChassisRequestDTO.getSiteId());
     
         Chassis chassis = new Chassis();
         chassis.setChassisId(chassisId);
@@ -46,15 +46,14 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         chassis.setChassisAxle(createChassisRequestDTO.getChassisAxle());
         chassis.setChassisKIRNo(createChassisRequestDTO.getChassisKIRNo());
         chassis.setChassisKIRDate(createChassisRequestDTO.getChassisKIRDate());
-        chassis.setChassisType(createChassisRequestDTO.getChassisType().toUpperCase());
+        chassis.setChassisType(createChassisRequestDTO.getChassisType());
         chassis.setChassisRemarks(createChassisRequestDTO.getChassisRemarks());
         chassis.setInsertedBy(currentUser);
         chassis.setInsertedDate(new Date());
-        chassis.setDivision(createChassisRequestDTO.getDivision().toUpperCase());
-        chassis.setDept(createChassisRequestDTO.getDept().toUpperCase().toUpperCase());
-        chassis.setRowStatus(createChassisRequestDTO.getRowStatus().toUpperCase());
-
-        chassis.setSiteId(createChassisRequestDTO.getSiteId().toUpperCase());
+        chassis.setDivision(createChassisRequestDTO.getDivision());
+        chassis.setDept(createChassisRequestDTO.getDept());
+        chassis.setRowStatus(createChassisRequestDTO.getRowStatus());
+        chassis.setSiteId(createChassisRequestDTO.getSiteId());
     
         chassisDb.save(chassis);
     
@@ -136,22 +135,17 @@ public class ChassisRestServiceImpl implements ChassisRestService {
     }
 
 
-    private String generateChassisId() {
-        Chassis lastChassis = chassisDb.findTopByChassisIdStartingWithOrderByChassisIdDesc("CH");
-        
+    private String generateChassisId(String siteId) {
+        Chassis lastChassis = chassisDb.findTopByChassisIdStartingWithOrderByChassisIdDesc(siteId);
+    
         int nextNumber = 1;
         if (lastChassis != null) {
             String lastChassisId = lastChassis.getChassisId();
-            String numberPart = lastChassisId.substring("CH".length());
-            
-            try {
-                nextNumber = Integer.parseInt(numberPart) + 1;
-            } catch (NumberFormatException e) {
-                nextNumber = 1;
-            }
+            String numberPart = lastChassisId.substring(siteId.length());
+            nextNumber = Integer.parseInt(numberPart) + 1;
         }
-        
-        return String.format("CH%05d", nextNumber);
-    }
     
+        return String.format("%s%05d", siteId, nextNumber);
+    }
+
 }
