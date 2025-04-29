@@ -248,6 +248,8 @@ public class OrderRestServiceImpl implements OrderRestService {
 
         orderDb.save(existingOrder);
 
+        notificationRestService.createOrderApprovalNotification(orderId, Arrays.asList(1L, 2L, 3L));;
+
         return request;
     }
 
@@ -268,6 +270,6 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setUpdatedDate(new Date());
     
         orderDb.save(order);
-    }
-    
+    }    
+
 }

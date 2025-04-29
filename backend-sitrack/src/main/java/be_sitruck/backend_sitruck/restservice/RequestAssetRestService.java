@@ -11,4 +11,5 @@ public interface RequestAssetRestService {
     List<CreateRequestAssetRequestDTO> getAllRequestAssets();
     void updateRequestAssetStatus(String requestAssetId, UpdateRequestAssetStatusDTO request);
     CreateRequestAssetRequestDTO getRequestAssetById(String requestAssetId);
+    CreateRequestAssetResponseDTO editRequestAsset(String requestAssetId, CreateRequestAssetRequestDTO requestDTO);
 }
