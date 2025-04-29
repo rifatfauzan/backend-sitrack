@@ -1,7 +1,9 @@
 package be_sitruck.backend_sitruck.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +34,10 @@ public class Order implements Serializable{
     // @Column(name = "customer_id")
     // private String customer.getId();
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Spj> spjList = new ArrayList<>();
+
+
     @Column(name = "qty_chassis_20")
     private Integer qtyChassis20;
 
@@ -51,7 +57,7 @@ public class Order implements Serializable{
     private String moveType;
 
     @Column(name = "down_payment")
-    private Integer downPayment;
+    private Float downPayment;
 
     // @Column(name = "approval_status")
     // private Integer approvalStatus;

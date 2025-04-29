@@ -90,6 +90,7 @@ public class WebSecurityConfig {
                .requestMatchers("/api/order/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/order/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+               .requestMatchers("/api/order/done/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
 
