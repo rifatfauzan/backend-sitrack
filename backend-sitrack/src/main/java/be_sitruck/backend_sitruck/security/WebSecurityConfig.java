@@ -109,6 +109,12 @@ public class WebSecurityConfig {
 
                .requestMatchers("/api/request-assets/**").hasAnyAuthority("Admin","Supervisor","Manager","Mekanik")
                .requestMatchers("/api/request-assets/approve/**").hasAnyAuthority("Admin","Supervisor","Manager")
+
+               .requestMatchers(
+        "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
               
                .anyRequest().authenticated()   
            )
