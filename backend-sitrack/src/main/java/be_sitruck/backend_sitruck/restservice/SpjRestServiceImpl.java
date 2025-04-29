@@ -1,6 +1,7 @@
 package be_sitruck.backend_sitruck.restservice;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,9 @@ public class SpjRestServiceImpl implements SpjRestService {
 
     @Autowired
     private TruckDb truckDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -155,6 +159,9 @@ public class SpjRestServiceImpl implements SpjRestService {
         Chassis chassis = chassisDb.findById(spjDTO.getChassisId()).orElse(null);
         SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
 
+        String spjId = generateSpjId();
+
+
         var spj = new Spj();
         spj.setId(generateSpjId());
         spj.setOrder(order);
@@ -192,6 +199,7 @@ public class SpjRestServiceImpl implements SpjRestService {
         
         spjDb.save(spj);
         
+        notificationRestService.createSpjApprovalNotification(spjId, Arrays.asList(1L, 2L, 3L));;
         return SpjToSpjResponseDTO(spj);
     }
 
@@ -238,6 +246,14 @@ public class SpjRestServiceImpl implements SpjRestService {
 
         String currentUser = jwtUtils.getCurrentUsername();
 
+        var driver = spj.getDriver();
+        var vehicle = spj.getVehicle();
+        var chassis = spj.getChassis();
+
+        driver.setRowStatus("A");
+        chassis.setRowStatus("A");
+        vehicle.setRowStatus("A");
+
         spj.setStatus(4);
         spj.setActualDateIn(new Date());
         spj.setUpdatedBy(currentUser);
@@ -275,5 +291,82 @@ public class SpjRestServiceImpl implements SpjRestService {
         spjResponseDTO.setApprovedDate(spj.getApprovedDate());
 
         return spjResponseDTO;
+    }
+
+    @Override
+    public SpjResponseDTO updateSPJ(String spjId, CreateSpjRequestDTO spjDTO) {
+       String currentUser = jwtUtils.getCurrentUsername();
+
+        Order order = orderDb.findById(spjDTO.getOrderId()).orElse(null);
+        Customer customer = order.getCustomer();
+        Truck vehicle = truckDb.findById(spjDTO.getVehicleId()).orElse(null);
+        Chassis chassis = chassisDb.findById(spjDTO.getChassisId()).orElse(null);
+        SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
+
+        
+        // Sebelum di Update 
+        Spj currentSpj = spjDb.findById(spjId).orElse(null);
+        if (currentSpj == null) {
+            throw new ValidationException("SPJ tidak ditemukan!");
+        }
+        
+        String driverId = currentSpj.getDriver().getDriverId();
+        SopirModel currentDriver = sopirDb.findById(driverId).orElse(null);
+        
+        String vehicleId = currentSpj.getVehicle().getVehicleId();
+        String chassisId = currentSpj.getChassis().getChassisId();
+
+        Truck currentVehicle = truckDb.findById(vehicleId).orElse(null);
+        Chassis currentChassis = chassisDb.findById(chassisId).orElse(null);
+
+
+        currentSpj.setCustomer(customer);
+
+        if (currentVehicle.getRowStatus().equals("I") && !currentVehicle.getVehicleId().equals(spjDTO.getVehicleId())) {
+            currentVehicle.setRowStatus("A");
+            currentSpj.setVehicle(vehicle);
+        }
+        currentSpj.setVehicle(vehicle);
+        currentSpj.setChassisSize(spjDTO.getChassisSize());
+
+        if (currentChassis.getRowStatus().equals("I") && !currentChassis.getChassisId().equals(spjDTO.getChassisId())) {
+            currentChassis.setRowStatus("A");
+            currentSpj.setChassis(chassis);
+        }
+        currentSpj.setChassis(chassis);
+        currentSpj.setContainerType(spjDTO.getContainerType());
+        currentSpj.setContainerQty(spjDTO.getContainerQty());
+
+        if(currentDriver.getRowStatus().equals("I") && !currentDriver.getDriverId().equals(spjDTO.getDriverId())) {
+            currentDriver.setRowStatus("A");
+            currentSpj.setDriver(driver);
+        }
+        currentSpj.setDriver(driver);
+        currentSpj.setDateOut(spjDTO.getDateOut());
+        currentSpj.setDateIn(spjDTO.getDateIn());
+        currentSpj.setCommission(customer.getCommission());
+        currentSpj.setOthersCommission(spjDTO.getOthersCommission());
+        currentSpj.setRemarksOperasional(spjDTO.getRemarksOperasional());
+        currentSpj.setStatus(1);
+        currentSpj.setUpdatedBy(currentUser);
+        currentSpj.setUpdatedDate(new Date());
+        
+        if (!"I".equals(vehicle.getRowStatus())) {
+            vehicle.setRowStatus("I");
+            truckDb.save(vehicle);
+        }
+
+        if (!"I".equals(chassis.getRowStatus())) {
+            chassis.setRowStatus("I");
+            chassisDb.save(chassis);
+        }
+        
+        if (!"I".equals(driver.getRowStatus())) {
+            driver.setRowStatus("I");
+            sopirDb.save(driver);
+        }        
+
+        spjDb.save(currentSpj);
+        return SpjToSpjResponseDTO(currentSpj);
     }
 }

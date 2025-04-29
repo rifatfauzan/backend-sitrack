@@ -1,5 +1,6 @@
 package be_sitruck.backend_sitruck.restservice;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,9 @@ public class OrderRestServiceImpl implements OrderRestService {
     private CustomerDb customerDb;
 
     @Autowired
+    private NotificationRestService notificationRestService;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     @Transactional
@@ -46,7 +50,9 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setCustomer(customer);
         order.setQtyChassis20(request.getQtyChassis20());
         order.setQtyChassis40(request.getQtyChassis40());
-        order.setSiteId(request.getSiteId());
+
+        order.setSiteId(customer.getSiteId());
+        
         order.setRemarksOperasional(request.getRemarksOperasional());
         order.setMoveType(request.getMoveType());
         order.setDownPayment(request.getDownPayment());
@@ -71,6 +77,8 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setQtyCh140fl(request.getQtyCh140fl());
 
         orderDb.save(order);
+
+        notificationRestService.createOrderApprovalNotification(orderId, Arrays.asList(1L, 2L, 3L));;
 
         return new CreateOrderResponseDTO(orderId, "Order berhasil ditambahkan!");
     }
@@ -145,6 +153,12 @@ public class OrderRestServiceImpl implements OrderRestService {
 
         orderDb.save(order);
 
+        notificationRestService.createOrderStatusNotification(
+            order.getOrderId(), 
+            request.getOrderStatus(),
+            Arrays.asList(1L, 2L, 3L, 4L)
+        );
+
         return new CreateOrderResponseDTO(orderId, "Approval dari order berhasil diubah!");
     }
 
@@ -160,5 +174,49 @@ public class OrderRestServiceImpl implements OrderRestService {
         }
 
         return String.format("OR%06d", nextNumber);
+    }
+
+    @Override
+    public CreateOrderRequestDTO updateOrder(String orderId, CreateOrderRequestDTO request) {
+       Order existingOrder = orderDb.findById(orderId).orElse(null);
+       Customer customer = customerDb.findById(request.getCustomerId())
+            .orElseThrow(() -> new ValidationException("Customer tidak ditemukan!"));
+
+        if(existingOrder == null){
+            throw new IllegalArgumentException("Order tidak ditemukan");
+        }
+
+        if (request.getMoveType().matches("[0-9]+")){
+            throw new IllegalArgumentException("Move type berupa string");
+        }
+        existingOrder.setOrderDate(request.getOrderDate());
+        existingOrder.setCustomer(customer);
+        existingOrder.setQtyChassis20(request.getQtyChassis20());
+        existingOrder.setQtyChassis40(request.getQtyChassis40());
+        existingOrder.setSiteId(customer.getSiteId());
+        existingOrder.setRemarksOperasional(request.getRemarksOperasional());
+        existingOrder.setMoveType(request.getMoveType());
+        existingOrder.setDownPayment(request.getDownPayment());
+        existingOrder.setUpdatedDate(Date.from(java.time.Instant.now()));
+        existingOrder.setUpdatedBy(jwtUtils.getCurrentUsername());
+        existingOrder.setQty120mtfl(request.getQty120mtfl());
+        existingOrder.setQty120mt(request.getQty120mt());
+        existingOrder.setQty220mtfl(request.getQty220mtfl());
+        existingOrder.setQty220mt(request.getQty220mt());
+        existingOrder.setQty140mtfl(request.getQty140mtfl());
+        existingOrder.setQty140mt(request.getQty140mt());
+        existingOrder.setQty120mt120fl(request.getQty120mt120fl());
+        existingOrder.setQty120mt220fl(request.getQty120mt220fl());
+        existingOrder.setQty220mt120fl(request.getQty220mt120fl());
+        existingOrder.setQty220mt220fl(request.getQty220mt220fl());
+        existingOrder.setQtyCh120fl(request.getQtyCh120fl());
+        existingOrder.setQtyCh220fl(request.getQtyCh220fl());
+        existingOrder.setQtyCh140fl(request.getQtyCh140fl());
+        existingOrder.setRemarksOperasional(request.getRemarksOperasional());
+        existingOrder.setOrderStatus(1);
+
+        orderDb.save(existingOrder);
+
+        return request;
     }
 }

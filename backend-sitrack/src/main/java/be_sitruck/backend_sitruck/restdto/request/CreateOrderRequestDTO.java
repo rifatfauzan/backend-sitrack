@@ -18,7 +18,7 @@ public class CreateOrderRequestDTO {
     private Integer qtyChassis40;
 
     
-    private String siteId;
+    // private String siteId;
     private String remarksOperasional;
     private String moveType;
     private Integer downPayment;
