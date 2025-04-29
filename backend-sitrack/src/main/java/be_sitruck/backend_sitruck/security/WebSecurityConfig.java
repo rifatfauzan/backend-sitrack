@@ -75,7 +75,9 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/order/all").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/order/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
-                .requestMatchers("/api/order/**").hasAnyAuthority("Operasional", "Admin","Supervisor","Manager")
+                .requestMatchers("/api/order/done/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+                .requestMatchers("/api/order/**").hasAnyAuthority( "Admin","Supervisor","Manager")
 
                 .requestMatchers("/api/spj/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                 .requestMatchers("/api/spj/available/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")

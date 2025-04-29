@@ -13,5 +13,5 @@ public interface OrderRestService {
     OrderDetailResponseDTO getOrderById(String orderId);
     CreateOrderResponseDTO approveOrder(ApproveOrderRequestDTO request);
     CreateOrderRequestDTO updateOrder (String orderId, CreateOrderRequestDTO request);
-
+    void markOrderAsDone(String orderId);
 }

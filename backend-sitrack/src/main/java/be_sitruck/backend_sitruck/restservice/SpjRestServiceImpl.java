@@ -230,6 +230,15 @@ public class SpjRestServiceImpl implements SpjRestService {
             truckDb.save(vehicle);
         }
 
+        if (approveRequestDTO.getStatus() == 3) {
+            Order order = spj.getOrder();
+            if (!order.getSpjList().contains(spj)) {
+                order.getSpjList().add(spj);
+                orderDb.save(order);
+            }
+        }
+    
+
         spjDb.save(spj);
         return SpjToSpjResponseDTO(spj);
     }
