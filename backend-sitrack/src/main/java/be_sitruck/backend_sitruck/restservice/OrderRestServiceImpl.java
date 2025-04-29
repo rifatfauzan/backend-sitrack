@@ -216,6 +216,7 @@ public class OrderRestServiceImpl implements OrderRestService {
         existingOrder.setOrderStatus(1);
 
         orderDb.save(existingOrder);
+        notificationRestService.createOrderApprovalNotification(orderId, Arrays.asList(1L, 2L, 3L));;
 
         return request;
     }

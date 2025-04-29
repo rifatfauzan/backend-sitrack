@@ -12,4 +12,5 @@ public class RequestAssetItemDTO {
     private Integer requestedQuantity;
     private String jenisAsset;
     private String brand;
+    private Integer assetPrice;
 }
