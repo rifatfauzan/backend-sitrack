@@ -231,6 +231,13 @@ public class SpjRestServiceImpl implements SpjRestService {
         }
 
         spjDb.save(spj);
+
+        notificationRestService.createSpjStatusNotification(
+            spj.getId(),
+            approveRequestDTO.getStatus(),
+            Arrays.asList(1L, 2L, 3L, 4L)
+        );
+
         return SpjToSpjResponseDTO(spj);
     }
 
@@ -367,6 +374,8 @@ public class SpjRestServiceImpl implements SpjRestService {
         }        
 
         spjDb.save(currentSpj);
+
+        notificationRestService.createSpjApprovalNotification(spjId, Arrays.asList(1L, 2L, 3L));;
         return SpjToSpjResponseDTO(currentSpj);
     }
 }

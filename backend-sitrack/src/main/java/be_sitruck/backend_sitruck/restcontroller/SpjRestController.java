@@ -15,7 +15,7 @@ import be_sitruck.backend_sitruck.restdto.request.CreateSpjRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.SpjResponseDTO;
 import be_sitruck.backend_sitruck.restservice.SpjRestService;
-import lombok.experimental.var;
+// import lombok.experimental.var;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
