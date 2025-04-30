@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -104,7 +105,7 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        truck.setRowStatus(request.getRowStatus());
+        truck.setRowStatus("A");
         truck.setRecordStatus(request.getRecordStatus());
         truck.setDept(request.getDept());
         truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
@@ -247,7 +248,7 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        truck.setRowStatus(request.getRowStatus());
+        truck.setRowStatus("A");
         truck.setDept(request.getDept());
         truck.setRecordStatus(request.getRecordStatus());
         truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
@@ -259,5 +260,28 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleId(),
             "Truck successfully updated"
         );
+    }
+
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?") // setiap tengah malam
+    public void checkExpiringTrucks() {
+        List<Truck> trucks = truckDb.findAll();
+        Date today = new Date();
+    
+        for (Truck truck : trucks) {
+            boolean updated = false;
+    
+            if (truck.getVehicleKIRDate() != null && truck.getVehicleKIRDate().before(today)) {
+                truck.setRowStatus("I");
+                updated = true;
+            }
+    
+            if (truck.getVehicleSTNKDate() != null && truck.getVehicleSTNKDate().before(today)) {
+                truck.setRowStatus("I");
+                updated = true;
+            }
+    
+            if (updated) truckDb.save(truck);
+        }
     }
 }
