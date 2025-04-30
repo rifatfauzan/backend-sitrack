@@ -17,4 +17,5 @@ public interface SpjRestService {
     SpjResponseDTO approveSpj(ApproveSpjRequestDTO approveRequestDTO);
     void markSpjAsDone(String id);
     // SpjResponseDTO updateSpj(String id, UpdateSpjRequestDTO spj);
+    SpjResponseDTO updateSPJ (String spjId, CreateSpjRequestDTO spjDTO);
 }

@@ -90,6 +90,7 @@ public class WebSecurityConfig {
                .requestMatchers("/api/order/add").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/order/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/order/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+               .requestMatchers("/api/order/done/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/order/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
 
@@ -99,6 +100,7 @@ public class WebSecurityConfig {
                .requestMatchers("/api/spj/vehicle-in").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/spj/detail/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/spj/update/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
+               .requestMatchers("/api/spj/done/**").hasAnyAuthority("Operasional", "Admin", "Manager", "Supervisor")
                .requestMatchers("/api/spj/**").hasAnyAuthority("Admin","Supervisor","Manager")
 
 
