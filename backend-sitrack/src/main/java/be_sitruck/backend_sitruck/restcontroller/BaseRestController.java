@@ -42,7 +42,7 @@ public class BaseRestController {
     public ResponseEntity<?> handleGlobalException(final Exception ex) {
         var baseResponseDTO = new BaseResponseDTO<Exception>();
         baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        baseResponseDTO.setMessage(String.format("Terjadi error pada server. Error: %s", ex.getMessage()));
+        baseResponseDTO.setMessage(String.format("Terjadi error pada server: %s", ex.getMessage()));
         baseResponseDTO.setTimestamp(new Date());
 
         ex.printStackTrace();

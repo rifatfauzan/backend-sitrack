@@ -153,6 +153,14 @@ public class SpjRestServiceImpl implements SpjRestService {
     public SpjResponseDTO addSpj(CreateSpjRequestDTO spjDTO) {
         String currenUser = jwtUtils.getCurrentUsername();
 
+        Date today = new Date();
+        if (spjDTO.getDateOut().before(today)) {
+            throw new ValidationException("Tanggal keluar tidak boleh kurang dari hari ini.");
+        }
+        if (spjDTO.getDateIn().before(today)) {
+            throw new ValidationException("Tanggal masuk tidak boleh kurang dari hari ini.");
+        }
+
         Order order = orderDb.findById(spjDTO.getOrderId()).orElse(null);
         Customer customer = order.getCustomer();
         Truck vehicle = truckDb.findById(spjDTO.getVehicleId()).orElse(null);
@@ -160,7 +168,6 @@ public class SpjRestServiceImpl implements SpjRestService {
         SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
 
         String spjId = generateSpjId();
-
 
         var spj = new Spj();
         spj.setId(generateSpjId());
@@ -315,7 +322,15 @@ public class SpjRestServiceImpl implements SpjRestService {
 
     @Override
     public SpjResponseDTO updateSPJ(String spjId, CreateSpjRequestDTO spjDTO) {
-       String currentUser = jwtUtils.getCurrentUsername();
+        String currentUser = jwtUtils.getCurrentUsername();
+       
+        Date today = new Date();
+        if (spjDTO.getDateOut().before(today)) {
+            throw new ValidationException("Tanggal keluar tidak boleh kurang dari hari ini.");
+        }
+        if (spjDTO.getDateIn().before(today)) {
+            throw new ValidationException("Tanggal masuk tidak boleh kurang dari hari ini.");
+        }
 
         Order order = orderDb.findById(spjDTO.getOrderId()).orElse(null);
         Customer customer = order.getCustomer();
