@@ -15,6 +15,7 @@ import be_sitruck.backend_sitruck.restdto.request.CreateSpjRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.SpjResponseDTO;
 import be_sitruck.backend_sitruck.restservice.SpjRestService;
+// import lombok.experimental.var;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -168,6 +169,24 @@ public class SpjRestController {
             response.setTimestamp(new Date());
             response.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/update/{spjId}")
+    public ResponseEntity<?> updateSpj(@PathVariable("spjId") String spjId, @RequestBody CreateSpjRequestDTO requestDTO) {
+        try {
+            var response = new BaseResponseDTO<>();
+            response.setData(spjRestService.updateSPJ(spjId, requestDTO));
+            response.setMessage("Data SPJ berhasil diperbarui");
+            response.setTimestamp(new Date());
+            response.setStatus(200);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            var response = new BaseResponseDTO<>();
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            response.setStatus(400);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 

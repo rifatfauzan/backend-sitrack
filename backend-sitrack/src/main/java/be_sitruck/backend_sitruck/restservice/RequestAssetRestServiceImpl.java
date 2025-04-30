@@ -105,8 +105,8 @@ public class RequestAssetRestServiceImpl implements RequestAssetRestService {
     
         requestAsset.setStatus(request.getStatus());
         requestAsset.setRequestRemark(request.getRequestRemark());
-        requestAsset.setUpdatedBy(currentUser);
-        requestAsset.setUpdatedDate(new Date());
+        requestAsset.setApprovalBy(currentUser);
+        requestAsset.setApprovalDate(new Date());
     
         //Jika status APPROVED (1), tambah requestedstok dari asset terkait
         if (request.getStatus() == 1) {
