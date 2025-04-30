@@ -111,6 +111,12 @@ public class WebSecurityConfig {
 
                .requestMatchers("/api/request-assets/**").hasAnyAuthority("Admin","Supervisor","Manager","Mekanik")
                .requestMatchers("/api/request-assets/approve/**").hasAnyAuthority("Admin","Supervisor","Manager")
+
+               .requestMatchers(
+        "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
               
                .anyRequest().authenticated()   
            )
@@ -141,8 +147,12 @@ public class WebSecurityConfig {
    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception{
        http.csrf(Customizer.withDefaults())
            .authorizeHttpRequests (requests -> requests
-               .requestMatchers (new AntPathRequestMatcher("/css/**")).permitAll()
-               .requestMatchers (new AntPathRequestMatcher("/js/**")).permitAll()
+                .requestMatchers (new AntPathRequestMatcher("/css/**")).permitAll()
+                .requestMatchers (new AntPathRequestMatcher("/js/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/v3/api-docs/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/webjars/**")).permitAll()
                .anyRequest().authenticated()
            )  
            .formLogin((form) -> form
