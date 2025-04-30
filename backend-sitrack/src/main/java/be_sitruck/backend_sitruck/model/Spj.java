@@ -26,11 +26,11 @@ public class Spj {
     @JoinColumn(name = "customer_id", nullable = false, referencedColumnName = "customer_id")
     private Customer customer;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "vehicle_id", nullable = false, referencedColumnName = "vehicle_id")
     private Truck vehicle;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "chassis_id", nullable = false, referencedColumnName = "chassis_id")
     private Chassis chassis;
 

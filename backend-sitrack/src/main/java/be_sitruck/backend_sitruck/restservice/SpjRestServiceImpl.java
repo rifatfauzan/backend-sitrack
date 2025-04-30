@@ -240,6 +240,13 @@ public class SpjRestServiceImpl implements SpjRestService {
     
 
         spjDb.save(spj);
+
+        notificationRestService.createSpjStatusNotification(
+            spj.getId(),
+            approveRequestDTO.getStatus(),
+            Arrays.asList(1L, 2L, 3L, 4L)
+        );
+
         return SpjToSpjResponseDTO(spj);
     }
 
@@ -262,6 +269,10 @@ public class SpjRestServiceImpl implements SpjRestService {
         driver.setRowStatus("A");
         chassis.setRowStatus("A");
         vehicle.setRowStatus("A");
+
+        sopirDb.save(driver);
+        chassisDb.save(chassis);
+        truckDb.save(vehicle);
 
         spj.setStatus(4);
         spj.setActualDateIn(new Date());
@@ -376,6 +387,8 @@ public class SpjRestServiceImpl implements SpjRestService {
         }        
 
         spjDb.save(currentSpj);
+
+        notificationRestService.createSpjApprovalNotification(spjId, Arrays.asList(1L, 2L, 3L));;
         return SpjToSpjResponseDTO(currentSpj);
     }
 }

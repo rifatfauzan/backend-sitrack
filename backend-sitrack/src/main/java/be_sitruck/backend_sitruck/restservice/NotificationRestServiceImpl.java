@@ -172,7 +172,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     private void processDocument(Date expiryDate, String docType, String referenceType,
                                 String referenceId, NotificationCategory category,
                                 Date today) {
-        if (expiryDate == null) return;
+        if (expiryDate == null) return; 
 
         long diff = expiryDate.getTime() - today.getTime();
         long days = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
@@ -199,7 +199,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         createNotificationForRoles(
             title, message, category,
             referenceId, referenceType, expiryDate,
-            daysRemaining, Arrays.asList(1L, 2L, 3L, 4L, 5L)
+            daysRemaining, Arrays.asList(1L, 2L, 3L)
         );
     }
 
@@ -269,16 +269,16 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         );
     }
 
-    // @Override
-    // public void createSpjStatusNotification(String spjId, int status, List<Long> roleIds) {
-    //     String statusLabel = getStatusLabel(status);
-    //     String title = "Status SPJ Diperbarui";
-    //     String message = String.format("SPJ dengan ID %s telah berubah status menjadi: %s", orderId, statusLabel);
-    //     createNotificationForRoles(
-    //         title, message, NotificationCategory.SPJ_UPDATE,
-    //         spjId, "SPJ", null, null, Arrays.asList(4L)
-    //     );
-    // }
+    @Override
+    public void createSpjStatusNotification(String spjId, int status, List<Long> roleIds) {
+        String statusLabel = getStatusLabel(status);
+        String title = "Status SPJ Diperbarui";
+        String message = String.format("SPJ dengan ID %s telah berubah status menjadi: %s", spjId, statusLabel);
+        createNotificationForRoles(
+            title, message, NotificationCategory.SPJ_UPDATE,
+            spjId, "SPJ", null, null, Arrays.asList(4L)
+        );
+    }
 
     private String getRequestAssetStatusLabel(int status) {
         return switch (status) {
