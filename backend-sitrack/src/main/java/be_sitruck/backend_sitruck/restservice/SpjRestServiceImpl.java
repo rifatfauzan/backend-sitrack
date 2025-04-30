@@ -270,6 +270,10 @@ public class SpjRestServiceImpl implements SpjRestService {
         chassis.setRowStatus("A");
         vehicle.setRowStatus("A");
 
+        sopirDb.save(driver);
+        chassisDb.save(chassis);
+        truckDb.save(vehicle);
+
         spj.setStatus(4);
         spj.setActualDateIn(new Date());
         spj.setUpdatedBy(currentUser);
