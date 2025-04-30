@@ -1,7 +1,6 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
 import be_sitruck.backend_sitruck.model.Notification;
-import be_sitruck.backend_sitruck.model.NotificationCategory;
 import be_sitruck.backend_sitruck.model.UserModel;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restservice.ChassisRestService;
@@ -17,9 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -106,14 +103,5 @@ public class NotificationRestController {
         response.setTimestamp(new Date());
         response.setStatus(HttpStatus.OK.value());
         return ResponseEntity.ok(response);
-    }
-
-    private Object getReferenceData(Notification notification) {
-        return switch (notification.getReferenceType().toUpperCase()) {
-            case "TRUCK" -> truckRestService.getTruckById(notification.getReferenceId());
-            case "CHASSIS" -> chassisRestService.getChassisById(notification.getReferenceId());
-            case "SOPIR" -> sopirRestService.viewSopirById(notification.getReferenceId());
-            default -> null;
-        };
     }
 }
