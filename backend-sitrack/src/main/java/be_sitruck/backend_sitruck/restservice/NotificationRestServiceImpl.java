@@ -140,12 +140,13 @@ public class NotificationRestServiceImpl implements NotificationRestService {
 
     private void processTruckDocuments(Date today) {
         truckRestService.getAllTruck().forEach(truck -> {
+            String truckBrand = truck.getVehicleBrand();
             processDocument(
-                truck.getVehicleSTNKDate(), "STNK", "TRUCK", truck.getVehicleId(),
+                truck.getVehicleSTNKDate(), "STNK", "TRUCK", truck.getVehicleId(), truckBrand,
                 NotificationCategory.VEHICLE_STNK_EXPIRY, today
             );
             processDocument(
-                truck.getVehicleKIRDate(), "KIR", "TRUCK", truck.getVehicleId(),
+                truck.getVehicleKIRDate(), "KIR", "TRUCK", truck.getVehicleId(), truckBrand,
                 NotificationCategory.VEHICLE_KIR_EXPIRY, today
             );
         });
@@ -154,7 +155,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
     private void processChassisDocuments(Date today) {
         chassisRestService.getAllChassis().forEach(chassis -> {
             processDocument(
-                chassis.getChassisKIRDate(), "KIR", "CHASSIS", chassis.getChassisId(),
+                chassis.getChassisKIRDate(), "KIR", "CHASSIS", chassis.getChassisId(), chassis.getChassisId(),
                 NotificationCategory.CHASSIS_KIR_EXPIRY, today
             );
         });
@@ -162,15 +163,16 @@ public class NotificationRestServiceImpl implements NotificationRestService {
 
     private void processDriverDocuments(Date today) {
         sopirRestService.viewAllSopir().forEach(driver -> {
+            String driverName = driver.getDriverName();
             processDocument(
-                driver.getDriver_SIM_Date(), "SIM", "SOPIR", driver.getDriverId(),
+                driver.getDriver_SIM_Date(), "SIM", "SOPIR", driver.getDriverId(), driverName,
                 NotificationCategory.DRIVER_SIM_EXPIRY, today
             );
         });
     }
 
     private void processDocument(Date expiryDate, String docType, String referenceType,
-                                String referenceId, NotificationCategory category,
+                                String referenceId, String referenceName, NotificationCategory category,
                                 Date today) {
         if (expiryDate == null) return; 
 
@@ -184,12 +186,12 @@ public class NotificationRestServiceImpl implements NotificationRestService {
 
         if (isExpired) {
             title = docType + " Expired";
-            message = docType + " pada " + referenceType + " " + referenceId + 
+            message = docType + " pada " + referenceType + " " + referenceName + 
                     " sudah expired sejak " + Math.abs(days) + " hari yang lalu";
             daysRemaining = 0;
         } else if (days <= 30) {
             title = docType + " Akan Expired";
-            message = docType + " pada " + referenceType + " " + referenceId + 
+            message = docType + " pada " + referenceType + " " + referenceName + 
                     " akan expired dalam " + (days + 1) + " hari";
             daysRemaining = (int) days + 1;
         } else {
