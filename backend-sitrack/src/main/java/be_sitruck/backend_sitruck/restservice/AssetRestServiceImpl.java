@@ -30,42 +30,63 @@ public class AssetRestServiceImpl implements AssetRestService {
             throw new ValidationException("Jenis Asset harus diisi");
         }
 
-        if (request.getJumlahStok() == null || request.getJumlahStok() < 0) {
-            throw new ValidationException("Jumlah Stok harus diisi dan tidak boleh negatif");
+        try{
+            Integer.valueOf(request.getJumlahStok());
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Jumlah Stok harus berupa angka");
         }
 
+        if (request.getJumlahStok() == null || request.getJumlahStok() < 0 ) {
+            throw new ValidationException("Jumlah Stok harus diisi dan tidak boleh negatif");
+        }
+    
         if (request.getBrand() == null || request.getBrand().isBlank()) {
             throw new ValidationException("Brand harus diisi");
+        }
+    
+        // Cek duplikat brand dan jenisAsset
+        List<Asset> existingAssets = assetDb.findByBrandAndJenisAsset(request.getBrand(), request.getJenisAsset());
+        if (!existingAssets.isEmpty()) {
+            throw new ValidationException("Asset dengan brand dan jenis tersebut sudah ada");
+        }
+    
+        if(request.getBrand().matches("[0-9]+")){
+            throw new ValidationException("Brand tidak boleh berupa angka");
+        }
+
+        if (request.getAssetPrice() == null || request.getAssetPrice() <= 0) {
+            throw new ValidationException("Asset Price harus diisi dan tidak boleh negatif");
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
         String maxAssetId = assetDb.findMaxAssetId(); 
-
+    
         int nextNumber = 1;
         if (maxAssetId != null && maxAssetId.length() > 2) {
-            String numberPart = maxAssetId.substring(2); // Ambil 5 digit terakhir
+            String numberPart = maxAssetId.substring(2);
             try {
                 nextNumber = Integer.parseInt(numberPart) + 1;
             } catch (NumberFormatException e) {
                 nextNumber = 1;
             }
         }
-
+    
         String paddedNumber = String.format("%05d", nextNumber);
         String generatedAssetId = "AS" + paddedNumber;
-
+    
         Asset asset = new Asset();
         asset.setAssetId(generatedAssetId);
         asset.setJenisAsset(request.getJenisAsset());
         asset.setJumlahStok(request.getJumlahStok());
         asset.setBrand(request.getBrand());
         asset.setAssetRemark(request.getAssetRemark());
-        asset.setRequestedStok(0); // Requested stok default 0 saat create
+        asset.setRequestedStok(0);
         asset.setCreatedBy(currentUser);
         asset.setCreatedDate(new Date());
+        asset.setAssetPrice(request.getAssetPrice());
 
         assetDb.save(asset);
-
+    
         return new CreateAssetResponseDTO(
                 asset.getAssetId(),
                 "Asset berhasil ditambahkan"
@@ -91,6 +112,65 @@ public class AssetRestServiceImpl implements AssetRestService {
         dto.setCreatedDate(asset.getCreatedDate());
         dto.setUpdatedBy(asset.getUpdatedBy());
         dto.setUpdatedDate(asset.getUpdatedDate());
+        dto.setAssetPrice(asset.getAssetPrice());
         return dto;
+    }
+
+    @Override
+    public CreateAssetRequestDTO getAssetById(String assetId) {
+        Asset asset = assetDb.findById(assetId).orElse(null);
+        if (asset == null) {
+            return null; 
+        }
+        return convertToAssetDTO(asset);
+    }
+
+    @Override
+    public CreateAssetRequestDTO updateAsset(String assetId, CreateAssetRequestDTO assetDTO) {
+        Asset asset = assetDb.findById(assetId).orElse(null);
+        if (asset == null) {
+            throw new IllegalArgumentException("Asset dengan ID: " + assetId + " tidak ditemukan"); 
+        }
+        if (assetDTO.getJenisAsset() == null || assetDTO.getJenisAsset().isBlank()) {
+            throw new ValidationException("Jenis Asset harus diisi");
+        }
+
+        if (assetDTO.getJumlahStok() == null || assetDTO.getJumlahStok() < 0 ) {
+            throw new ValidationException("Jumlah Stok harus diisi dan tidak boleh negatif");
+        }
+
+        if (assetDTO.getBrand() == null || assetDTO.getBrand().isBlank()) {
+            throw new ValidationException("Brand harus diisi");
+        }
+
+        if(assetDTO.getBrand().matches("[0-9]+")){
+            throw new ValidationException("Brand tidak boleh berupa angka");
+        } 
+
+        if (assetDTO.getAssetPrice() == null || assetDTO.getAssetPrice() <= 0) {
+            throw new ValidationException("Asset Price harus diisi dan tidak boleh negatif");
+        }
+
+        // Cek duplikat brand dan jenisAsset
+        List<Asset> existingAssets = assetDb.findByBrandAndJenisAsset(assetDTO.getBrand(), assetDTO.getJenisAsset());
+        boolean duplicateExists = existingAssets.stream()
+                .anyMatch(existingAsset -> !existingAsset.getAssetId().equals(assetId));
+        if (duplicateExists) {
+            throw new ValidationException("Asset dengan brand dan jenis tersebut sudah ada");
+        }
+
+            asset.setJenisAsset(assetDTO.getJenisAsset());
+            asset.setJumlahStok(assetDTO.getJumlahStok());
+            asset.setBrand(assetDTO.getBrand());
+            asset.setAssetRemark(assetDTO.getAssetRemark());
+            asset.setRequestedStok(assetDTO.getRequestedStok());
+            asset.setAssetPrice(assetDTO.getAssetPrice());
+
+        asset.setUpdatedBy(jwtUtils.getCurrentUsername());
+        asset.setUpdatedDate(new Date());
+
+        assetDb.save(asset);
+
+        return convertToAssetDTO(asset);
     }
 }
