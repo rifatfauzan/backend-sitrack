@@ -131,4 +131,23 @@ public class OrderController {
         }
     }
 
+    @PutMapping("/done/{orderId}")
+    public ResponseEntity<?> markOrderAsDone(@PathVariable("orderId") String orderId) {
+        try {
+            orderRestService.markOrderAsDone(orderId);
+
+            BaseResponseDTO response = new BaseResponseDTO<>();
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Order berhasil di Mark as Done!");
+            response.setTimestamp(new Date());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            BaseResponseDTO response = new BaseResponseDTO<>();
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setMessage(e.getMessage());
+            response.setTimestamp(new Date());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

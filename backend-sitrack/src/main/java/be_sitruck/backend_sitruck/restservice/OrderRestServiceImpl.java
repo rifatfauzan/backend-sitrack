@@ -16,6 +16,7 @@ import be_sitruck.backend_sitruck.restdto.request.ApproveOrderRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateOrderRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateOrderResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.OrderDetailResponseDTO;
+import be_sitruck.backend_sitruck.restdto.response.SpjResponseDTO;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
@@ -99,11 +100,41 @@ public class OrderRestServiceImpl implements OrderRestService {
     }
 
     private OrderDetailResponseDTO toDTO(Order order) {
+
+        List<SpjResponseDTO> spjResponseList = order.getSpjList().stream()
+        .map(spj -> new SpjResponseDTO(
+            spj.getId(),
+            spj.getOrder().getOrderId(),
+            spj.getCustomer().getId(),
+            spj.getVehicle().getVehicleId(),
+            spj.getChassis().getChassisId(),
+            spj.getChassisSize(),
+            spj.getContainerType(),
+            spj.getContainerQty(),
+            spj.getDriver().getDriverId(),
+            spj.getDateOut(),
+            spj.getDateIn(),
+            spj.getActualDateIn(),
+            spj.getCommission(),
+            spj.getOthersCommission(),
+            spj.getRemarksOperasional(),
+            spj.getRemarksSupervisor(),
+            spj.getStatus(),
+            spj.getInsertedBy(),
+            spj.getInsertedDate(),
+            spj.getUpdatedBy(),
+            spj.getUpdatedDate(),
+            spj.getApprovedBy(),
+            spj.getApprovedDate()
+        ))
+        .collect(Collectors.toList());
+        
         return new OrderDetailResponseDTO(
             
             order.getOrderId(),
             order.getOrderDate(),
             order.getCustomer().getId(),
+            spjResponseList, 
             order.getQtyChassis20(),
             order.getQtyChassis40(),
             order.getSiteId(),
@@ -216,8 +247,29 @@ public class OrderRestServiceImpl implements OrderRestService {
         existingOrder.setOrderStatus(1);
 
         orderDb.save(existingOrder);
+
         notificationRestService.createOrderApprovalNotification(orderId, Arrays.asList(1L, 2L, 3L));;
 
         return request;
     }
+
+    @Transactional
+    @Override
+    public void markOrderAsDone(String orderId) {
+        Order order = orderDb.findById(orderId)
+                .orElseThrow(() -> new ValidationException("Order tidak ditemukan!"));
+    
+        if (order.getOrderStatus() != 3) {
+            throw new ValidationException("Order hanya bisa di-mark as done jika statusnya Ongoing!");
+        }
+    
+        String currentUser = jwtUtils.getCurrentUsername();
+    
+        order.setOrderStatus(4);
+        order.setUpdatedBy(currentUser);
+        order.setUpdatedDate(new Date());
+    
+        orderDb.save(order);
+    }    
+
 }
