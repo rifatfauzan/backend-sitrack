@@ -31,6 +31,7 @@ public class CreateChassisRequestDTO {
     @Size(max = 20, message = "Nomor KIR maksimal 20 karakter!")
     private String chassisKIRNo;
 
+    @Future(message = "KIR Expiration Date harus lebih dari hari ini!")
     @NotNull(message = "Tanggal KIR tidak boleh kosong!")
     private Date chassisKIRDate;
 

@@ -423,3 +423,4 @@ gradle-app.setting
 *.hprof
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,visualstudiocode,notepadpp,windows,macos,linux,vim,node,vue,vuejs,venv,gradle,maven
+.qodo
