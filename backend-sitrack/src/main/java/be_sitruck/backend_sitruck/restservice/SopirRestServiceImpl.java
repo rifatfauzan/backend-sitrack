@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ public class SopirRestServiceImpl implements SopirRestService {
     public CreateSopirResponseDTO addSopir(CreateSopirRequestDTO sopirDTO) {
         String currentUser = jwtUtils.getCurrentUsername();
         SopirModel existingSopir = sopirDb.findByDriverKTPNo(sopirDTO.getDriver_KTP_No());
+        Date today = new Date();
 
         if(existingSopir != null){
             throw new IllegalArgumentException("Sopir dengan NIK tersebut sudah ada");
@@ -51,6 +53,10 @@ public class SopirRestServiceImpl implements SopirRestService {
             throw new IllegalArgumentException("Nomor SIM Driver harus berupa angka");
         }
         sopir.setDriver_SIM_No(sopirDTO.getDriver_SIM_No());
+
+        if (sopirDTO.getDriver_SIM_Date().before(today) || sopirDTO.getDriver_SIM_Date() == today) {
+            throw new IllegalArgumentException("Anda tidak bisa menginput tanggal SIM yang sudah expired");
+        }
         sopir.setDriver_SIM_Date(sopirDTO.getDriver_SIM_Date());
 
         if(!sopirDTO.getDriverContact().matches("[0-9]+") & !sopirDTO.getDriverContact().isBlank()){
@@ -205,6 +211,23 @@ public class SopirRestServiceImpl implements SopirRestService {
         return namaDriver + increment;
     }
 
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkExpiringDriver() {
+        List<SopirModel> sopirList = sopirDb.findAll();
+        Date today = new Date();
+
+        for (SopirModel sopir : sopirList) {
+            if (sopir.getDriver_SIM_Date() != null && sopir.getDriver_SIM_Date().before(today)) {
+                sopir.setRecordStatus("I");
+                sopirDb.save(sopir);
+            }
+            if (sopir.getDriver_SIM_Date() != null && sopir.getDriver_SIM_Date() == today ) {
+                sopir.setRecordStatus("I");
+                sopirDb.save(sopir);
+            }
+        }
+    }
 
 
     
