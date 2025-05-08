@@ -125,4 +125,9 @@ public class Order implements Serializable{
     @Column(name = "qty_ch140fl")
     private Integer qtyCh140fl;
 
+    @Column(name = "tariff_chassis_20", nullable = true)
+    private Integer tariffChassis20;
+
+    @Column(name = "tariff_chassis_40", nullable = true)
+    private Integer tariffChassis40;
 }
