@@ -85,9 +85,9 @@ public class CustomerRestServiceImpl implements CustomerRestService{
                                        + customerDTO.getCityDestination().toUpperCase() + "' sudah ada!");
         }
 
-        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getAddress().isEmpty() || customerDTO.getSiteId().isEmpty()) {
-            throw new RuntimeException("Nama customer, kota tujuan, alamat, dan Site ID wajib diisi.");
-        }        
+        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getSiteId().isEmpty()) {
+            throw new RuntimeException("Nama customer, kota tujuan, dan Site ID wajib diisi.");
+        }
         
         var customer = new Customer();
         customer.setId(generateCustomerId());
@@ -123,8 +123,8 @@ public class CustomerRestServiceImpl implements CustomerRestService{
                                     + customerDTO.getCityDestination().toUpperCase() + "' sudah ada!");
         }
 
-        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getAddress().isEmpty() || customerDTO.getSiteId().isEmpty()) {
-            throw new RuntimeException("Nama customer, kota tujuan, alamat, dan Site ID wajib diisi.");
+        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getSiteId().isEmpty()) {
+            throw new RuntimeException("Nama customer, kota tujuan, dan Site ID wajib diisi.");
         }    
 
         customer.setSiteId(customerDTO.getSiteId().toUpperCase());

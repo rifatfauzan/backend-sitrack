@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import be_sitruck.backend_sitruck.model.Order;
 import be_sitruck.backend_sitruck.model.Customer;
 import be_sitruck.backend_sitruck.repository.OrderDb;
+import be_sitruck.backend_sitruck.repository.TariffDb;
 import be_sitruck.backend_sitruck.repository.CustomerDb;
 import be_sitruck.backend_sitruck.restdto.request.ApproveOrderRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateOrderRequestDTO;
@@ -29,6 +30,9 @@ public class OrderRestServiceImpl implements OrderRestService {
 
     @Autowired
     private CustomerDb customerDb;
+
+    @Autowired
+    private TariffDb tariffDb;
 
     @Autowired
     private NotificationRestService notificationRestService;
@@ -62,6 +66,24 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setCreatedBy(currentUser);
         order.setCreatedDate(new Date());
         order.setOrderStatus(1);
+
+        if (request.getQtyChassis20() != null && request.getQtyChassis20() > 0) {
+            Integer tariff20 = tariffDb.findByCustomerId(customer.getId()).stream()
+                .filter(t -> t.getMoveType().equalsIgnoreCase(request.getMoveType()) && t.getChassisSize() == 20)
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("Tariff untuk Chassis Size 20 dengan Move Type " + request.getMoveType() + " tidak ditemukan atau belum didefinisikan untuk Customer " + customer.getName() + "!"))
+                .getTotalTariff();
+            order.setTariffChassis20(tariff20);
+        }
+    
+        if (request.getQtyChassis40() != null && request.getQtyChassis40() > 0) {
+            Integer tariff40 = tariffDb.findByCustomerId(customer.getId()).stream()
+                .filter(t -> t.getMoveType().equalsIgnoreCase(request.getMoveType()) && t.getChassisSize() == 40)
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("Tariff untuk chassis size 40 dengan Move Type " + request.getMoveType() + " tidak ditemukan atau belum didefinisikan untuk Customer " + customer.getName() + "!"))
+                .getTotalTariff();
+            order.setTariffChassis40(tariff40);
+        }
 
         order.setQty120mtfl(request.getQty120mtfl());
         order.setQty120mt(request.getQty120mt());
@@ -158,6 +180,9 @@ public class OrderRestServiceImpl implements OrderRestService {
             order.getQtyCh220fl(),
             order.getQtyCh140fl(),
 
+            order.getTariffChassis20(),
+            order.getTariffChassis40(),
+
             order.getCreatedBy(),
             order.getCreatedDate(),
             order.getUpdatedBy(),
@@ -245,6 +270,28 @@ public class OrderRestServiceImpl implements OrderRestService {
         existingOrder.setQtyCh140fl(request.getQtyCh140fl());
         existingOrder.setRemarksOperasional(request.getRemarksOperasional());
         existingOrder.setOrderStatus(1);
+
+        if (request.getQtyChassis20() != null && request.getQtyChassis20() > 0) {
+            Integer tariff20 = tariffDb.findByCustomerId(customer.getId()).stream()
+                .filter(t -> t.getMoveType().equalsIgnoreCase(request.getMoveType()) && t.getChassisSize() == 20)
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("Tariff untuk Chassis Size 20 dengan Move Type " + request.getMoveType() + " tidak ditemukan atau belum didefinisikan untuk Customer " + customer.getName() + "!"))
+                .getTotalTariff();
+            existingOrder.setTariffChassis20(tariff20);
+        } else {
+            existingOrder.setTariffChassis20(null);
+        }
+    
+        if (request.getQtyChassis40() != null && request.getQtyChassis40() > 0) {
+            Integer tariff40 = tariffDb.findByCustomerId(customer.getId()).stream()
+                .filter(t -> t.getMoveType().equalsIgnoreCase(request.getMoveType()) && t.getChassisSize() == 40)
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("Tariff untuk chassis size 40 dengan Move Type " + request.getMoveType() + " tidak ditemukan atau belum didefinisikan untuk Customer " + customer.getName() + "!"))
+                .getTotalTariff();
+            existingOrder.setTariffChassis40(tariff40);
+        } else {
+            existingOrder.setTariffChassis40(null);
+        }
 
         orderDb.save(existingOrder);
 
