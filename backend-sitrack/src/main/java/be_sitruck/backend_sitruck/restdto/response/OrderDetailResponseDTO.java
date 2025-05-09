@@ -43,6 +43,9 @@ public class OrderDetailResponseDTO {
     private Integer qtyCh220fl;
     private Integer qtyCh140fl;
 
+    private Integer tariffChassis20;
+    private Integer tariffChassis40;
+
     private String createdBy;
     private Date createdDate;
     private String updatedBy;
