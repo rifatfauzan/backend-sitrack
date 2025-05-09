@@ -45,17 +45,17 @@ public class TruckRestServiceImpl implements TruckRestService {
             throw new IllegalArgumentException("KIR terdaftar di truck lain!");
         }
 
-        if (request.getVehicleBizLicenseNo() != null &&
+        if (!request.getVehicleBizLicenseNo().isEmpty() &&
             truckDb.existsByVehicleBizLicenseNo(vehicleBizLicenseNo)) {
             throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
         }
 
-        if (request.getVehicleDispensationNo() != null &&
+        if (!request.getVehicleDispensationNo().isEmpty() &&
             truckDb.existsByVehicleDispensationNo(vehicleDispensationNo)) {
             throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
         }
 
-        if (request.getVehicleNumber() != null &&
+        if (!request.getVehicleNumber().isEmpty() &&
             truckDb.existsByVehicleNumber(vehicleNumber)) {
             throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
         }
@@ -192,25 +192,31 @@ public class TruckRestServiceImpl implements TruckRestService {
             truckDb.existsByVehiclePlateNo(vehiclePlateNo)) {
             throw new IllegalArgumentException("Plat Nomor terdaftar di truck lain!");
         }
-    
+
         if (!truck.getVehicleKIRNo().equalsIgnoreCase(vehicleKIRNo) &&
             truckDb.existsByVehicleKIRNo(vehicleKIRNo)) {
             throw new IllegalArgumentException("KIR terdaftar di truck lain!");
         }
-    
-        if (request.getVehicleBizLicenseNo() != null && 
-            truckDb.existsByVehicleBizLicenseNo(vehicleBizLicenseNo)) {
-            throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
+
+        if (vehicleBizLicenseNo != null && !vehicleBizLicenseNo.isEmpty()) {
+            Truck existingTruck = truckDb.findByVehicleBizLicenseNo(vehicleBizLicenseNo);
+            if (existingTruck != null && !existingTruck.getVehicleId().equals(vehicleId)) {
+                throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
+            }
         }
 
-        if (request.getVehicleDispensationNo() != null &&
-            truckDb.existsByVehicleDispensationNo(vehicleDispensationNo)) {
-            throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
+        if (vehicleDispensationNo != null && !vehicleDispensationNo.isEmpty()) {
+            Truck existingTruck = truckDb.findByVehicleDispensationNo(vehicleDispensationNo);
+            if (existingTruck != null && !existingTruck.getVehicleId().equals(vehicleId)) {
+                throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
+            }
         }
 
-        if (request.getVehicleNumber() != null &&
-            truckDb.existsByVehicleNumber(vehicleNumber)) {
-            throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
+        if (vehicleNumber != null && !vehicleNumber.isEmpty()) {
+            Truck existingTruck = truckDb.findByVehicleNumber(vehicleNumber);
+            if (existingTruck != null && !existingTruck.getVehicleId().equals(vehicleId)) {
+                throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
+            }
         }
     
         String currentUser = jwtUtils.getCurrentUsername();
