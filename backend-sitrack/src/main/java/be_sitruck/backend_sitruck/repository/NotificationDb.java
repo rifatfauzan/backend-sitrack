@@ -35,4 +35,15 @@ public interface NotificationDb extends JpaRepository<Notification, Long> {
     
     @Query("SELECT n FROM Notification n WHERE n.id = :id AND n.user = :user")
     Optional<Notification> findByIdAndUser(@Param("id") Long id, @Param("user") UserModel user);
+
+    @Query("SELECT n FROM Notification n WHERE " +
+           "n.category = :category AND " +
+           "n.referenceType = :referenceType AND " +
+           "n.referenceId = :referenceId AND " +
+           "n.isActive = true")
+    List<Notification> findByCategoryAndReferenceTypeAndReferenceIdAndIsActiveTrue(
+        @Param("category") NotificationCategory category,
+        @Param("referenceType") String referenceType,
+        @Param("referenceId") String referenceId
+    );
 }
