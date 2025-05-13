@@ -51,7 +51,10 @@ public class ExcelExporter {
     public byte[] exportVehiclesToExcel(List<Truck> vehicles, String reportTitle, String period, String logoPath) {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Vehicles");
-            String companyInfo = "PT. GLORIOUS INTERBUANA\nKawasan Berikat Nusatara Marunda\nJl. Medan No. 4 Kav. C 18/2\nJakarta Utara - Indonesia";
+            String companyInfo = "PT. GLORIOUS INTERBUANA\n" +
+                "Kawasan Berikat Nusatara Marunda\n" +
+                "Jl. Medan No. 4 Kav. C 18/2\n" +
+                "Jakarta Utara - Indonesia";
             String[] columns = {"Vehicle ID", "Vehicle Brand", "Year", "Type", "Plate No.", "KIR No.", "STNK Expiration", "KIR Expiration"};
             int startRow = addExcelHeader(workbook, sheet, logoPath, companyInfo, reportTitle, period, columns.length);
             Row headerRow = sheet.createRow(startRow);
@@ -229,6 +232,7 @@ public class ExcelExporter {
         font.setBold(true);
         font.setFontHeightInPoints((short)10);
         style.setFont(font);
+        style.setWrapText(true);
         companyCell.setCellStyle(style);
         sheet.addMergedRegion(new CellRangeAddress(rowIdx, rowIdx+2, 1, colCount-1));
         rowIdx += 3;
