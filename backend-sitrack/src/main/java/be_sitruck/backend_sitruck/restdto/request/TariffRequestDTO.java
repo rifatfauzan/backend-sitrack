@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 public class TariffRequestDTO {
     private String tariffId;  // bisa null kalo baru ditambahin
 
-    @NotBlank(message = "Tipe chassis tidak boleh kosong.")
-    private String chassisType;
+    @NotBlank(message = "Chassis size tidak boleh kosong.")
+    private int chassisSize;
 
     @NotBlank(message = "Move type tidak boleh kosong.")
     private String moveType;

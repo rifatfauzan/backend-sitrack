@@ -14,5 +14,5 @@ public interface TruckRestService {
     UpdateTruckResponseDTO updateTruck(String vehicleId, UpdateTruckRequestDTO updateTruckRequestDTO);
     List<CreateTruckRequestDTO> getAllTruck();
     CreateTruckRequestDTO getTruckById(String truckId);
-
+    void checkExpiringTrucks();
 }

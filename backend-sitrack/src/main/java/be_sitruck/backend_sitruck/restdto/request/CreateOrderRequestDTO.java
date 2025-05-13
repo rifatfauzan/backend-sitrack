@@ -21,7 +21,7 @@ public class CreateOrderRequestDTO {
     // private String siteId;
     private String remarksOperasional;
     private String moveType;
-    private Integer downPayment;
+    private Float downPayment;
 
     private Integer qty120mtfl = 0;
     private Integer qty120mt = 0;
