@@ -3,6 +3,7 @@ package be_sitruck.backend_sitruck.restservice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +154,23 @@ public class SpjRestServiceImpl implements SpjRestService {
     public SpjResponseDTO addSpj(CreateSpjRequestDTO spjDTO) {
         String currenUser = jwtUtils.getCurrentUsername();
 
+        LocalDate today = new Date().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateOut = spjDTO.getDateOut().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateIn = spjDTO.getDateIn().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+
+        if (dateOut.isBefore(today)) {
+            throw new ValidationException("Tanggal keluar tidak boleh kurang dari hari ini.");
+        }
+        if (dateIn.isBefore(today)) {
+            throw new ValidationException("Tanggal masuk tidak boleh kurang dari hari ini.");
+        }
+
         Order order = orderDb.findById(spjDTO.getOrderId()).orElse(null);
         Customer customer = order.getCustomer();
         Truck vehicle = truckDb.findById(spjDTO.getVehicleId()).orElse(null);
@@ -160,7 +178,6 @@ public class SpjRestServiceImpl implements SpjRestService {
         SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
 
         String spjId = generateSpjId();
-
 
         var spj = new Spj();
         spj.setId(generateSpjId());
@@ -230,7 +247,23 @@ public class SpjRestServiceImpl implements SpjRestService {
             truckDb.save(vehicle);
         }
 
+        if (approveRequestDTO.getStatus() == 3) {
+            Order order = spj.getOrder();
+            if (!order.getSpjList().contains(spj)) {
+                order.getSpjList().add(spj);
+                orderDb.save(order);
+            }
+        }
+    
+
         spjDb.save(spj);
+
+        notificationRestService.createSpjStatusNotification(
+            spj.getId(),
+            approveRequestDTO.getStatus(),
+            Arrays.asList(1L, 2L, 3L, 4L)
+        );
+
         return SpjToSpjResponseDTO(spj);
     }
 
@@ -253,6 +286,10 @@ public class SpjRestServiceImpl implements SpjRestService {
         driver.setRowStatus("A");
         chassis.setRowStatus("A");
         vehicle.setRowStatus("A");
+
+        sopirDb.save(driver);
+        chassisDb.save(chassis);
+        truckDb.save(vehicle);
 
         spj.setStatus(4);
         spj.setActualDateIn(new Date());
@@ -295,7 +332,24 @@ public class SpjRestServiceImpl implements SpjRestService {
 
     @Override
     public SpjResponseDTO updateSPJ(String spjId, CreateSpjRequestDTO spjDTO) {
-       String currentUser = jwtUtils.getCurrentUsername();
+        String currentUser = jwtUtils.getCurrentUsername();
+       
+        LocalDate today = new Date().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateOut = spjDTO.getDateOut().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateIn = spjDTO.getDateIn().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+
+        if (dateOut.isBefore(today)) {
+            throw new ValidationException("Tanggal keluar tidak boleh kurang dari hari ini.");
+        }
+        if (dateIn.isBefore(today)) {
+            throw new ValidationException("Tanggal masuk tidak boleh kurang dari hari ini.");
+        }
 
         Order order = orderDb.findById(spjDTO.getOrderId()).orElse(null);
         Customer customer = order.getCustomer();
@@ -367,6 +421,8 @@ public class SpjRestServiceImpl implements SpjRestService {
         }        
 
         spjDb.save(currentSpj);
+
+        notificationRestService.createSpjApprovalNotification(spjId, Arrays.asList(1L, 2L, 3L));;
         return SpjToSpjResponseDTO(currentSpj);
     }
 }

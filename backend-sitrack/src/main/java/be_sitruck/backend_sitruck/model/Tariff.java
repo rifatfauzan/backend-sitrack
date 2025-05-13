@@ -20,7 +20,7 @@ public class Tariff {
     private Customer customer;
 
     @Column(name = "type", nullable = false)
-    private String chassisType;
+    private int chassisSize;
 
     @Column(name = "move_type", nullable = false)
     private String moveType;

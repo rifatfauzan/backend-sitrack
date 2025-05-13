@@ -23,5 +23,5 @@ public interface NotificationRestService {
     void createRequestAssetApprovalNotification(String requestAssetId, List<Long> roleIds);
     void createRequestAssetStatusNotification(String requestAssetId, int status, List<Long> roleIds);
     void createSpjApprovalNotification(String spjId, List<Long> roleIds);
-    // void createSpjStatusNotification(String spjId, int status, List<Long> roleIds);
+    void createSpjStatusNotification(String spjId, int status, List<Long> roleIds);
 }

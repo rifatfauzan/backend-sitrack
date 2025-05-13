@@ -1,7 +1,9 @@
 package be_sitruck.backend_sitruck.restdto.response;
 
 import java.util.Date;
+import java.util.List;
 
+import be_sitruck.backend_sitruck.model.Spj;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +18,7 @@ public class OrderDetailResponseDTO {
     private String orderId;
     private Date orderDate;
     private String customerId;
+    private List<SpjResponseDTO> spjList;
 
     private Integer qtyChassis20;
     private Integer qtyChassis40;
@@ -23,7 +26,7 @@ public class OrderDetailResponseDTO {
     private String remarksOperasional;
     private String remarksSupervisor;
     private String moveType;
-    private Integer downPayment;
+    private Float downPayment;
     private Integer orderStatus;
 
     private Integer qty120mtfl;
@@ -39,6 +42,9 @@ public class OrderDetailResponseDTO {
     private Integer qtyCh120fl;
     private Integer qtyCh220fl;
     private Integer qtyCh140fl;
+
+    private Integer tariffChassis20;
+    private Integer tariffChassis40;
 
     private String createdBy;
     private Date createdDate;
