@@ -1,5 +1,6 @@
 package be_sitruck.backend_sitruck.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,5 @@ public interface SpjDb extends JpaRepository<Spj, String> {
     List<Spj> findByStatusIn(List<Integer> status);
     Optional<Spj> findFirstByIdStartingWithOrderByIdDesc(String prefix);
     List<Spj> findByOrderAndStatusIn(Order order, List<Integer> status);
+    List<Spj> findByDateOutBetween(Date fromDate, Date endDate);
 }

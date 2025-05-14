@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import be_sitruck.backend_sitruck.model.Chassis;
 import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.model.UserModel;
+import be_sitruck.backend_sitruck.model.NotificationCategory;
 import be_sitruck.backend_sitruck.repository.ChassisDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateChassisRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateChassisResponseDTO;
@@ -25,6 +26,9 @@ public class ChassisRestServiceImpl implements ChassisRestService {
     
     @Autowired
     private ChassisDb chassisDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -117,17 +121,23 @@ public class ChassisRestServiceImpl implements ChassisRestService {
             throw new ValidationException("Nomor KIR sudah terdaftar dalam sistem!");
         }
 
+        if (!existingChassis.getChassisKIRDate().equals(updateRequest.getChassisKIRDate())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.CHASSIS_KIR_EXPIRY,
+                "CHASSIS",
+                chassisId
+            );
+        }
+
         existingChassis.setChassisSize(updateRequest.getChassisSize());
         existingChassis.setChassisYear(updateRequest.getChassisYear());
         existingChassis.setChassisNumber(updateRequest.getChassisNumber());
         existingChassis.setChassisAxle(updateRequest.getChassisAxle());
         existingChassis.setChassisKIRNo(updateRequest.getChassisKIRNo());
         existingChassis.setChassisKIRDate(updateRequest.getChassisKIRDate());
-        // existingChassis.setChassisType(updateRequest.getChassisType());
         existingChassis.setChassisRemarks(updateRequest.getChassisRemarks());
         existingChassis.setDivision(updateRequest.getDivision());
         existingChassis.setDept(updateRequest.getDept());
-        // existingChassis.setRowStatus(updateRequest.getRowStatus());
         existingChassis.setUpdatedBy(jwtUtils.getCurrentUsername());
         existingChassis.setUpdatedDate(new Date());
 

@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
+import java.util.List;
+
 @Repository
 public interface OrderDb extends JpaRepository<Order, String> {
     Order findByOrderId(String orderId);
@@ -13,4 +16,6 @@ public interface OrderDb extends JpaRepository<Order, String> {
     String findTopByOrderIdOrderByOrderIdDesc();
 
     Order findTopByOrderIdStartingWithOrderByOrderIdDesc(String prefix);
+
+    List<Order> findByOrderDateBetween(Date fromDate, Date endDate);
 }
