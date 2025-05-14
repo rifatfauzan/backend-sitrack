@@ -47,10 +47,16 @@ public class ReportRestServiceImpl implements ReportRestService {
     }
     @Override
     public List<Order> getOrdersByDateRange(Date fromDate, Date endDate) {
+        if (fromDate == null || endDate == null) {
+            return orderDb.findAll();
+        }
         return orderDb.findByOrderDateBetween(fromDate, endDate);
     }
     @Override
     public List<Spj> getSpjByDateRange(Date fromDate, Date endDate) {
+        if (fromDate == null || endDate == null) {
+            return spjDb.findAll();
+        }
         return spjDb.findByDateOutBetween(fromDate, endDate);
     }
     @Override

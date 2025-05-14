@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.text.SimpleDateFormat;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -32,7 +36,136 @@ public class ReportRestController {
     public ResponseEntity<?> generateReport(@RequestBody ReportFilterRequestDTO filter) {
         try {
             Object reportData = reportRestService.generateReport(filter);
-            return ResponseEntity.ok(reportData);
+            Map<String, Object> response = new HashMap<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            
+            switch (filter.getReportType()) {
+                case "ALL_CUSTOMERS":
+                    List<Customer> customers = (List<Customer>) reportData;
+                    List<Map<String, String>> formattedCustomers = customers.stream()
+                        .map(customer -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("Customer ID", customer.getId());
+                            row.put("Customer Name", customer.getName());
+                            row.put("Site ID", customer.getSiteId());
+                            row.put("Address", customer.getAddress());
+                            row.put("Destination", customer.getCityDestination());
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedCustomers);
+                    response.put("columns", Arrays.asList("Customer ID", "Customer Name", "Site ID", "Address", "Destination"));
+                    break;
+                    
+                case "ALL_VEHICLES":
+                    List<Truck> vehicles = (List<Truck>) reportData;
+                    List<Map<String, String>> formattedVehicles = vehicles.stream()
+                        .map(vehicle -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("Vehicle ID", vehicle.getVehicleId());
+                            row.put("Vehicle Brand", vehicle.getVehicleBrand());
+                            row.put("Year", vehicle.getVehicleYear());
+                            row.put("Type", vehicle.getVehicleType());
+                            row.put("Plate No.", vehicle.getVehiclePlateNo());
+                            row.put("KIR No.", vehicle.getVehicleKIRNo());
+                            row.put("STNK Expiration", sdf.format(vehicle.getVehicleSTNKDate()));
+                            row.put("KIR Expiration", sdf.format(vehicle.getVehicleKIRDate()));
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedVehicles);
+                    response.put("columns", Arrays.asList("Vehicle ID", "Vehicle Brand", "Year", "Type", "Plate No.", "KIR No.", "STNK Expiration", "KIR Expiration"));
+                    break;
+                    
+                case "ALL_CHASSIS":
+                    List<Chassis> chassisList = (List<Chassis>) reportData;
+                    List<Map<String, String>> formattedChassis = chassisList.stream()
+                        .map(chassis -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("Chassis ID", chassis.getChassisId());
+                            row.put("Year", chassis.getChassisYear());
+                            row.put("Size", String.valueOf(chassis.getChassisSize()));
+                            row.put("Type", chassis.getChassisType());
+                            row.put("Chassis No.", chassis.getChassisNumber());
+                            row.put("KIR No.", chassis.getChassisKIRNo());
+                            row.put("KIR Expiration", sdf.format(chassis.getChassisKIRDate()));
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedChassis);
+                    response.put("columns", Arrays.asList("Chassis ID", "Year", "Size", "Type", "Chassis No.", "KIR No.", "KIR Expiration"));
+                    break;
+                    
+                case "ALL_DRIVERS":
+                    List<SopirModel> drivers = (List<SopirModel>) reportData;
+                    List<Map<String, String>> formattedDrivers = drivers.stream()
+                        .map(driver -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("Driver ID", driver.getDriverId());
+                            row.put("Driver Name", driver.getDriverName());
+                            row.put("KTP No.", driver.getDriver_KTP_No());
+                            row.put("SIM No.", driver.getDriver_SIM_No());
+                            row.put("Join Date", sdf.format(driver.getDriverJoinDate()));
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedDrivers);
+                    response.put("columns", Arrays.asList("Driver ID", "Driver Name", "KTP No.", "SIM No.", "Join Date"));
+                    break;
+                    
+                case "ALL_ORDERS":
+                    List<Order> orders = (List<Order>) reportData;
+                    List<Map<String, String>> formattedOrders = orders.stream()
+                        .map(order -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("Order ID", order.getOrderId());
+                            row.put("Customer ID", order.getCustomer().getId());
+                            row.put("Customer Name", order.getCustomer().getName());
+                            row.put("Order Date", sdf.format(order.getOrderDate()));
+                            row.put("Move Type", order.getMoveType());
+                            row.put("Down Payment", String.valueOf(order.getDownPayment()));
+                            row.put("20' Chassis Qty", String.valueOf(order.getQtyChassis20()));
+                            row.put("40' Chassis Qty", String.valueOf(order.getQtyChassis40()));
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedOrders);
+                    response.put("columns", Arrays.asList("Order ID", "Customer ID", "Customer Name", "Order Date", "Move Type", "Down Payment", "20' Chassis Qty", "40' Chassis Qty"));
+                    break;
+                    
+                case "ALL_SPJ":
+                    List<Spj> spjList = (List<Spj>) reportData;
+                    List<Map<String, String>> formattedSpj = spjList.stream()
+                        .map(spj -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("SPJ ID", spj.getId());
+                            row.put("Order ID", spj.getOrder().getOrderId());
+                            row.put("Customer ID", spj.getCustomer().getId());
+                            row.put("Customer Name", spj.getCustomer().getName());
+                            row.put("Driver Name", spj.getDriver().getDriverName());
+                            row.put("Vehicle ID", spj.getVehicle().getVehicleId());
+                            row.put("Chassis ID", spj.getChassis().getChassisId());
+                            row.put("Chassis Size", String.valueOf(spj.getChassisSize()));
+                            row.put("Chassis Type", spj.getChassis().getChassisType());
+                            row.put("Container Qty", String.valueOf(spj.getContainerQty()));
+                            row.put("Container Type", spj.getContainerType());
+                            row.put("Commission", String.valueOf(spj.getCommission()));
+                            row.put("Other Commission", String.valueOf(spj.getOthersCommission()));
+                            row.put("Date Out", sdf.format(spj.getDateOut()));
+                            row.put("Date In", sdf.format(spj.getDateIn()));
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedSpj);
+                    response.put("columns", Arrays.asList("SPJ ID", "Order ID", "Customer ID", "Customer Name", "Driver Name", "Vehicle ID", "Chassis ID", "Chassis Size", "Chassis Type", "Container Qty", "Container Type", "Commission", "Other Commission", "Date Out", "Date In"));
+                    break;
+                    
+                default:
+                    return ResponseEntity.badRequest().body("Invalid report type");
+            }
+            
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
