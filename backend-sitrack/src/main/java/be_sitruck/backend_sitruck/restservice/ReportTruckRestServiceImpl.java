@@ -64,6 +64,7 @@ public class ReportTruckRestServiceImpl implements ReportTruckRestService {
 
         report.setVehiclePlateNo(truck.getVehiclePlateNo());
         report.setVehicleType(truck.getVehicleType());
+        report.setVehicleBrand(truck.getVehicleBrand());
 
         report.setAssets(new ArrayList<>());
         reportTruckDb.save(report);
@@ -111,6 +112,7 @@ public class ReportTruckRestServiceImpl implements ReportTruckRestService {
         dto.setVehicleId(report.getVehicleId());
         dto.setVehiclePlateNo(report.getVehiclePlateNo());
         dto.setVehicleType(report.getVehicleType());
+        dto.setVehicleBrand(report.getVehicleBrand());
         dto.setDescription(report.getDescription());
         dto.setCreatedBy(report.getCreatedBy());
 

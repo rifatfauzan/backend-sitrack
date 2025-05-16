@@ -54,6 +54,9 @@ public class ReportTruck {
     @Column(name = "vehicle_type", length = 20)
     private String vehicleType;
 
+    @Column(name = "vehicle_brand", length = 20)
+    private String vehicleBrand;
+
     @Column(name = "created_by", length = 50)
     private String createdBy;
 

@@ -28,4 +28,5 @@ public class ReportTruckRequestDTO {
     private List<ReportTruckAssetDTO> assets;
     private String vehiclePlateNo;
     private String vehicleType;
+    private String vehicleBrand;
 }
