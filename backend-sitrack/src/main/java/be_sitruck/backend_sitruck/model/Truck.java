@@ -92,6 +92,9 @@ public class Truck {
 
     @Column(name = "Vehicle_Group", length = 1)
     private String vehicleGroup;
+
+    @Column(name = "Vehicle_Commision")
+    private int vehicleCommission;
     
     @Column(name = "Inserted_By", length = 20)
     private String insertedBy;

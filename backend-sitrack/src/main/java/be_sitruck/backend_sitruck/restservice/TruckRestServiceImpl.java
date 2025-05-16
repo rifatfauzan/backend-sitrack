@@ -167,6 +167,7 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleNumber(),
             truck.getVehicleFuelConsumption(),
             truck.getVehicleGroup(),
+            truck.getVehicleCommission(),
             truck.getInsertedBy(),
             truck.getInsertedDate(),
             truck.getUpdatedBy(),
