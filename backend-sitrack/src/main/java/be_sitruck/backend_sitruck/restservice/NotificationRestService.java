@@ -24,4 +24,6 @@ public interface NotificationRestService {
     void createRequestAssetStatusNotification(String requestAssetId, int status, List<Long> roleIds);
     void createSpjApprovalNotification(String spjId, List<Long> roleIds);
     void createSpjStatusNotification(String spjId, int status, List<Long> roleIds);
+    
+    void deactivateNotificationsByCategoryAndReference(NotificationCategory category, String referenceType, String referenceId);
 }

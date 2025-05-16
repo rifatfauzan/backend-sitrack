@@ -1,6 +1,6 @@
 package be_sitruck.backend_sitruck.restservice;
 
-
+import be_sitruck.backend_sitruck.model.NotificationCategory;
 import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.repository.TruckDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateTruckRequestDTO;
@@ -24,6 +24,9 @@ public class TruckRestServiceImpl implements TruckRestService {
 
     @Autowired
     private TruckDb truckDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -221,7 +224,22 @@ public class TruckRestServiceImpl implements TruckRestService {
     
         String currentUser = jwtUtils.getCurrentUsername();
     
-        // Set UPPERCASE saat simpan
+        if (!truck.getVehicleSTNKDate().equals(request.getVehicleSTNKDate())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.VEHICLE_STNK_EXPIRY,
+                "TRUCK",
+                vehicleId
+            );
+        }
+        
+        if (!truck.getVehicleKIRDate().equals(request.getVehicleKIRDate())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.VEHICLE_KIR_EXPIRY,
+                "TRUCK",
+                vehicleId
+            );
+        }
+    
         truck.setVehicleId(vehicleId);
         truck.setVehicleBrand(request.getVehicleBrand());
         truck.setVehicleYear(request.getVehicleYear());
