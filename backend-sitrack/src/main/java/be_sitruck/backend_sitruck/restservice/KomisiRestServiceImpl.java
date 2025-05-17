@@ -47,6 +47,10 @@ public class KomisiRestServiceImpl implements KomisiRestService {
                 "Komisi untuk kendaraan dengan tujuan lokasi ini sudah terbuat"
             );
         }
+        //set truckcommision ke truck
+        truck.setVehicleCommission(requestDTO.getTruckCommission());
+        truckDb.save(truck);
+        
         var newKomisi = komisiDb.save(komisi);
         return toDto(newKomisi);
     }
@@ -83,6 +87,13 @@ public class KomisiRestServiceImpl implements KomisiRestService {
                 "Komisi untuk kendaraan dengan tujuan lokasi ini sudah terbuat"
             );
         }
+
+        // set truckcommission ke truck
+        Truck truck = truckDb.findById(requestDTO.getTruckId())
+            .orElseThrow(() -> new RuntimeException("Truck not found"));
+        truck.setVehicleCommission(requestDTO.getTruckCommission());
+        truckDb.save(truck);
+
         komisiDb.save(existingKomisi);
         return toDto(existingKomisi);
     }
