@@ -193,8 +193,10 @@ public class WebSecurityConfig {
        config.setAllowCredentials(true);
        config.addAllowedOriginPattern("https://sitrack.up.railway.app");
        config.addAllowedOriginPattern("http://localhost:*");
+       config.addAllowedOriginPattern("http://127.0.0.1:*");
        config.addAllowedHeader("*");
        config.addAllowedMethod("*");
+       config.setMaxAge(3600L);
        source.registerCorsConfiguration("/**", config);
        return new CorsFilter(source);
    }
