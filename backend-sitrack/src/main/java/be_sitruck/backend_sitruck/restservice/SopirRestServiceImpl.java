@@ -16,6 +16,8 @@ import be_sitruck.backend_sitruck.repository.SopirDb;
 import be_sitruck.backend_sitruck.restdto.response.CreateSopirResponseDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateSopirRequestDTO;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
+import be_sitruck.backend_sitruck.model.NotificationCategory;
+import jakarta.validation.ValidationException;
 
 @Service
 @Transactional
@@ -26,6 +28,9 @@ public class SopirRestServiceImpl implements SopirRestService {
 
     @Autowired
     SopirDb sopirDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Override
     public CreateSopirResponseDTO addSopir(CreateSopirRequestDTO sopirDTO) {
@@ -156,13 +161,21 @@ public class SopirRestServiceImpl implements SopirRestService {
 
     @Override
     public CreateSopirResponseDTO updateSopir(String driverId, CreateSopirRequestDTO sopirDTO) {
-        
-       SopirModel existingSopir = sopirDb.findById(driverId).orElse(null);
-       Date today = new Date();
+        SopirModel existingSopir = sopirDb.findById(driverId).orElse(null);
+        Date today = new Date();
 
         if(existingSopir == null){
-              throw new IllegalArgumentException("Sopir tidak ditemukan");
+            throw new IllegalArgumentException("Sopir tidak ditemukan");
         }
+
+        if (!existingSopir.getDriver_SIM_Date().equals(sopirDTO.getDriver_SIM_Date())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.DRIVER_SIM_EXPIRY,
+                "SOPIR",
+                driverId
+            );
+        }
+
         existingSopir.setDriverName(sopirDTO.getDriverName());
         existingSopir.setDriver_KTP_No(sopirDTO.getDriver_KTP_No());
         existingSopir.setDriver_KTP_Date(sopirDTO.getDriver_KTP_Date());
@@ -200,7 +213,6 @@ public class SopirRestServiceImpl implements SopirRestService {
 
         sopirDb.save(existingSopir);
         return sopirToSopirResponseDTO(existingSopir);
-
     }
 
     @Override
