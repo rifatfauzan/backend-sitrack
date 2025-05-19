@@ -45,8 +45,8 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         }
     }    
 
-    private String generateTariffId(String customerId, String chassisType, String moveType) {
-        return customerId + "-" + chassisType + "-" + moveType;
+    private String generateTariffId(String customerId, int chassisSize, String moveType) {
+        return customerId + "-" + chassisSize + "-" + moveType;
     }
 
     @Override
@@ -85,9 +85,9 @@ public class CustomerRestServiceImpl implements CustomerRestService{
                                        + customerDTO.getCityDestination().toUpperCase() + "' sudah ada!");
         }
 
-        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getAddress().isEmpty() || customerDTO.getSiteId().isEmpty()) {
-            throw new RuntimeException("Nama customer, kota tujuan, alamat, dan Site ID wajib diisi.");
-        }        
+        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getSiteId().isEmpty()) {
+            throw new RuntimeException("Nama customer, kota tujuan, dan Site ID wajib diisi.");
+        }
         
         var customer = new Customer();
         customer.setId(generateCustomerId());
@@ -123,8 +123,8 @@ public class CustomerRestServiceImpl implements CustomerRestService{
                                     + customerDTO.getCityDestination().toUpperCase() + "' sudah ada!");
         }
 
-        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getAddress().isEmpty() || customerDTO.getSiteId().isEmpty()) {
-            throw new RuntimeException("Nama customer, kota tujuan, alamat, dan Site ID wajib diisi.");
+        if (customerDTO.getName().isEmpty() || customerDTO.getCityDestination().isEmpty() || customerDTO.getSiteId().isEmpty()) {
+            throw new RuntimeException("Nama customer, kota tujuan, dan Site ID wajib diisi.");
         }    
 
         customer.setSiteId(customerDTO.getSiteId().toUpperCase());
@@ -146,12 +146,12 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         } else {
             Set<String> seenCombinations = new HashSet<>();
             for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
-                String chassisTypeUpper = tariffDTO.getChassisType().toUpperCase();
+                int chassisSize = tariffDTO.getChassisSize();
                 String moveTypeUpper = tariffDTO.getMoveType().toUpperCase();
-                String combinationKey = chassisTypeUpper + "-" + moveTypeUpper;
+                String combinationKey = chassisSize + "-" + moveTypeUpper;
 
                 if (!seenCombinations.add(combinationKey)) {
-                    throw new RuntimeException("Kombinasi chasis type '" + chassisTypeUpper + "' dan move type '" + moveTypeUpper + "' tidak boleh duplikat.");
+                    throw new RuntimeException("Kombinasi chasis size '" + chassisSize + "' dan move type '" + moveTypeUpper + "' tidak boleh duplikat.");
                 }
             }
     
@@ -159,9 +159,9 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             List<Tariff> newTariffs = new ArrayList<>();
             for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
                 Tariff newTariff = new Tariff();
-                newTariff.setTariffId(generateTariffId(customer.getId(), tariffDTO.getChassisType().toUpperCase(), tariffDTO.getMoveType().toUpperCase()));
+                newTariff.setTariffId(generateTariffId(customer.getId(), tariffDTO.getChassisSize(), tariffDTO.getMoveType().toUpperCase()));
                 newTariff.setCustomer(customer);
-                newTariff.setChassisType(tariffDTO.getChassisType().toUpperCase());
+                newTariff.setChassisSize(tariffDTO.getChassisSize());
                 newTariff.setMoveType(tariffDTO.getMoveType().toUpperCase());
                 newTariff.setStdTariff(tariffDTO.getStdTariff());
                 newTariff.setInsurance(tariffDTO.getInsurance());
@@ -201,7 +201,7 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             var tariffResponse = new TariffResponseDTO();
             tariffResponse.setTariffId(tariff.getTariffId());
             tariffResponse.setCustomerId(tariff.getCustomer().getId());
-            tariffResponse.setChassisType(tariff.getChassisType());
+            tariffResponse.setChassisSize(tariff.getChassisSize());
             tariffResponse.setMoveType(tariff.getMoveType());
             tariffResponse.setStdTariff(tariff.getStdTariff());
             tariffResponse.setInsurance(tariff.getInsurance());

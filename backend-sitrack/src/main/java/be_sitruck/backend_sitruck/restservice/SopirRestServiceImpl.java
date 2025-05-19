@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,8 @@ import be_sitruck.backend_sitruck.repository.SopirDb;
 import be_sitruck.backend_sitruck.restdto.response.CreateSopirResponseDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateSopirRequestDTO;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
+import be_sitruck.backend_sitruck.model.NotificationCategory;
+import jakarta.validation.ValidationException;
 
 @Service
 @Transactional
@@ -26,10 +29,14 @@ public class SopirRestServiceImpl implements SopirRestService {
     @Autowired
     SopirDb sopirDb;
 
+    @Autowired
+    private NotificationRestService notificationRestService;
+
     @Override
     public CreateSopirResponseDTO addSopir(CreateSopirRequestDTO sopirDTO) {
         String currentUser = jwtUtils.getCurrentUsername();
         SopirModel existingSopir = sopirDb.findByDriverKTPNo(sopirDTO.getDriver_KTP_No());
+        Date today = new Date();
 
         if(existingSopir != null){
             throw new IllegalArgumentException("Sopir dengan NIK tersebut sudah ada");
@@ -51,6 +58,10 @@ public class SopirRestServiceImpl implements SopirRestService {
             throw new IllegalArgumentException("Nomor SIM Driver harus berupa angka");
         }
         sopir.setDriver_SIM_No(sopirDTO.getDriver_SIM_No());
+
+        if (sopirDTO.getDriver_SIM_Date().before(today) || sopirDTO.getDriver_SIM_Date() == today) {
+            throw new IllegalArgumentException("Anda tidak bisa menginput tanggal SIM yang sudah expired");
+        }
         sopir.setDriver_SIM_Date(sopirDTO.getDriver_SIM_Date());
 
         if(!sopirDTO.getDriverContact().matches("[0-9]+") & !sopirDTO.getDriverContact().isBlank()){
@@ -150,13 +161,21 @@ public class SopirRestServiceImpl implements SopirRestService {
 
     @Override
     public CreateSopirResponseDTO updateSopir(String driverId, CreateSopirRequestDTO sopirDTO) {
-        
-       SopirModel existingSopir = sopirDb.findById(driverId).orElse(null);
-       Date today = new Date();
+        SopirModel existingSopir = sopirDb.findById(driverId).orElse(null);
+        Date today = new Date();
 
         if(existingSopir == null){
-              throw new IllegalArgumentException("Sopir tidak ditemukan");
+            throw new IllegalArgumentException("Sopir tidak ditemukan");
         }
+
+        if (!existingSopir.getDriver_SIM_Date().equals(sopirDTO.getDriver_SIM_Date())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.DRIVER_SIM_EXPIRY,
+                "SOPIR",
+                driverId
+            );
+        }
+
         existingSopir.setDriverName(sopirDTO.getDriverName());
         existingSopir.setDriver_KTP_No(sopirDTO.getDriver_KTP_No());
         existingSopir.setDriver_KTP_Date(sopirDTO.getDriver_KTP_Date());
@@ -194,7 +213,6 @@ public class SopirRestServiceImpl implements SopirRestService {
 
         sopirDb.save(existingSopir);
         return sopirToSopirResponseDTO(existingSopir);
-
     }
 
     @Override
@@ -205,6 +223,23 @@ public class SopirRestServiceImpl implements SopirRestService {
         return namaDriver + increment;
     }
 
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkExpiringDriver() {
+        List<SopirModel> sopirList = sopirDb.findAll();
+        Date today = new Date();
+
+        for (SopirModel sopir : sopirList) {
+            if (sopir.getDriver_SIM_Date() != null && sopir.getDriver_SIM_Date().before(today)) {
+                sopir.setRecordStatus("I");
+                sopirDb.save(sopir);
+            }
+            if (sopir.getDriver_SIM_Date() != null && sopir.getDriver_SIM_Date() == today ) {
+                sopir.setRecordStatus("I");
+                sopirDb.save(sopir);
+            }
+        }
+    }
 
 
     

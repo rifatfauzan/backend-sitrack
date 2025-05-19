@@ -1,5 +1,6 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
+import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.restdto.request.CreateTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.UpdateTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
@@ -12,6 +13,8 @@ import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -20,11 +23,27 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/truck")
 public class TruckRestController {
-    
+
     @Autowired
     private TruckRestService truckRestService;
 
-    //Create Truck
+    // Handler khusus untuk validasi DTO gagal
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseResponseDTO<?>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+
+        BaseResponseDTO<Object> resp = new BaseResponseDTO<>();
+        String msg = ex.getBindingResult().getFieldError().getDefaultMessage();
+
+        resp.setStatus(HttpStatus.BAD_REQUEST.value());
+        resp.setMessage(msg);
+        resp.setTimestamp(new Date());
+        resp.setData(null);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resp);
+    }
+
+    // Create Truck
     @PostMapping("/add")
     public ResponseEntity<?> createTruck(@Valid @RequestBody CreateTruckRequestDTO request) {
         var baseResponseDTO = new BaseResponseDTO<CreateTruckResponseDTO>();
@@ -44,7 +63,8 @@ public class TruckRestController {
         }
     }
 
-    //Get All Trucks
+    // Get All Trucks
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllTrucks() {
         var baseResponseDTO = new BaseResponseDTO<List<CreateTruckRequestDTO>>();
@@ -64,7 +84,8 @@ public class TruckRestController {
         }
     }
 
-    // Get Truck by ID
+    //  Get Truck by ID
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
     @GetMapping("/detail")
     public ResponseEntity<?> getTruckById(@RequestParam("id") String vehicleId) {
         var baseResponseDTO = new BaseResponseDTO<CreateTruckRequestDTO>();
@@ -90,12 +111,12 @@ public class TruckRestController {
         }
     }
 
-    // Update Truck
+    //Update Truck
     @PutMapping("/update")
     public ResponseEntity<?> updateTruck(@RequestParam("id") String vehicleId,
                                          @Valid @RequestBody UpdateTruckRequestDTO request) {
         var baseResponseDTO = new BaseResponseDTO<UpdateTruckResponseDTO>();
-    
+
         try {
             UpdateTruckResponseDTO response = truckRestService.updateTruck(vehicleId, request);
             baseResponseDTO.setStatus(HttpStatus.OK.value());
@@ -106,15 +127,15 @@ public class TruckRestController {
         } catch (ValidationException e) {
             baseResponseDTO.setStatus(HttpStatus.BAD_REQUEST.value());
             baseResponseDTO.setMessage("Validasi gagal: " + e.getMessage());
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(null);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(baseResponseDTO);
         } catch (Exception e) {
-            e.printStackTrace();
             baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            baseResponseDTO.setMessage("Terjadi kesalahan saat memperbarui truck");
+            baseResponseDTO.setMessage(e.getMessage());
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
         }
     }
-    
-
-
 }

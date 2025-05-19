@@ -1,6 +1,6 @@
 package be_sitruck.backend_sitruck.restservice;
 
-
+import be_sitruck.backend_sitruck.model.NotificationCategory;
 import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.repository.TruckDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateTruckRequestDTO;
@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -25,6 +26,9 @@ public class TruckRestServiceImpl implements TruckRestService {
     private TruckDb truckDb;
 
     @Autowired
+    private NotificationRestService notificationRestService;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
 
@@ -33,6 +37,9 @@ public class TruckRestServiceImpl implements TruckRestService {
         
         String vehiclePlateNo = request.getVehiclePlateNo().toUpperCase();
         String vehicleKIRNo = request.getVehicleKIRNo().toUpperCase();
+        String vehicleBizLicenseNo = request.getVehicleBizLicenseNo().toUpperCase();
+        String vehicleDispensationNo = request.getVehicleDispensationNo().toUpperCase();
+        String vehicleNumber = request.getVehicleNumber().toUpperCase();
         
         if (truckDb.existsByVehiclePlateNo(vehiclePlateNo)) {
             throw new IllegalArgumentException("Plat Nomor terdaftar di truck lain!");
@@ -41,27 +48,19 @@ public class TruckRestServiceImpl implements TruckRestService {
             throw new IllegalArgumentException("KIR terdaftar di truck lain!");
         }
 
-        if (request.getVehicleBizLicenseNo() != null && !request.getVehicleBizLicenseNo().isEmpty()) {
-            String vehicleBizLicenseNo = request.getVehicleBizLicenseNo().toUpperCase();
-           Truck existingTruck = truckDb.findByVehicleBizLicenseNo(vehicleBizLicenseNo);
-            if (existingTruck!= null) {
-                throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
-            }
+        if (!request.getVehicleBizLicenseNo().isEmpty() &&
+            truckDb.existsByVehicleBizLicenseNo(vehicleBizLicenseNo)) {
+            throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
         }
-        
-        if (request.getVehicleDispensationNo() != null && !request.getVehicleDispensationNo().isEmpty()) {
-            String vehicleDispensationNo = request.getVehicleDispensationNo().toUpperCase();
-            Truck existingTruck = truckDb.findByVehicleDispensationNo(vehicleDispensationNo);
-            if (existingTruck!=null) {
-                throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
-            }
+
+        if (!request.getVehicleDispensationNo().isEmpty() &&
+            truckDb.existsByVehicleDispensationNo(vehicleDispensationNo)) {
+            throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
         }
-        
-        if (request.getVehicleNumber() != null && !request.getVehicleNumber().isEmpty()) {
-            Truck existingTruck = truckDb.findByVehicleNumber(request.getVehicleNumber());
-            if (existingTruck != null) {
-                throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
-            }
+
+        if (!request.getVehicleNumber().isEmpty() &&
+            truckDb.existsByVehicleNumber(vehicleNumber)) {
+            throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
         }
 
         String currentUser = jwtUtils.getCurrentUsername();
@@ -104,7 +103,7 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        truck.setRowStatus(request.getRowStatus());
+        truck.setRowStatus("A");
         truck.setRecordStatus(request.getRecordStatus());
         truck.setDept(request.getDept());
         truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
@@ -168,6 +167,7 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleNumber(),
             truck.getVehicleFuelConsumption(),
             truck.getVehicleGroup(),
+            truck.getVehicleCommission(),
             truck.getInsertedBy(),
             truck.getInsertedDate(),
             truck.getUpdatedBy(),
@@ -187,44 +187,60 @@ public class TruckRestServiceImpl implements TruckRestService {
     
         String vehiclePlateNo = request.getVehiclePlateNo().toUpperCase();
         String vehicleKIRNo = request.getVehicleKIRNo().toUpperCase();
+        String vehicleBizLicenseNo = request.getVehicleBizLicenseNo().toUpperCase();
+        String vehicleDispensationNo = request.getVehicleDispensationNo().toUpperCase();
+        String vehicleNumber = request.getVehicleNumber().toUpperCase();
     
         // Validasi STNK & KIR
         if (!truck.getVehiclePlateNo().equalsIgnoreCase(vehiclePlateNo) &&
             truckDb.existsByVehiclePlateNo(vehiclePlateNo)) {
             throw new IllegalArgumentException("Plat Nomor terdaftar di truck lain!");
         }
-    
+
         if (!truck.getVehicleKIRNo().equalsIgnoreCase(vehicleKIRNo) &&
             truckDb.existsByVehicleKIRNo(vehicleKIRNo)) {
             throw new IllegalArgumentException("KIR terdaftar di truck lain!");
         }
-    
-        if (request.getVehicleBizLicenseNo() != null && !request.getVehicleBizLicenseNo().isEmpty()) {
-            String vehicleBizLicenseNo = request.getVehicleBizLicenseNo().toUpperCase();
-           Truck existingTruck = truckDb.findByVehicleBizLicenseNo(vehicleBizLicenseNo);
-            if (existingTruck!= null) {
+
+        if (vehicleBizLicenseNo != null && !vehicleBizLicenseNo.isEmpty()) {
+            Truck existingTruck = truckDb.findByVehicleBizLicenseNo(vehicleBizLicenseNo);
+            if (existingTruck != null && !existingTruck.getVehicleId().equals(vehicleId)) {
                 throw new IllegalArgumentException("Business License Number sudah terdaftar di truck lain!");
             }
         }
-        
-        if (request.getVehicleDispensationNo() != null && !request.getVehicleDispensationNo().isEmpty()) {
-            String vehicleDispensationNo = request.getVehicleDispensationNo().toUpperCase();
+
+        if (vehicleDispensationNo != null && !vehicleDispensationNo.isEmpty()) {
             Truck existingTruck = truckDb.findByVehicleDispensationNo(vehicleDispensationNo);
-            if (existingTruck!=null) {
+            if (existingTruck != null && !existingTruck.getVehicleId().equals(vehicleId)) {
                 throw new IllegalArgumentException("Dispensation Number sudah terdaftar di truck lain!");
             }
         }
-        
-        if (request.getVehicleNumber() != null && !request.getVehicleNumber().isEmpty()) {
-            Truck existingTruck = truckDb.findByVehicleNumber(request.getVehicleNumber());
-            if (existingTruck != null) {
+
+        if (vehicleNumber != null && !vehicleNumber.isEmpty()) {
+            Truck existingTruck = truckDb.findByVehicleNumber(vehicleNumber);
+            if (existingTruck != null && !existingTruck.getVehicleId().equals(vehicleId)) {
                 throw new IllegalArgumentException("Vehicle Number sudah terdaftar di truck lain!");
             }
         }
     
         String currentUser = jwtUtils.getCurrentUsername();
     
-        // Set UPPERCASE saat simpan
+        if (!truck.getVehicleSTNKDate().equals(request.getVehicleSTNKDate())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.VEHICLE_STNK_EXPIRY,
+                "TRUCK",
+                vehicleId
+            );
+        }
+        
+        if (!truck.getVehicleKIRDate().equals(request.getVehicleKIRDate())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.VEHICLE_KIR_EXPIRY,
+                "TRUCK",
+                vehicleId
+            );
+        }
+    
         truck.setVehicleId(vehicleId);
         truck.setVehicleBrand(request.getVehicleBrand());
         truck.setVehicleYear(request.getVehicleYear());
@@ -247,7 +263,7 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        truck.setRowStatus(request.getRowStatus());
+        truck.setRowStatus("A");
         truck.setDept(request.getDept());
         truck.setRecordStatus(request.getRecordStatus());
         truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
@@ -259,5 +275,28 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleId(),
             "Truck successfully updated"
         );
+    }
+
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?") // setiap tengah malam
+    public void checkExpiringTrucks() {
+        List<Truck> trucks = truckDb.findAll();
+        Date today = new Date();
+    
+        for (Truck truck : trucks) {
+            boolean updated = false;
+    
+            if (truck.getVehicleKIRDate() != null && truck.getVehicleKIRDate().before(today)) {
+                truck.setRowStatus("I");
+                updated = true;
+            }
+    
+            if (truck.getVehicleSTNKDate() != null && truck.getVehicleSTNKDate().before(today)) {
+                truck.setRowStatus("I");
+                updated = true;
+            }
+    
+            if (updated) truckDb.save(truck);
+        }
     }
 }

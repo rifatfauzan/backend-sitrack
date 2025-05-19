@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import be_sitruck.backend_sitruck.model.Chassis;
+import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.model.UserModel;
+import be_sitruck.backend_sitruck.model.NotificationCategory;
 import be_sitruck.backend_sitruck.repository.ChassisDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateChassisRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateChassisResponseDTO;
@@ -23,6 +26,9 @@ public class ChassisRestServiceImpl implements ChassisRestService {
     
     @Autowired
     private ChassisDb chassisDb;
+
+    @Autowired
+    private NotificationRestService notificationRestService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -52,7 +58,7 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         chassis.setInsertedDate(new Date());
         chassis.setDivision(createChassisRequestDTO.getDivision().toUpperCase());
         chassis.setDept(createChassisRequestDTO.getDept().toUpperCase().toUpperCase());
-        chassis.setRowStatus(createChassisRequestDTO.getRowStatus().toUpperCase());
+        chassis.setRowStatus("A");
 
         chassis.setSiteId(createChassisRequestDTO.getSiteId().toUpperCase());
     
@@ -100,7 +106,6 @@ public class ChassisRestServiceImpl implements ChassisRestService {
                 chassis.getSiteId()
         );
     }
-    
 
     @Transactional
     @Override
@@ -116,17 +121,23 @@ public class ChassisRestServiceImpl implements ChassisRestService {
             throw new ValidationException("Nomor KIR sudah terdaftar dalam sistem!");
         }
 
+        if (!existingChassis.getChassisKIRDate().equals(updateRequest.getChassisKIRDate())) {
+            notificationRestService.deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.CHASSIS_KIR_EXPIRY,
+                "CHASSIS",
+                chassisId
+            );
+        }
+
         existingChassis.setChassisSize(updateRequest.getChassisSize());
         existingChassis.setChassisYear(updateRequest.getChassisYear());
         existingChassis.setChassisNumber(updateRequest.getChassisNumber());
         existingChassis.setChassisAxle(updateRequest.getChassisAxle());
         existingChassis.setChassisKIRNo(updateRequest.getChassisKIRNo());
         existingChassis.setChassisKIRDate(updateRequest.getChassisKIRDate());
-        // existingChassis.setChassisType(updateRequest.getChassisType());
         existingChassis.setChassisRemarks(updateRequest.getChassisRemarks());
         existingChassis.setDivision(updateRequest.getDivision());
         existingChassis.setDept(updateRequest.getDept());
-        existingChassis.setRowStatus(updateRequest.getRowStatus());
         existingChassis.setUpdatedBy(jwtUtils.getCurrentUsername());
         existingChassis.setUpdatedDate(new Date());
 
@@ -152,6 +163,24 @@ public class ChassisRestServiceImpl implements ChassisRestService {
         }
         
         return String.format("CH%05d", nextNumber);
+    }
+
+    @Override
+    @Scheduled(cron = "0 0 0 * * ?") // setiap tengah malam
+    public void checkExpiringChassis() {
+        List<Chassis> allChassis = chassisDb.findAll();
+        Date today = new Date();
+    
+        for (Chassis chassis : allChassis) {
+            boolean updated = false;
+    
+            if (chassis.getChassisKIRDate() != null && chassis.getChassisKIRDate().before(today)) {
+                chassis.setRowStatus("I");
+                updated = true;
+            }
+    
+            if (updated) chassisDb.save(chassis);
+        }
     }
     
 }

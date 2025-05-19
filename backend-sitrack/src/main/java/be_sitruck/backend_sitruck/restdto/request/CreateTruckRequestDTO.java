@@ -2,6 +2,7 @@ package be_sitruck.backend_sitruck.restdto.request;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -30,12 +31,14 @@ public class CreateTruckRequestDTO {
     @NotBlank(message = "Vehicle plate number is required")
     private String vehiclePlateNo;
     
+    @Future(message = "Tanggal Expired STNK harus lebih dari hari ini!")
     @NotNull(message = "Vehicle STNK date is required")
     private Date vehicleSTNKDate;
     
     @NotBlank(message = "Vehicle KIR number is required")
     private String vehicleKIRNo;
     
+    @Future(message = "Tanggal Expired KIR harus lebih dari hari ini!")
     @NotNull(message = "Vehicle KIR date is required")
     private Date vehicleKIRDate;
 
@@ -86,6 +89,8 @@ public class CreateTruckRequestDTO {
     private Double vehicleFuelConsumption = 0.0;
 
     private String vehicleGroup;
+
+    private int vehicleCommission;
 
     private String insertedBy;
     private Date insertedDate;
