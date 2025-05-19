@@ -1,0 +1,296 @@
+package be_sitruck.backend_sitruck.util;
+
+import be_sitruck.backend_sitruck.model.*;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.PdfPCell;
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+
+@Component
+public class PDFExporter {
+
+    private void addReportHeader(Document document, String reportTitle, String startDate, String endDate) throws DocumentException {
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new int[]{1, 10});
+        try {
+            String logoPath = ResourceUtils.getFile("classpath:static/GIB.png").getAbsolutePath();
+            Image logo = Image.getInstance(logoPath);
+            logo.scaleToFit(110, 110);
+            PdfPCell logoCell = new PdfPCell(logo, false);
+            logoCell.setBorder(Rectangle.NO_BORDER);
+            logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            logoCell.setPadding(0f);
+            headerTable.addCell(logoCell);
+        } catch (Exception e) {
+            PdfPCell logoCell = new PdfPCell(new Phrase("[LOGO]"));
+            logoCell.setBorder(Rectangle.NO_BORDER);
+            logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+            logoCell.setPadding(0f);
+            headerTable.addCell(logoCell);
+        }
+        String companyInfo = "PT. GLORIOUS INTERBUANA\n" +
+                "Kawasan Berikat Nusatara Marunda\n" +
+                "Jl. Medan No. 4 Kav. C 18/2\n" +
+                "Jakarta Utara - Indonesia";
+        PdfPCell infoCell = new PdfPCell();
+        infoCell.setBorder(Rectangle.NO_BORDER);
+        infoCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        infoCell.setPadding(0f);
+        infoCell.setPaddingLeft(50f);
+        infoCell.addElement(new Paragraph(companyInfo, new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD)));
+        headerTable.addCell(infoCell);
+        document.add(headerTable);
+        document.add(new Paragraph(" "));
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 20, Font.BOLD);
+        Paragraph title = new Paragraph(reportTitle, titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+        if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
+            Paragraph periodP = new Paragraph("Order period: " + startDate + " until " + endDate, new Font(Font.FontFamily.HELVETICA, 12));
+            periodP.setAlignment(Element.ALIGN_CENTER);
+            document.add(periodP);
+        }
+        document.add(new Paragraph(" "));
+    }
+
+    public byte[] exportCustomersToPDF(List<Customer> customers) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Customer Report", "", "");
+            PdfPTable table = new PdfPTable(5);
+            table.setWidthPercentage(100);
+
+            table.addCell("Customer ID");
+            table.addCell("Customer Name");
+            table.addCell("Site ID");
+            table.addCell("Address");
+            table.addCell("Destination");
+
+            for (Customer customer : customers) {
+                table.addCell(customer.getId());
+                table.addCell(customer.getName());
+                table.addCell(customer.getSiteId());
+                table.addCell(customer.getAddress());
+                table.addCell(customer.getCityDestination());
+            }
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportVehiclesToPDF(List<Truck> vehicles) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Vehicle Report", "", "");
+            PdfPTable table = new PdfPTable(8);
+            table.setWidthPercentage(100);
+
+            table.addCell("Vehicle ID");
+            table.addCell("Vehicle Brand");
+            table.addCell("Year");
+            table.addCell("Type");
+            table.addCell("Plate No.");
+            table.addCell("KIR No.");
+            table.addCell("STNK Expiration");
+            table.addCell("KIR Expiration");
+
+            for (Truck vehicle : vehicles) {
+                table.addCell(vehicle.getVehicleId());
+                table.addCell(vehicle.getVehicleBrand());
+                table.addCell(vehicle.getVehicleYear());
+                table.addCell(vehicle.getVehicleType());
+                table.addCell(vehicle.getVehiclePlateNo());
+                table.addCell(vehicle.getVehicleKIRNo());
+                table.addCell(vehicle.getVehicleSTNKDate().toString());
+                table.addCell(vehicle.getVehicleKIRDate().toString());
+            }
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportChassisToPDF(List<Chassis> chassisList) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Chassis Report", "", "");
+            PdfPTable table = new PdfPTable(7);
+            table.setWidthPercentage(100);
+
+            table.addCell("Chassis ID");
+            table.addCell("Year");
+            table.addCell("Size");
+            table.addCell("Type");
+            table.addCell("Chassis No.");
+            table.addCell("KIR No.");
+            table.addCell("KIR Expiration");
+
+            for (Chassis chassis : chassisList) {
+                table.addCell(chassis.getChassisId());
+                table.addCell(chassis.getChassisYear());
+                table.addCell(String.valueOf(chassis.getChassisSize()));
+                table.addCell(chassis.getChassisType());
+                table.addCell(chassis.getChassisNumber());
+                table.addCell(chassis.getChassisKIRNo());
+                table.addCell(chassis.getChassisKIRDate().toString());
+            }
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportDriversToPDF(List<SopirModel> drivers) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Driver Report", "", "");
+            PdfPTable table = new PdfPTable(5);
+            table.setWidthPercentage(100);
+
+            table.addCell("Driver ID");
+            table.addCell("Driver Name");
+            table.addCell("KTP No.");
+            table.addCell("SIM No.");
+            table.addCell("Join Date");
+
+            for (SopirModel driver : drivers) {
+                table.addCell(driver.getDriverId());
+                table.addCell(driver.getDriverName());
+                table.addCell(driver.getDriver_KTP_No());
+                table.addCell(driver.getDriver_SIM_No());
+                table.addCell(driver.getDriverJoinDate().toString());
+            }
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportOrdersToPDF(List<Order> orders, String fromDate, String endDate) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Order Report", fromDate, endDate);
+            PdfPTable table = new PdfPTable(8);
+            table.setWidthPercentage(100);
+
+            table.addCell("Order ID");
+            table.addCell("Customer ID");
+            table.addCell("Customer Name");
+            table.addCell("Order Date");
+            table.addCell("Move Type");
+            table.addCell("Down Payment");
+            table.addCell("20' Chassis Qty");
+            table.addCell("40' Chassis Qty");
+
+            for (Order order : orders) {
+                table.addCell(order.getOrderId());
+                table.addCell(order.getCustomer().getId());
+                table.addCell(order.getCustomer().getName());
+                table.addCell(order.getOrderDate().toString());
+                table.addCell(order.getMoveType());
+                table.addCell(String.valueOf(order.getDownPayment()));
+                table.addCell(String.valueOf(order.getQtyChassis20()));
+                table.addCell(String.valueOf(order.getQtyChassis40()));
+            }
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportSpjToPDF(List<Spj> spjList, String fromDate, String endDate) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "SPJ Report", fromDate, endDate);
+            PdfPTable table = new PdfPTable(15);
+            table.setWidthPercentage(100);
+
+            table.addCell("SPJ ID");
+            table.addCell("Order ID");
+            table.addCell("Customer ID");
+            table.addCell("Customer Name");
+            table.addCell("Driver Name");
+            table.addCell("Vehicle ID");
+            table.addCell("Chassis ID");
+            table.addCell("Chassis Size");
+            table.addCell("Chassis Type");
+            table.addCell("Container Qty");
+            table.addCell("Container Type");
+            table.addCell("Commission");
+            table.addCell("Other Commission");
+            table.addCell("Date Out");
+            table.addCell("Date In");
+
+            for (Spj spj : spjList) {
+                table.addCell(spj.getId());
+                table.addCell(spj.getOrder().getOrderId());
+                table.addCell(spj.getCustomer().getId());
+                table.addCell(spj.getCustomer().getName());
+                table.addCell(spj.getDriver().getDriverName());
+                table.addCell(spj.getVehicle().getVehicleId());
+                table.addCell(spj.getChassis().getChassisId());
+                table.addCell(String.valueOf(spj.getChassisSize()));
+                table.addCell(spj.getChassis().getChassisType());
+                table.addCell(String.valueOf(spj.getContainerQty()));
+                table.addCell(spj.getContainerType());
+                table.addCell(String.valueOf(spj.getCommission()));
+                table.addCell(String.valueOf(spj.getOthersCommission()));
+                table.addCell(spj.getDateOut().toString());
+                table.addCell(spj.getDateIn().toString());
+            }
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+} 

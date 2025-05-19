@@ -3,6 +3,7 @@ package be_sitruck.backend_sitruck.restservice;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,11 +154,20 @@ public class SpjRestServiceImpl implements SpjRestService {
     public SpjResponseDTO addSpj(CreateSpjRequestDTO spjDTO) {
         String currenUser = jwtUtils.getCurrentUsername();
 
-        Date today = new Date();
-        if (spjDTO.getDateOut().before(today)) {
+        LocalDate today = new Date().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateOut = spjDTO.getDateOut().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateIn = spjDTO.getDateIn().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+
+        if (dateOut.isBefore(today)) {
             throw new ValidationException("Tanggal keluar tidak boleh kurang dari hari ini.");
         }
-        if (spjDTO.getDateIn().before(today)) {
+        if (dateIn.isBefore(today)) {
             throw new ValidationException("Tanggal masuk tidak boleh kurang dari hari ini.");
         }
 
@@ -324,11 +334,20 @@ public class SpjRestServiceImpl implements SpjRestService {
     public SpjResponseDTO updateSPJ(String spjId, CreateSpjRequestDTO spjDTO) {
         String currentUser = jwtUtils.getCurrentUsername();
        
-        Date today = new Date();
-        if (spjDTO.getDateOut().before(today)) {
+        LocalDate today = new Date().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateOut = spjDTO.getDateOut().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+        LocalDate dateIn = spjDTO.getDateIn().toInstant()
+            .atZone(java.time.ZoneId.systemDefault())
+            .toLocalDate();
+
+        if (dateOut.isBefore(today)) {
             throw new ValidationException("Tanggal keluar tidak boleh kurang dari hari ini.");
         }
-        if (spjDTO.getDateIn().before(today)) {
+        if (dateIn.isBefore(today)) {
             throw new ValidationException("Tanggal masuk tidak boleh kurang dari hari ini.");
         }
 
