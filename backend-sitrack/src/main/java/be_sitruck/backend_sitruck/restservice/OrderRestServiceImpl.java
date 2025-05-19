@@ -172,6 +172,7 @@ public class OrderRestServiceImpl implements OrderRestService {
             order.getQty220mt(),
             order.getQty140mtfl(),
             order.getQty140mt(),
+            order.getQty120mt140fl(),
             order.getQty120mt120fl(),
             order.getQty120mt220fl(),
             order.getQty220mt120fl(),
@@ -262,6 +263,8 @@ public class OrderRestServiceImpl implements OrderRestService {
         existingOrder.setQty140mtfl(request.getQty140mtfl());
         existingOrder.setQty140mt(request.getQty140mt());
         existingOrder.setQty120mt120fl(request.getQty120mt120fl());
+        existingOrder.setQty120mt140fl(request.getQty120mt140fl());
+
         existingOrder.setQty120mt220fl(request.getQty120mt220fl());
         existingOrder.setQty220mt120fl(request.getQty220mt120fl());
         existingOrder.setQty220mt220fl(request.getQty220mt220fl());

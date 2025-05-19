@@ -37,6 +37,7 @@ public class OrderDetailResponseDTO {
     private Integer qty140mt;
     private Integer qty120mt120fl;
     private Integer qty120mt220fl;
+    private Integer qty120mt140fl;
     private Integer qty220mt120fl;
     private Integer qty220mt220fl;
     private Integer qtyCh120fl;

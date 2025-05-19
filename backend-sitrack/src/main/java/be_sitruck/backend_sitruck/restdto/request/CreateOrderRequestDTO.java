@@ -1,5 +1,6 @@
 package be_sitruck.backend_sitruck.restdto.request;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.util.Date;
@@ -36,4 +37,5 @@ public class CreateOrderRequestDTO {
     private Integer qtyCh120fl = 0;
     private Integer qtyCh220fl = 0;
     private Integer qtyCh140fl = 0;
+    private Integer qty120mt140fl = 0;
 }

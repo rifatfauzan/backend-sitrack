@@ -94,7 +94,7 @@ public class Truck {
     private String vehicleGroup;
 
     @Column(name = "Vehicle_Commision")
-    private int vehicleCommission;
+    private Integer vehicleCommission;
     
     @Column(name = "Inserted_By", length = 20)
     private String insertedBy;
