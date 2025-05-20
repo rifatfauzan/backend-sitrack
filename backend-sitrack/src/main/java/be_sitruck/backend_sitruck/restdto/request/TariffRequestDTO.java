@@ -14,6 +14,9 @@ public class TariffRequestDTO {
     @NotBlank(message = "Chassis size tidak boleh kosong.")
     private int chassisSize;
 
+    @NotBlank(message = "Container Type tidak boleh kosong.")
+    private String containerType;
+
     @NotBlank(message = "Move type tidak boleh kosong.")
     private String moveType;
 

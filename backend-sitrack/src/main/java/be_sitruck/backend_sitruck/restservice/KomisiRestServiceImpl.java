@@ -8,13 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import be_sitruck.backend_sitruck.model.Komisi;
-import be_sitruck.backend_sitruck.model.Order;
+import be_sitruck.backend_sitruck.model.Spj;
 import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.repository.KomisiDb;
+import be_sitruck.backend_sitruck.repository.SpjDb;
 import be_sitruck.backend_sitruck.repository.TruckDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateKomisiRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.CreateKomisiResponseDTO;
-import be_sitruck.backend_sitruck.restdto.response.CreateSopirResponseDTO;
 import be_sitruck.backend_sitruck.security.jwt.JwtUtils;
 
 @Service
@@ -28,6 +28,9 @@ public class KomisiRestServiceImpl implements KomisiRestService {
 
     @Autowired
     private KomisiDb komisiDb;
+
+    @Autowired
+    private SpjDb spjDb;
 
     @Override
     public CreateKomisiResponseDTO addKomisi(CreateKomisiRequestDTO requestDTO) {
@@ -78,6 +81,13 @@ public class KomisiRestServiceImpl implements KomisiRestService {
         existingKomisi.setCommissionFee(requestDTO.getCommissionFee());
         existingKomisi.setLocation(requestDTO.getLocation().toUpperCase());
         existingKomisi.setTruckCommission(requestDTO.getTruckCommission());
+
+        List<Spj> spjList = spjDb.findByVehicleAndCustomer_CityDestination(existingKomisi.getTruck(), existingKomisi.getLocation());
+        for (Spj spj : spjList) {
+            spj.setCommission(existingKomisi.getCommissionFee() + existingKomisi.getTruckCommission());
+            spjDb.save(spj);
+        }
+
         existingKomisi.setTruck(truckDb.findById(requestDTO.getTruckId()).orElseThrow(() -> new RuntimeException("Truck not found")));
         existingKomisi.setUpdatedBy(jwtUtils.getCurrentUsername());
         existingKomisi.setUpdatedDate(new Date());
