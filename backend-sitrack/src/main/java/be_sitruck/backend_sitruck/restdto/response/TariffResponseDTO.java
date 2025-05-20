@@ -9,6 +9,7 @@ public class TariffResponseDTO {
     private String tariffId;
     private String customerId;
     private int chassisSize;
+    private String containerType;
     private String moveType;
     private int stdTariff;
     private int insurance;
