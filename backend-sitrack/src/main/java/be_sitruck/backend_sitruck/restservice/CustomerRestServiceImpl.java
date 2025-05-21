@@ -11,8 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import be_sitruck.backend_sitruck.model.Customer;
+import be_sitruck.backend_sitruck.model.Komisi;
+import be_sitruck.backend_sitruck.model.Spj;
 import be_sitruck.backend_sitruck.model.Tariff;
 import be_sitruck.backend_sitruck.repository.CustomerDb;
+import be_sitruck.backend_sitruck.repository.KomisiDb;
+import be_sitruck.backend_sitruck.repository.SpjDb;
 import be_sitruck.backend_sitruck.repository.TariffDb;
 import be_sitruck.backend_sitruck.restdto.request.CreateCustomerRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.TariffRequestDTO;
@@ -31,6 +35,12 @@ public class CustomerRestServiceImpl implements CustomerRestService{
     private TariffDb tariffDb;
 
     @Autowired
+    private SpjDb spjDb;
+
+    @Autowired
+    private KomisiDb komisiDb;
+
+    @Autowired
     private JwtUtils jwtUtils;
 
     private String generateCustomerId() {
@@ -45,8 +55,8 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         }
     }    
 
-    private String generateTariffId(String customerId, int chassisSize, String moveType) {
-        return customerId + "-" + chassisSize + "-" + moveType;
+    private String generateTariffId(String customerId, int chassisSize, String containerType, String moveType) {
+        return customerId + "-" + chassisSize + "-" + containerType + "-" + moveType;
     }
 
     @Override
@@ -98,7 +108,6 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customer.setCityOrigin(customerDTO.getCityOrigin().toUpperCase());
         customer.setCityDestination(customerDTO.getCityDestination().toUpperCase());
         customer.setCommodity(customerDTO.getCommodity().toUpperCase());
-        customer.setCommission(customerDTO.getCommission());
         customer.setTariffs(new ArrayList<>());
         customer.setInsertedBy(currentUser);
         customer.setInsertedDate(new Date());
@@ -133,8 +142,17 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customer.setContractNo(customerDTO.getContractNo());
         customer.setCityOrigin(customerDTO.getCityOrigin().toUpperCase());
         customer.setCityDestination(customerDTO.getCityDestination().toUpperCase());
+
+        List<Spj> spjList = spjDb.findByCustomer(customer);
+        for (Spj spj : spjList) {
+            Komisi komisi = komisiDb.findByTruck_VehicleIdAndLocation(spj.getVehicle().getVehicleId(), customer.getCityDestination().toUpperCase());
+            if (komisi != null) {
+                spj.setCommission(komisi.getCommissionFee() + komisi.getTruckCommission());
+                spjDb.save(spj);
+            }
+        }
+
         customer.setCommodity(customerDTO.getCommodity().toUpperCase());
-        customer.setCommission(customerDTO.getCommission());
         customer.setUpdatedBy(currentUser);
         customer.setUpdatedDate(new Date());
 
@@ -147,11 +165,12 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             Set<String> seenCombinations = new HashSet<>();
             for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
                 int chassisSize = tariffDTO.getChassisSize();
+                String containerType = tariffDTO.getContainerType().toUpperCase();
                 String moveTypeUpper = tariffDTO.getMoveType().toUpperCase();
-                String combinationKey = chassisSize + "-" + moveTypeUpper;
+                String combinationKey = chassisSize + "-" + containerType + "-" + moveTypeUpper;
 
                 if (!seenCombinations.add(combinationKey)) {
-                    throw new RuntimeException("Kombinasi chasis size '" + chassisSize + "' dan move type '" + moveTypeUpper + "' tidak boleh duplikat.");
+                    throw new RuntimeException("Kombinasi chassis size '" + chassisSize + "', container type '" + containerType + "', dan move type '" + moveTypeUpper + "' tidak boleh duplikat.");
                 }
             }
     
@@ -159,9 +178,10 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             List<Tariff> newTariffs = new ArrayList<>();
             for (TariffRequestDTO tariffDTO : customerDTO.getTariffs()) {
                 Tariff newTariff = new Tariff();
-                newTariff.setTariffId(generateTariffId(customer.getId(), tariffDTO.getChassisSize(), tariffDTO.getMoveType().toUpperCase()));
+                newTariff.setTariffId(generateTariffId(customer.getId(), tariffDTO.getChassisSize(), tariffDTO.getContainerType(), tariffDTO.getMoveType().toUpperCase()));
                 newTariff.setCustomer(customer);
                 newTariff.setChassisSize(tariffDTO.getChassisSize());
+                newTariff.setContainerType(tariffDTO.getContainerType().toUpperCase());
                 newTariff.setMoveType(tariffDTO.getMoveType().toUpperCase());
                 newTariff.setStdTariff(tariffDTO.getStdTariff());
                 newTariff.setInsurance(tariffDTO.getInsurance());
@@ -194,7 +214,6 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customerDTO.setCityOrigin(customer.getCityOrigin());
         customerDTO.setCityDestination(customer.getCityDestination());
         customerDTO.setCommodity(customer.getCommodity());
-        customerDTO.setCommission(customer.getCommission());
 
         List<TariffResponseDTO> listTariffResponse = new ArrayList<>();
         for (Tariff tariff : customer.getTariffs()) {
@@ -202,6 +221,7 @@ public class CustomerRestServiceImpl implements CustomerRestService{
             tariffResponse.setTariffId(tariff.getTariffId());
             tariffResponse.setCustomerId(tariff.getCustomer().getId());
             tariffResponse.setChassisSize(tariff.getChassisSize());
+            tariffResponse.setContainerType(tariff.getContainerType());
             tariffResponse.setMoveType(tariff.getMoveType());
             tariffResponse.setStdTariff(tariff.getStdTariff());
             tariffResponse.setInsurance(tariff.getInsurance());
