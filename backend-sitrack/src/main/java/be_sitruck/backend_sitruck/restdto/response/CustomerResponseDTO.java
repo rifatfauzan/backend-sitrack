@@ -20,7 +20,6 @@ public class CustomerResponseDTO {
     private String cityOrigin;
     private String cityDestination;
     private String commodity;
-    private int commission;
     private List<TariffResponseDTO> tariffs;
     private String insertedBy;
     private String updatedBy;
