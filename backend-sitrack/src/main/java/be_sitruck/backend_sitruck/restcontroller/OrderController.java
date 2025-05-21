@@ -170,6 +170,25 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/destination")
+    public ResponseEntity<?> getDestinationDistribution(@RequestParam("year") int year) {
+        BaseResponseDTO<List<Map<String, Object>>> response = new BaseResponseDTO<>();
+
+        try {
+            List<Map<String, Object>> data = orderRestService.getDestinationDistribution(year);
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Statistik distribusi tujuan berhasil diambil untuk tahun " + year);
+            response.setTimestamp(new Date());
+            response.setData(data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setMessage("Gagal mengambil data distribusi tujuan: " + e.getMessage());
+            response.setTimestamp(new Date());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 
 
 }

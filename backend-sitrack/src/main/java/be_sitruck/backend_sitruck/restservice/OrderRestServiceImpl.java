@@ -359,6 +359,22 @@ public class OrderRestServiceImpl implements OrderRestService {
         return result;
     }
 
+    @Override
+    public List<Map<String,Object>> getDestinationDistribution(int year) {
+        List<Object[]> rows = orderDb.countByCityDestination(year);
+    
+        return rows.stream()
+          .map(r -> {
+            String cityDest = (String) r[0];
+            Long   cnt      = (Long)   r[1];
+            return Map.<String,Object>of(
+              "name",  cityDest,
+              "value", cnt.intValue()
+            );
+          })
+          .collect(Collectors.toList());
+      }
+
 
 
 }
