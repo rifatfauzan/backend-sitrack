@@ -1,6 +1,7 @@
 package be_sitruck.backend_sitruck.restservice;
 
 import java.util.List;
+import java.util.Map;
 
 import be_sitruck.backend_sitruck.restdto.request.ApproveOrderRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateOrderRequestDTO;
@@ -14,4 +15,5 @@ public interface OrderRestService {
     CreateOrderResponseDTO approveOrder(ApproveOrderRequestDTO request);
     CreateOrderRequestDTO updateOrder (String orderId, CreateOrderRequestDTO request);
     void markOrderAsDone(String orderId);
+    List<Map<String, Object>> getMonthlyOrderStats(int year);
 }

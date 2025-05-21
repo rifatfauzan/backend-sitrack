@@ -2,6 +2,7 @@ package be_sitruck.backend_sitruck.restcontroller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -149,5 +150,26 @@ public class OrderController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/chart")
+    public ResponseEntity<?> getOrderChartByYear(@RequestParam("year") int year) {
+        BaseResponseDTO<List<Map<String, Object>>> response = new BaseResponseDTO<>();
+
+        try {
+            List<Map<String, Object>> data = orderRestService.getMonthlyOrderStats(year);
+            response.setStatus(HttpStatus.OK.value());
+            response.setMessage("Statistik order berhasil diambil untuk tahun " + year);
+            response.setTimestamp(new Date());
+            response.setData(data);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.setMessage("Gagal mengambil data chart: " + e.getMessage());
+            response.setTimestamp(new Date());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
 
 }

@@ -16,6 +16,6 @@ public interface OrderDb extends JpaRepository<Order, String> {
     String findTopByOrderIdOrderByOrderIdDesc();
 
     Order findTopByOrderIdStartingWithOrderByOrderIdDesc(String prefix);
-
+    List<Order> findByOrderStatus(int orderStatus);
     List<Order> findByOrderDateBetween(Date fromDate, Date endDate);
 }
