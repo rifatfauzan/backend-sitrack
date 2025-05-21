@@ -167,7 +167,6 @@ public class TruckRestServiceImpl implements TruckRestService {
             truck.getVehicleNumber(),
             truck.getVehicleFuelConsumption(),
             truck.getVehicleGroup(),
-            truck.getVehicleCommission(),
             truck.getInsertedBy(),
             truck.getInsertedDate(),
             truck.getUpdatedBy(),
@@ -263,7 +262,7 @@ public class TruckRestServiceImpl implements TruckRestService {
         truck.setVehicleType(request.getVehicleType());
         truck.setDivision(request.getDivision());
         truck.setVehicleNumber(request.getVehicleNumber());
-        truck.setRowStatus("A");
+        truck.setRowStatus(request.getRowStatus());
         truck.setDept(request.getDept());
         truck.setRecordStatus(request.getRecordStatus());
         truck.setVehicleFuelConsumption(request.getVehicleFuelConsumption() != null ? request.getVehicleFuelConsumption() : 0.0);
