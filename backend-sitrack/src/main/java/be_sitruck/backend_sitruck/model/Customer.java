@@ -40,9 +40,6 @@ public class Customer {
     @Column(name = "commodity", length = 50)
     private String commodity;
 
-    @Column(name = "commission", nullable = false)
-    private int commission;
-
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Tariff> tariffs;
 
