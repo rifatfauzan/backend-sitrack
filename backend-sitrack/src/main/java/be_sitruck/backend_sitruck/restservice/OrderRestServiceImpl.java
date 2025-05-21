@@ -1,8 +1,13 @@
 package be_sitruck.backend_sitruck.restservice;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -317,6 +322,59 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setUpdatedDate(new Date());
     
         orderDb.save(order);
-    }    
+    }
+
+    @Override
+    public List<Map<String, Object>> getMonthlyOrderStats(int year) {
+        List<Order> doneOrders = orderDb.findByOrderStatus(4); // 4 = Done
+
+        String[] monthNames = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+
+        int[] counts = new int[12];
+
+        for (Order order : doneOrders) {
+            if (order.getOrderDate() != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(order.getOrderDate());
+
+                int orderYear = cal.get(Calendar.YEAR);
+                int orderMonth = cal.get(Calendar.MONTH);
+
+                if (orderYear == year) {
+                    counts[orderMonth]++;
+                }
+            }
+        }
+
+        // Format hasil menjadi list of map
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            Map<String, Object> entry = new HashMap<>();
+            entry.put("month", monthNames[i]);
+            entry.put("orderCount", counts[i]);
+            result.add(entry);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<Map<String,Object>> getDestinationDistribution(int year) {
+        List<Object[]> rows = orderDb.countByCityDestination(year);
+    
+        return rows.stream()
+          .map(r -> {
+            String cityDest = (String) r[0];
+            Long   cnt      = (Long)   r[1];
+            return Map.<String,Object>of(
+              "name",  cityDest,
+              "value", cnt.intValue()
+            );
+          })
+          .collect(Collectors.toList());
+      }
+
+
 
 }

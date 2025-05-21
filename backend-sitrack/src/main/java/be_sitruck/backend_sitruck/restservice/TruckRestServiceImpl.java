@@ -298,4 +298,10 @@ public class TruckRestServiceImpl implements TruckRestService {
             if (updated) truckDb.save(truck);
         }
     }
+
+    // Menghitung jumlah truck yang ada
+    @Override
+    public long countTrucks(){
+        return truckDb.count();
+    }
 }

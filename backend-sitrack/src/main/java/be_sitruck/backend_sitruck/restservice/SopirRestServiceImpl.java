@@ -241,7 +241,11 @@ public class SopirRestServiceImpl implements SopirRestService {
         }
     }
 
-
+    //menghitung jumlah sopir yang ada
+    @Override
+    public long countSopir(){
+        return sopirDb.count();
+    }
     
     
     
