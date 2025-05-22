@@ -2,6 +2,7 @@ package be_sitruck.backend_sitruck.restcontroller;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -112,4 +113,25 @@ public class CustomerRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
         }
     }
+
+    @PreAuthorize("hasAnyAuthority('Admin', 'Supervisor', 'Manager', 'Operasional')")
+    @GetMapping("/stats/{year}")
+    public ResponseEntity<?> getCustomerTransactionStats(@PathVariable("year") int year) {
+        var baseResponseDTO = new BaseResponseDTO<List<Map<String, Object>>>();
+        try {
+            List<Map<String, Object>> stats = customerRestService.getCustomerTransactionStats(year);
+            baseResponseDTO.setStatus(HttpStatus.OK.value());
+            baseResponseDTO.setMessage("Statistik transaksi customer berhasil diambil untuk tahun " + year);
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(stats);
+            return ResponseEntity.ok(baseResponseDTO);
+        } catch (Exception e) {
+            baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            baseResponseDTO.setMessage("Gagal mengambil statistik: " + e.getMessage());
+            baseResponseDTO.setTimestamp(new Date());
+            baseResponseDTO.setData(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
+        }
+    }
+
 }
