@@ -1,10 +1,14 @@
 package be_sitruck.backend_sitruck.util;
 
 import be_sitruck.backend_sitruck.model.*;
+import be_sitruck.backend_sitruck.repository.AssetDb;
+
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.PdfPCell;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
@@ -13,6 +17,9 @@ import java.util.List;
 
 @Component
 public class PDFExporter {
+
+    @Autowired
+    private AssetDb assetDb;
 
     private void addReportHeader(Document document, String reportTitle, String startDate, String endDate) throws DocumentException {
         PdfPTable headerTable = new PdfPTable(2);
@@ -293,4 +300,60 @@ public class PDFExporter {
 
         return out.toByteArray();
     }
-} 
+
+    public byte[] exportReportTruckToPDF(ReportTruck report) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Vehicle Maintenance Report", "", "");
+            PdfPTable table = new PdfPTable(10);
+            table.setWidthPercentage(100);
+
+            table.addCell("Report ID");
+            table.addCell("Date");
+            table.addCell("Start Repair");
+            table.addCell("Finish Repair");
+            table.addCell("Vehicle ID");
+            table.addCell("Vehicle Brand");
+            table.addCell("Vehicle Type");
+            table.addCell("Vehicle Plate No.");
+            table.addCell("Description");
+            table.addCell("Assets Used (Quantity)");
+
+            table.addCell(report.getReportTruckId());
+            table.addCell(report.getDate().toString());
+            table.addCell(report.getStartRepair().toString());
+            table.addCell(report.getFinishRepair().toString());
+            table.addCell(report.getVehicleId());
+            table.addCell(report.getVehicleBrand());
+            table.addCell(report.getVehicleType());
+            table.addCell(report.getVehiclePlateNo());
+            table.addCell(report.getDescription());
+
+            StringBuilder assets = new StringBuilder();
+            for (ReportTruckAsset assetUsed : report.getAssets()) {
+                String assetName = "-";
+                if (assetUsed.getAssetId() != null) {
+                    Asset asset = assetDb.findByAssetId(assetUsed.getAssetId());
+                    if (asset != null) {
+                        assetName = asset.getJenisAsset();
+                    }
+                }
+                assets.append(assetName).append(" (").append(assetUsed.getQuantity()).append(")").append(", ");
+            }
+            if (assets.length() > 0) {
+                assets.setLength(assets.length() - 2);
+            }
+            table.addCell(assets.toString());
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+}
