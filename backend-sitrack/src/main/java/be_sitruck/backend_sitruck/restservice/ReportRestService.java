@@ -13,4 +13,5 @@ public interface ReportRestService {
     List<Order> getOrdersByDateRange(Date fromDate, Date endDate);
     List<Spj> getSpjByDateRange(Date fromDate, Date endDate);
     Object generateReport(ReportFilterRequestDTO filter);
+    List<Komisi> getAllKomisi();
 } 

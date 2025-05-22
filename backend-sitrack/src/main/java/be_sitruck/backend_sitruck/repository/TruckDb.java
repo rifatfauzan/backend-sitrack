@@ -12,6 +12,9 @@ import org.springframework.stereotype.Repository;
 public interface TruckDb extends JpaRepository<Truck, String> {
     Truck findByVehicleId(String vechicleId);
 
+    boolean existsByVehicleBizLicenseNo(String bizLicenseNo);
+    boolean existsByVehicleDispensationNo(String dispensationNo);
+    boolean existsByVehicleNumber(String vehicleNumber);
     boolean existsByVehiclePlateNo(String vehiclePlateNo);
     boolean existsByVehicleKIRNo(String vehicleKIRNo);
     @Query(value = "SELECT vehicle_id FROM truck ORDER BY CAST(SUBSTRING(vehicle_id, LENGTH(vehicle_id) - 4, 5) AS INTEGER) DESC LIMIT 1", nativeQuery = true)

@@ -1,8 +1,10 @@
 package be_sitruck.backend_sitruck.util;
 
 import be_sitruck.backend_sitruck.model.*;
+import be_sitruck.backend_sitruck.repository.AssetDb;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
@@ -12,6 +14,9 @@ import java.util.List;
 
 @Component
 public class ExcelExporter {
+
+    @Autowired
+    private AssetDb assetDb;
 
     public byte[] exportCustomersToExcel(List<Customer> customers, String reportTitle, String period, String logoPath) {
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -301,4 +306,94 @@ public class ExcelExporter {
             throw new RuntimeException("Failed to export orders to Excel", e);
         }
     }
-} 
+
+    public byte[] exportReportTruckToExcel(ReportTruck reportTruck, String reportTitle, String period, String logoPath) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Vehicle Maintenance Report");
+            String companyInfo = "PT. GLORIOUS INTERBUANA\nKawasan Berikat Nusatara Marunda\nJl. Medan No. 4 Kav. C 18/2\nJakarta Utara - Indonesia";
+            String[] columns = {"Report Truck ID", "Date", "Start Repair", "Finish Repair", "Vehicle ID", "Vehicle Plate No.", "Vehicle Type", "Vehicle Brand", "Description", "Assets Used (Quantity)"};
+            int startRow = addExcelHeader(workbook, sheet, logoPath, companyInfo, reportTitle, period, columns.length);
+            Row headerRow = sheet.createRow(startRow);
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+            }
+            int rowNum = startRow + 1;
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(reportTruck.getReportTruckId());
+            row.createCell(1).setCellValue(reportTruck.getDate().toString());
+            row.createCell(2).setCellValue(reportTruck.getStartRepair().toString());
+            row.createCell(3).setCellValue(reportTruck.getFinishRepair().toString());
+            row.createCell(4).setCellValue(reportTruck.getVehicleId());
+            row.createCell(5).setCellValue(reportTruck.getVehiclePlateNo());
+            row.createCell(6).setCellValue(reportTruck.getVehicleType());
+            row.createCell(7).setCellValue(reportTruck.getVehicleBrand());
+            row.createCell(8).setCellValue(reportTruck.getDescription());
+            StringBuilder assets = new StringBuilder();
+            for (ReportTruckAsset asset : reportTruck.getAssets()) {
+                String assetName = "-";
+                if (asset.getAssetId() != null) {
+                    be_sitruck.backend_sitruck.model.Asset assetObj = assetDb.findByAssetId(asset.getAssetId());
+                    if (assetObj != null) {
+                        assetName = assetObj.getJenisAsset();
+                    }
+                }
+                assets.append(assetName).append(" (").append(asset.getQuantity()).append(")").append(", ");
+            }
+            if (assets.length() > 0) {
+                assets.setLength(assets.length() - 2);
+            }
+            row.createCell(9).setCellValue(assets.toString());
+
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export Vehicle Maintenance Report to Excel", e);
+        }
+    }
+
+    public byte[] exportReportTruckToExcel(ReportTruck reportTruck) {
+        return exportReportTruckToExcel(reportTruck, "Vehicle Maintenance Report", "", "src/main/resources/static/GIB.png");
+    }
+
+    public byte[] exportCommissionsToExcel(List<Komisi> komisiList, String reportTitle, String period, String logoPath) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Commissions");
+            String companyInfo = "PT. GLORIOUS INTERBUANA\nKawasan Berikat Nusatara Marunda\nJl. Medan No. 4 Kav. C 18/2\nJakarta Utara - Indonesia";
+            String[] columns = {"Commission ID", "Truck ID", "Vehicle Name", "Location", "Truck Commission Fee", "Commission Fee"};
+            int startRow = addExcelHeader(workbook, sheet, logoPath, companyInfo, reportTitle, period, columns.length);
+            Row headerRow = sheet.createRow(startRow);
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+            }
+            int rowNum = startRow + 1;
+            for (Komisi komisi : komisiList) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(komisi.getKomisiId());
+                row.createCell(1).setCellValue(komisi.getTruck().getVehicleId());
+                row.createCell(2).setCellValue(komisi.getTruck().getVehicleBrand());
+                row.createCell(3).setCellValue(komisi.getLocation());
+                row.createCell(4).setCellValue(komisi.getTruckCommission());
+                row.createCell(5).setCellValue(komisi.getCommissionFee());
+            }
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export drivers to Excel", e);
+        }
+    }
+
+    public byte[] exportCommissionsToExcel(List<Komisi> komisiList) {
+        return exportCommissionsToExcel(komisiList, "Commissions Report", "", "src/main/resources/static/GIB.png");
+    }
+}

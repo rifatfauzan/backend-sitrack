@@ -14,4 +14,5 @@ public interface KomisiDb extends JpaRepository<Komisi, String> {
     Komisi findByTruck_VehicleIdAndLocation(String vehicleId, String location);
 
     
+    
 }

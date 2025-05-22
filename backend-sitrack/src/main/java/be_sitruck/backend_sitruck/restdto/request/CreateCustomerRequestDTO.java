@@ -34,7 +34,4 @@ public class CreateCustomerRequestDTO {
 
     @Size(max = 50, message = "Komoditas maksimal berisi 50 karakter.")
     private String commodity;
-
-    @NotBlank(message = "Komisi tidak boleh kosong.")
-    private int commission;
 }
