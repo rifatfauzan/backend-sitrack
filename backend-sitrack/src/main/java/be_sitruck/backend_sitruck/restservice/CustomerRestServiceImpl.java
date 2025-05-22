@@ -1,9 +1,12 @@
 package be_sitruck.backend_sitruck.restservice;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import be_sitruck.backend_sitruck.model.Customer;
+import be_sitruck.backend_sitruck.model.Order;
+import be_sitruck.backend_sitruck.model.Tariff;
+import be_sitruck.backend_sitruck.repository.CustomerDb;
+import be_sitruck.backend_sitruck.repository.OrderDb;
 import be_sitruck.backend_sitruck.model.Komisi;
 import be_sitruck.backend_sitruck.model.Spj;
 import be_sitruck.backend_sitruck.model.Tariff;
@@ -35,6 +42,9 @@ public class CustomerRestServiceImpl implements CustomerRestService{
     private TariffDb tariffDb;
 
     @Autowired
+    private OrderDb orderDb;
+    
+    @Autowired    
     private SpjDb spjDb;
 
     @Autowired
@@ -239,5 +249,41 @@ public class CustomerRestServiceImpl implements CustomerRestService{
         customerDTO.setUpdatedDate(customer.getUpdatedDate());
 
         return customerDTO;
+    }
+
+    // Tambahkan di CustomerRestServiceImpl.java
+
+    @Override
+    public List<Map<String, Object>> getCustomerTransactionStats(int year) {
+        List<Order> doneOrders = orderDb.findByOrderStatus(4); // 4 = Done
+
+        Map<String, Integer> customerCountMap = new HashMap<>();
+
+        for (Order order : doneOrders) {
+            if (order.getOrderDate() != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(order.getOrderDate());
+                if (cal.get(Calendar.YEAR) == year) {
+                    String customerName = order.getCustomer().getName();
+                    customerCountMap.put(customerName, customerCountMap.getOrDefault(customerName, 0) + 1);
+                }
+            }
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (var entry : customerCountMap.entrySet()) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", entry.getKey());
+            map.put("value", entry.getValue());
+            result.add(map);
+        }
+
+        return result;
+    }
+
+    // Menghitung customer yang ada
+    @Override
+    public long countCustomer(){
+        return customerDb.count();
     }
 }
