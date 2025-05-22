@@ -13,4 +13,5 @@ public interface ChassisRestService {
     CreateChassisRequestDTO getChassisById(String chassisId);
     CreateChassisResponseDTO updateChassis(String chassisId, CreateChassisRequestDTO updateRequest);
     void checkExpiringChassis();
+    long countChassis();
 }

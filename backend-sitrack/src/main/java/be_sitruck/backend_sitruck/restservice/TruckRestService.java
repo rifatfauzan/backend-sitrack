@@ -15,4 +15,5 @@ public interface TruckRestService {
     List<CreateTruckRequestDTO> getAllTruck();
     CreateTruckRequestDTO getTruckById(String truckId);
     void checkExpiringTrucks();
+    long countTrucks();
 }

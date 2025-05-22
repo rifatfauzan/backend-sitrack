@@ -3,7 +3,11 @@ package be_sitruck.backend_sitruck.repository;
 import be_sitruck.backend_sitruck.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.Date;
+import java.util.List;
 
 @Repository
 public interface OrderDb extends JpaRepository<Order, String> {
@@ -13,4 +17,9 @@ public interface OrderDb extends JpaRepository<Order, String> {
     String findTopByOrderIdOrderByOrderIdDesc();
 
     Order findTopByOrderIdStartingWithOrderByOrderIdDesc(String prefix);
+    List<Order> findByOrderStatus(int orderStatus);
+    List<Order> findByOrderDateBetween(Date fromDate, Date endDate);
+
+    @Query(value = "SELECT o.customer.cityDestination, COUNT(o) FROM Order o WHERE o.orderStatus = 4 AND YEAR(o.orderDate) = :year GROUP BY o.customer.cityDestination")
+    List<Object[]> countByCityDestination(@Param("year") int year);
 }
