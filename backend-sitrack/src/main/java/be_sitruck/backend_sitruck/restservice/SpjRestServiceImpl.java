@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 
 import be_sitruck.backend_sitruck.model.Chassis;
 import be_sitruck.backend_sitruck.model.Customer;
+import be_sitruck.backend_sitruck.model.Komisi;
 import be_sitruck.backend_sitruck.model.Order;
 import be_sitruck.backend_sitruck.model.SopirModel;
 import be_sitruck.backend_sitruck.model.Spj;
 import be_sitruck.backend_sitruck.model.Truck;
 import be_sitruck.backend_sitruck.repository.ChassisDb;
+import be_sitruck.backend_sitruck.repository.KomisiDb;
 import be_sitruck.backend_sitruck.repository.OrderDb;
 import be_sitruck.backend_sitruck.repository.SopirDb;
 import be_sitruck.backend_sitruck.repository.SpjDb;
@@ -48,6 +50,9 @@ public class SpjRestServiceImpl implements SpjRestService {
     private TruckDb truckDb;
 
     @Autowired
+    private KomisiDb komisiDb;
+
+    @Autowired
     private NotificationRestService notificationRestService;
 
     @Autowired
@@ -69,6 +74,7 @@ public class SpjRestServiceImpl implements SpjRestService {
         Order order = orderDb.findById(orderId)
             .orElseThrow(() -> new ValidationException("Order tidak ditemukan!"));
 
+        String moveType = order.getMoveType().toUpperCase();
         List<Spj> spjList = spjDb.findByOrderAndStatusIn(order, List.of(1, 3, 4));
 
         int usedChassis20 = (int) spjList.stream()
@@ -86,9 +92,13 @@ public class SpjRestServiceImpl implements SpjRestService {
         });
 
         Map<String, Integer> available = new HashMap<>();
-
-        available.put("chassis20", (order.getQtyChassis20() != null ? order.getQtyChassis20() : 0) - usedChassis20);
-        available.put("chassis40", (order.getQtyChassis40() != null ? order.getQtyChassis40() : 0) - usedChassis40);
+        if (moveType.equals("REPO")) {
+            available.put("chassis20", order.getQtyChassis20() != null ? order.getQtyChassis20() : 0);
+            available.put("chassis40", order.getQtyChassis40() != null ? order.getQtyChassis40() : 0);
+        } else {
+            available.put("chassis20", (order.getQtyChassis20() != null ? order.getQtyChassis20() : 0) - usedChassis20);
+            available.put("chassis40", (order.getQtyChassis40() != null ? order.getQtyChassis40() : 0) - usedChassis40);
+        }
 
         available.put("120mtfl", (order.getQty120mtfl() != null ? order.getQty120mtfl() : 0) - usedContainers.getOrDefault("120mtfl", 0));
         available.put("120mt", (order.getQty120mt() != null ? order.getQty120mt() : 0) - usedContainers.getOrDefault("120mt", 0));
@@ -176,6 +186,35 @@ public class SpjRestServiceImpl implements SpjRestService {
         Truck vehicle = truckDb.findById(spjDTO.getVehicleId()).orElse(null);
         Chassis chassis = chassisDb.findById(spjDTO.getChassisId()).orElse(null);
         SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
+        String moveType = order.getMoveType().toUpperCase();
+
+        List<Spj> activeSpjList = spjDb.findByStatusIn(List.of(1, 3, 4));
+        
+        if (moveType.equals("REPO")) {
+            for (Spj spj : activeSpjList) {
+                boolean sameDriver = spj.getDriver().getDriverId().equals(driver.getDriverId());
+                boolean sameTruck = spj.getVehicle().getVehicleId().equals(vehicle.getVehicleId());
+                boolean sameChassis = spj.getChassis().getChassisId().equals(chassis.getChassisId());
+                boolean sameCombo = sameDriver && sameTruck && sameChassis;
+                if ((sameDriver || sameTruck || sameChassis) && !sameCombo) {
+                    List<String> conflicts = new ArrayList<>();
+                    if (sameDriver) conflicts.add("sopir");
+                    if (sameTruck) conflicts.add("truck");
+                    if (sameChassis) conflicts.add("chassis");
+                    String conflictStr = String.join(" dan ", conflicts);
+                    throw new ValidationException(
+                        String.format("Kombinasi %s yang dipilih sudah digunakan di SPJ lain dengan kombinasi berbeda. " +
+                        "Untuk move type REPO, sopir, truck, dan chassis hanya boleh digunakan bersamaan jika ketiganya sama persis.", conflictStr)
+                    );
+                }
+            }
+        }
+
+        String destination = customer.getCityDestination().toUpperCase();
+        Komisi komisi = komisiDb.findByTruck_VehicleIdAndLocation(vehicle.getVehicleId(), destination);
+        if (komisi == null) {
+            throw new ValidationException("Komisi untuk truck " + vehicle.getVehicleId() + " dan destinasi " + destination + " belum didefinisikan!");
+        }
 
         String spjId = generateSpjId();
 
@@ -191,7 +230,7 @@ public class SpjRestServiceImpl implements SpjRestService {
         spj.setDriver(driver);
         spj.setDateOut(spjDTO.getDateOut());
         spj.setDateIn(spjDTO.getDateIn());
-        spj.setCommission(customer.getCommission());
+        spj.setCommission(komisi.getCommissionFee() + komisi.getTruckCommission());
         spj.setOthersCommission(spjDTO.getOthersCommission());
         spj.setRemarksOperasional(spjDTO.getRemarksOperasional());
         spj.setRemarksSupervisor(spjDTO.getRemarksSupervisor());
@@ -199,20 +238,21 @@ public class SpjRestServiceImpl implements SpjRestService {
         spj.setInsertedBy(currenUser);
         spj.setInsertedDate(new Date());
 
-        if (!"I".equals(vehicle.getRowStatus())) {
-            vehicle.setRowStatus("I");
+        if (moveType.equals("REPO")) {
+            vehicle.setRowStatus("R");
+            chassis.setRowStatus("R");
+            driver.setRowStatus("R");
             truckDb.save(vehicle);
-        }
-        
-        if (!"I".equals(chassis.getRowStatus())) {
-            chassis.setRowStatus("I");
             chassisDb.save(chassis);
-        }
-        
-        if (!"I".equals(driver.getRowStatus())) {
-            driver.setRowStatus("I");
             sopirDb.save(driver);
-        }        
+        } else {
+            vehicle.setRowStatus("H");
+            chassis.setRowStatus("H");
+            driver.setRowStatus("H");
+            truckDb.save(vehicle);
+            chassisDb.save(chassis);
+            sopirDb.save(driver);
+        } 
         
         spjDb.save(spj);
         
@@ -233,29 +273,46 @@ public class SpjRestServiceImpl implements SpjRestService {
         spj.setApprovedBy(currentUser);
         spj.setApprovedDate(new Date());
 
-        if (approveRequestDTO.getStatus() == 2 || approveRequestDTO.getStatus() == 0) {
-            var driver = spj.getDriver();
-            var vehicle = spj.getVehicle();
-            var chassis = spj.getChassis();
+        String moveType = spj.getOrder().getMoveType().toUpperCase();
+        var driver = spj.getDriver();
+        var vehicle = spj.getVehicle();
+        var chassis = spj.getChassis();
 
-            driver.setRowStatus("A");
-            chassis.setRowStatus("A");
-            vehicle.setRowStatus("A");
-
-            sopirDb.save(driver);
-            chassisDb.save(chassis);
-            truckDb.save(vehicle);
+        if (moveType.equals("REPO")) {
+            if (approveRequestDTO.getStatus() == 0) {
+                driver.setRowStatus("A");
+                vehicle.setRowStatus("A");
+                chassis.setRowStatus("A");
+            } else if (approveRequestDTO.getStatus() == 2) {
+                driver.setRowStatus("R");
+                vehicle.setRowStatus("R");
+                chassis.setRowStatus("R");
+            }
+        } else {
+            if (approveRequestDTO.getStatus() == 2 || approveRequestDTO.getStatus() == 0) {
+                driver.setRowStatus("A");
+                vehicle.setRowStatus("A");
+                chassis.setRowStatus("A");
+            }
         }
 
         if (approveRequestDTO.getStatus() == 3) {
+            if (!moveType.equals("REPO")) {
+                vehicle.setRowStatus("I");
+                chassis.setRowStatus("I");
+                driver.setRowStatus("I");
+            }
+
             Order order = spj.getOrder();
             if (!order.getSpjList().contains(spj)) {
                 order.getSpjList().add(spj);
                 orderDb.save(order);
             }
         }
-    
-
+        
+        sopirDb.save(driver);
+        truckDb.save(vehicle);
+        chassisDb.save(chassis);
         spjDb.save(spj);
 
         notificationRestService.createSpjStatusNotification(
@@ -283,9 +340,26 @@ public class SpjRestServiceImpl implements SpjRestService {
         var vehicle = spj.getVehicle();
         var chassis = spj.getChassis();
 
-        driver.setRowStatus("A");
-        chassis.setRowStatus("A");
-        vehicle.setRowStatus("A");
+        String moveType = spj.getOrder().getMoveType().toUpperCase();
+
+        if (moveType.equals("REPO")) {
+            List<Spj> activeRepoSpj = spjDb.findByStatusIn(List.of(1, 3, 4)).stream()
+                .filter(s -> !s.getId().equals(spj.getId()))
+                .filter(s -> s.getDriver().getDriverId().equals(driver.getDriverId()))
+                .filter(s -> s.getVehicle().getVehicleId().equals(vehicle.getVehicleId()))
+                .filter(s -> s.getChassis().getChassisId().equals(chassis.getChassisId()))
+                .toList();
+
+            if (activeRepoSpj.isEmpty()) {
+                driver.setRowStatus("A");
+                chassis.setRowStatus("A");
+                vehicle.setRowStatus("A");
+            }
+        } else {
+            driver.setRowStatus("A");
+            chassis.setRowStatus("A");
+            vehicle.setRowStatus("A");
+        }
 
         sopirDb.save(driver);
         chassisDb.save(chassis);
@@ -298,7 +372,6 @@ public class SpjRestServiceImpl implements SpjRestService {
 
         spjDb.save(spj);
     }
-
     
     private SpjResponseDTO SpjToSpjResponseDTO(Spj spj) {
         var spjResponseDTO = new SpjResponseDTO();
@@ -356,8 +429,35 @@ public class SpjRestServiceImpl implements SpjRestService {
         Truck vehicle = truckDb.findById(spjDTO.getVehicleId()).orElse(null);
         Chassis chassis = chassisDb.findById(spjDTO.getChassisId()).orElse(null);
         SopirModel driver = sopirDb.findById(spjDTO.getDriverId()).orElse(null);
+        String moveType = order.getMoveType().toUpperCase();
 
-        
+        List<Spj> activeSpjList = spjDb.findByStatusIn(List.of(1, 3, 4));
+
+        if (moveType.equals("REPO")) {
+            for (Spj spj : activeSpjList) {
+                boolean sameDriver = spj.getDriver().getDriverId().equals(driver.getDriverId());
+                boolean sameTruck = spj.getVehicle().getVehicleId().equals(vehicle.getVehicleId());
+                boolean sameChassis = spj.getChassis().getChassisId().equals(chassis.getChassisId());
+                boolean sameCombo = sameDriver && sameTruck && sameChassis;
+                if ((sameDriver || sameTruck || sameChassis) && !sameCombo) {
+                    List<String> conflicts = new ArrayList<>();
+                    if (sameDriver) conflicts.add("sopir");
+                    if (sameTruck) conflicts.add("truck");
+                    if (sameChassis) conflicts.add("chassis");
+                    String conflictStr = String.join(" dan ", conflicts);
+                    throw new ValidationException(
+                        String.format("Kombinasi %s yang dipilih sudah digunakan di SPJ lain dengan kombinasi berbeda. " +
+                        "Untuk move type REPO, sopir, truck, dan chassis hanya boleh digunakan bersamaan jika ketiganya sama persis.", conflictStr)
+                    );
+                }
+            }
+        }
+
+        Komisi komisi = komisiDb.findByTruck_VehicleIdAndLocation(vehicle.getVehicleId(), customer.getCityDestination().toUpperCase());
+        if (komisi == null) {
+            throw new ValidationException("Komisi untuk truck " + vehicle.getVehicleId() + " dan destinasi " + customer.getCityDestination() + " belum didefinisikan!");
+        }
+
         // Sebelum di Update 
         Spj currentSpj = spjDb.findById(spjId).orElse(null);
         if (currentSpj == null) {
@@ -377,14 +477,14 @@ public class SpjRestServiceImpl implements SpjRestService {
         currentSpj.setCustomer(customer);
 
         if (currentVehicle.getRowStatus().equals("I") && !currentVehicle.getVehicleId().equals(spjDTO.getVehicleId())) {
-            currentVehicle.setRowStatus("A");
+            currentVehicle.setRowStatus("H");
             currentSpj.setVehicle(vehicle);
         }
         currentSpj.setVehicle(vehicle);
         currentSpj.setChassisSize(spjDTO.getChassisSize());
 
         if (currentChassis.getRowStatus().equals("I") && !currentChassis.getChassisId().equals(spjDTO.getChassisId())) {
-            currentChassis.setRowStatus("A");
+            currentChassis.setRowStatus("H");
             currentSpj.setChassis(chassis);
         }
         currentSpj.setChassis(chassis);
@@ -392,33 +492,34 @@ public class SpjRestServiceImpl implements SpjRestService {
         currentSpj.setContainerQty(spjDTO.getContainerQty());
 
         if(currentDriver.getRowStatus().equals("I") && !currentDriver.getDriverId().equals(spjDTO.getDriverId())) {
-            currentDriver.setRowStatus("A");
+            currentDriver.setRowStatus("H");
             currentSpj.setDriver(driver);
         }
         currentSpj.setDriver(driver);
         currentSpj.setDateOut(spjDTO.getDateOut());
         currentSpj.setDateIn(spjDTO.getDateIn());
-        currentSpj.setCommission(customer.getCommission());
+        currentSpj.setCommission(komisi.getCommissionFee() + komisi.getTruckCommission());
         currentSpj.setOthersCommission(spjDTO.getOthersCommission());
         currentSpj.setRemarksOperasional(spjDTO.getRemarksOperasional());
         currentSpj.setStatus(1);
         currentSpj.setUpdatedBy(currentUser);
         currentSpj.setUpdatedDate(new Date());
         
-        if (!"I".equals(vehicle.getRowStatus())) {
-            vehicle.setRowStatus("I");
+        if (moveType.equals("REPO")) {
+            vehicle.setRowStatus("R");
+            chassis.setRowStatus("R");
+            driver.setRowStatus("R");
             truckDb.save(vehicle);
-        }
-
-        if (!"I".equals(chassis.getRowStatus())) {
-            chassis.setRowStatus("I");
             chassisDb.save(chassis);
-        }
-        
-        if (!"I".equals(driver.getRowStatus())) {
-            driver.setRowStatus("I");
             sopirDb.save(driver);
-        }        
+        } else {
+            vehicle.setRowStatus("H");
+            chassis.setRowStatus("H");
+            driver.setRowStatus("H");
+            truckDb.save(vehicle);
+            chassisDb.save(chassis);
+            sopirDb.save(driver);
+        }
 
         spjDb.save(currentSpj);
 

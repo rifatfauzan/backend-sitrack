@@ -132,7 +132,7 @@ public class TruckRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(baseResponseDTO);
         } catch (Exception e) {
             baseResponseDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            baseResponseDTO.setMessage("Terjadi kesalahan saat memperbarui truck");
+            baseResponseDTO.setMessage(e.getMessage());
             baseResponseDTO.setTimestamp(new Date());
             baseResponseDTO.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
