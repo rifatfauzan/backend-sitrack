@@ -91,8 +91,6 @@ public class UpdateTruckRequestDTO {
 
     private String vehicleGroup;
 
-    private int vehicleCommission;
-
     private String insertedBy;
     private Date insertedDate;
     private String updatedBy;

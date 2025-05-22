@@ -19,8 +19,11 @@ public class Tariff {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "chassis_size", nullable = false)
     private int chassisSize;
+
+    @Column(name = "container_type", nullable = false)
+    private String containerType;
 
     @Column(name = "move_type", nullable = false)
     private String moveType;
