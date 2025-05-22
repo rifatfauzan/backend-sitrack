@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import be_sitruck.backend_sitruck.model.Spj;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,11 @@ public class OrderDetailResponseDTO {
     private Integer qtyCh120fl;
     private Integer qtyCh220fl;
     private Integer qtyCh140fl;
+
+    private Integer qty120mt140fl;
+    private Integer qty145mt;
+    private Integer qty145fl; 
+    private Integer qty145mtfl;
 
     private Integer tariffChassis20;
     private Integer tariffChassis40;
