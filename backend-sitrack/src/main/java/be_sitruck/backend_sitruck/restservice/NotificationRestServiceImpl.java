@@ -187,12 +187,12 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         if (isExpired) {
             title = docType + " Expired";
             message = docType + " pada " + referenceType + " " + referenceName + 
-                    " sudah expired sejak " + Math.abs(days) + " hari yang lalu";
+                    " sudah expired sejak tanggal " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(expiryDate);
             daysRemaining = 0;
         } else if (days <= 30) {
             title = docType + " Akan Expired";
             message = docType + " pada " + referenceType + " " + referenceName + 
-                    " akan expired dalam " + (days + 1) + " hari";
+                    " akan expired pada tanggal " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(expiryDate);
             daysRemaining = (int) days + 1;
         } else {
             return;
@@ -220,6 +220,15 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         String statusLabel = getStatusLabel(status);
         String title = "Status Order Diperbarui";
         String message = String.format("Order dengan ID %s telah berubah status menjadi: %s", orderId, statusLabel);
+        
+        if (status == 0 || status == 2 || status == 3) {
+            deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.ORDER_UPDATE,
+                "ORDER",
+                orderId
+            );
+        }
+        
         createNotificationForRoles(
             title, message, NotificationCategory.ORDER_UPDATE,
             orderId, "ORDER", null, null, Arrays.asList(4L)
@@ -249,6 +258,15 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             requestAssetId, 
             statusLabel
         );
+        
+        if (status == 2 || status == 3 || status == 1) {
+            deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.REQUEST_ASSET_UPDATE,
+                "REQUEST_ASSET",
+                requestAssetId
+            );
+        }
+        
         createNotificationForRoles(
             title,
             message,
@@ -257,7 +275,7 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             "REQUEST_ASSET",
             null,
             null,
-            roleIds
+            Arrays.asList(5L)
         );
     }
 
@@ -276,6 +294,15 @@ public class NotificationRestServiceImpl implements NotificationRestService {
         String statusLabel = getStatusLabel(status);
         String title = "Status SPJ Diperbarui";
         String message = String.format("SPJ dengan ID %s telah berubah status menjadi: %s", spjId, statusLabel);
+        
+        if (status == 0 || status == 2 || status == 3) {
+            deactivateNotificationsByCategoryAndReference(
+                NotificationCategory.SPJ_UPDATE,
+                "SPJ",
+                spjId
+            );
+        }
+        
         createNotificationForRoles(
             title, message, NotificationCategory.SPJ_UPDATE,
             spjId, "SPJ", null, null, Arrays.asList(4L)
@@ -301,5 +328,16 @@ public class NotificationRestServiceImpl implements NotificationRestService {
             case 4 -> "Done";
             default -> "Unknown";
         };
+    }
+
+    @Override
+    public void deactivateNotificationsByCategoryAndReference(NotificationCategory category, String referenceType, String referenceId) {
+        List<Notification> notifications = notificationDb.findByCategoryAndReferenceTypeAndReferenceIdAndIsActiveTrue(
+            category, referenceType, referenceId);
+        
+        for (Notification notification : notifications) {
+            notification.setIsActive(false);
+            notificationDb.save(notification);
+        }
     }
 }
