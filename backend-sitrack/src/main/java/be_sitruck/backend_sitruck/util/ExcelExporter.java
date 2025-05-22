@@ -360,4 +360,40 @@ public class ExcelExporter {
     public byte[] exportReportTruckToExcel(ReportTruck reportTruck) {
         return exportReportTruckToExcel(reportTruck, "Vehicle Maintenance Report", "", "src/main/resources/static/GIB.png");
     }
+
+    public byte[] exportCommissionsToExcel(List<Komisi> komisiList, String reportTitle, String period, String logoPath) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Commissions");
+            String companyInfo = "PT. GLORIOUS INTERBUANA\nKawasan Berikat Nusatara Marunda\nJl. Medan No. 4 Kav. C 18/2\nJakarta Utara - Indonesia";
+            String[] columns = {"Commission ID", "Truck ID", "Vehicle Name", "Location", "Truck Commission Fee", "Commission Fee"};
+            int startRow = addExcelHeader(workbook, sheet, logoPath, companyInfo, reportTitle, period, columns.length);
+            Row headerRow = sheet.createRow(startRow);
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+            }
+            int rowNum = startRow + 1;
+            for (Komisi komisi : komisiList) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(komisi.getKomisiId());
+                row.createCell(1).setCellValue(komisi.getTruck().getVehicleId());
+                row.createCell(2).setCellValue(komisi.getTruck().getVehicleBrand());
+                row.createCell(3).setCellValue(komisi.getLocation());
+                row.createCell(4).setCellValue(komisi.getTruckCommission());
+                row.createCell(5).setCellValue(komisi.getCommissionFee());
+            }
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export drivers to Excel", e);
+        }
+    }
+
+    public byte[] exportCommissionsToExcel(List<Komisi> komisiList) {
+        return exportCommissionsToExcel(komisiList, "Commissions Report", "", "src/main/resources/static/GIB.png");
+    }
 }

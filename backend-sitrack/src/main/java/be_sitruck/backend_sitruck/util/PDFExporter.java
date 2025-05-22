@@ -11,12 +11,17 @@ import com.itextpdf.text.pdf.PdfPCell;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 @Component
 public class PDFExporter {
+    Locale indo = new Locale("id", "ID");
+    NumberFormat currencyFmt = NumberFormat.getCurrencyInstance(indo);
 
     @Autowired
     private AssetDb assetDb;
@@ -235,7 +240,8 @@ public class PDFExporter {
                 table.addCell(order.getCustomer().getName());
                 table.addCell(order.getOrderDate().toString());
                 table.addCell(order.getMoveType());
-                table.addCell(String.valueOf(order.getDownPayment()));
+                String dwnPayment = currencyFmt.format(order.getDownPayment());
+                table.addCell(dwnPayment);
                 table.addCell(String.valueOf(order.getQtyChassis20()));
                 table.addCell(String.valueOf(order.getQtyChassis40()));
             }
@@ -287,8 +293,10 @@ public class PDFExporter {
                 table.addCell(spj.getChassis().getChassisType());
                 table.addCell(String.valueOf(spj.getContainerQty()));
                 table.addCell(spj.getContainerType());
-                table.addCell(String.valueOf(spj.getCommission()));
-                table.addCell(String.valueOf(spj.getOthersCommission()));
+                String comm = currencyFmt.format(spj.getCommission());
+                table.addCell(comm);
+                String othersComm = currencyFmt.format(spj.getOthersCommission());
+                table.addCell(othersComm);
                 table.addCell(spj.getDateOut().toString());
                 table.addCell(spj.getDateIn().toString());
             }
@@ -348,6 +356,44 @@ public class PDFExporter {
                 assets.setLength(assets.length() - 2);
             }
             table.addCell(assets.toString());
+
+            document.add(table);
+        } finally {
+            document.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportKomisiToPDF(List<Komisi> komisiList) throws DocumentException {
+        Document document = new Document(PageSize.A4.rotate());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+            addReportHeader(document, "Commissions Report ", "", "");
+            PdfPTable table = new PdfPTable(6);
+            table.setWidthPercentage(100);
+
+            table.addCell("Commission ID");
+            table.addCell("Truck ID");
+            table.addCell("Vehicle Name");
+            table.addCell("Location");
+            table.addCell("Truck Commission Fee");
+            table.addCell("Commission Fee");
+            
+
+            for (Komisi komisi : komisiList) {
+                table.addCell(komisi.getKomisiId());
+                table.addCell(komisi.getTruck().getVehicleId());
+                table.addCell(komisi.getTruck().getVehicleBrand());
+                table.addCell(komisi.getLocation());
+                String truckFee = currencyFmt.format(komisi.getTruckCommission());
+                table.addCell(truckFee);
+                String commissionFee = currencyFmt.format(komisi.getCommissionFee());
+                table.addCell(commissionFee);
+            }
 
             document.add(table);
         } finally {
