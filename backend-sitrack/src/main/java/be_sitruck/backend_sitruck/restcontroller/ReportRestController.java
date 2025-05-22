@@ -57,6 +57,25 @@ public class ReportRestController {
                     response.put("data", formattedCustomers);
                     response.put("columns", Arrays.asList("Customer ID", "Customer Name", "Site ID", "Address", "Destination"));
                     break;
+
+                case "ALL_COMMISSIONS":
+                    List<Komisi> komisiList = (List<Komisi>) reportData;
+                    List<Map<String, String>> formattedKomisi = komisiList.stream()
+                        .map(komisi -> {
+                            Map<String, String> row = new HashMap<>();
+                            row.put("Commission ID", komisi.getKomisiId());
+                            row.put("Truck ID", komisi.getTruck().getVehicleId());
+                            row.put("Vehicle Name", komisi.getTruck().getVehicleBrand());
+                            row.put("Location", komisi.getLocation());
+                            row.put("Truck Commission Fee", String.valueOf(komisi.getTruckCommission()));
+                            row.put ("Commission Fee", String.valueOf(komisi.getCommissionFee()));
+
+                            return row;
+                        })
+                        .collect(Collectors.toList());
+                    response.put("data", formattedKomisi);
+                    response.put("columns", Arrays.asList("Commission ID", "Truck ID", "Vehicle Name", "Location", "Truck Commission Fee", "Commission Fee"));
+                    break;
                     
                 case "ALL_VEHICLES":
                     List<Truck> vehicles = (List<Truck>) reportData;
@@ -193,6 +212,9 @@ public class ReportRestController {
                 case "ALL_DRIVERS":
                     pdfBytes = pdfExporter.exportDriversToPDF((List<SopirModel>) reportData);
                     break;
+                case "ALL_COMMISSIONS":
+                    pdfBytes = pdfExporter.exportKomisiToPDF((List<Komisi>) reportData);
+                    break;
                 case "ALL_ORDERS":
                     pdfBytes = pdfExporter.exportOrdersToPDF((List<Order>) reportData, fromDateStr, endDateStr);
                     break;
@@ -243,6 +265,9 @@ public class ReportRestController {
                     break;
                 case "ALL_SPJ":
                     excelBytes = excelExporter.exportSpjToExcel((List<Spj>) reportData, "SPJ Report", period, logoPath);
+                    break;
+                case "ALL_COMMISSIONS":
+                    excelBytes = excelExporter.exportCommissionsToExcel((List<Komisi>) reportData, "Commissions Report", "", logoPath);
                     break;
                 default:
                     return ResponseEntity.badRequest().body("Invalid report type");
