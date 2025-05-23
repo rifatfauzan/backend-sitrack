@@ -1,26 +1,35 @@
 package be_sitruck.backend_sitruck.restcontroller;
 
+import be_sitruck.backend_sitruck.model.ReportTruck;
 import be_sitruck.backend_sitruck.restdto.request.ReportTruckRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.BaseResponseDTO;
 import be_sitruck.backend_sitruck.restdto.response.ReportTruckResponseDTO;
 import be_sitruck.backend_sitruck.restservice.ReportTruckRestService;
+import be_sitruck.backend_sitruck.util.ExcelExporter;
+import be_sitruck.backend_sitruck.util.PDFExporter;
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/report-truck")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"https://sitrack.up.railway.app", "http://localhost:*", "http://127.0.0.1:*"}, allowCredentials = "true")
 public class ReportTruckRestController {
 
     private final ReportTruckRestService reportTruckRestService;
+    private final PDFExporter pdfExporter;
+    private final ExcelExporter excelExporter;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BaseResponseDTO<?>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -70,6 +79,49 @@ public class ReportTruckRestController {
             baseResponseDTO.setTimestamp(new Date());
             baseResponseDTO.setData(null);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(baseResponseDTO);
+        }
+    }
+
+    @PostMapping("/export/pdf")
+    public ResponseEntity<?> exportReportTruckToPDF(@RequestBody Map<String, String> body) {
+        String reportTruckId = body.get("reportTruckId");
+        if (reportTruckId == null || reportTruckId.isEmpty()) {
+            return ResponseEntity.badRequest().body("reportTruckId is required");
+        }
+
+        try {
+            ReportTruck report = reportTruckRestService.getReportTruckById(reportTruckId);
+            byte[] pdfBytes = pdfExporter.exportReportTruckToPDF(report);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "report_truck_" + report.getReportTruckId() + ".pdf");
+
+            return ResponseEntity.ok().headers(headers).body(pdfBytes);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/export/excel")
+    public ResponseEntity<?> exportReportTruckToExcel(@RequestBody Map<String, String> body) {
+        String reportTruckId = body.get("reportTruckId");
+        if (reportTruckId == null || reportTruckId.isEmpty()) {
+            return ResponseEntity.badRequest().body("reportTruckId is required");
+        }
+
+        try {
+            ReportTruck report = reportTruckRestService.getReportTruckById(reportTruckId);
+            String logoPath = "src/main/resources/static/GIB.png";
+            byte[] excelBytes = excelExporter.exportReportTruckToExcel(report, "Vehicle Maintenance Report", "", logoPath);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "report_truck_" + report.getReportTruckId() + ".xlsx");
+
+            return ResponseEntity.ok().headers(headers).body(excelBytes);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
