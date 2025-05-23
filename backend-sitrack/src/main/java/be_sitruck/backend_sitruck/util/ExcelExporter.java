@@ -10,6 +10,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.List;
 
 @Component
@@ -215,17 +216,19 @@ public class ExcelExporter {
         int rowIdx = 0;
         try {
             if (logoPath != null && !logoPath.isEmpty()) {
-                FileInputStream is = new FileInputStream(logoPath);
-                byte[] bytes = IOUtils.toByteArray(is);
-                int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
-                is.close();
-                CreationHelper helper = workbook.getCreationHelper();
-                Drawing<?> drawing = sheet.createDrawingPatriarch();
-                ClientAnchor anchor = helper.createClientAnchor();
-                anchor.setCol1(0);
-                anchor.setRow1(rowIdx);
-                Picture pict = drawing.createPicture(anchor, pictureIdx);
-                pict.resize(1, 3); // 1 kolom, 3 baris
+                InputStream is = getClass().getResourceAsStream("/static/GIB.png");
+                if (is != null) {
+                    byte[] bytes = IOUtils.toByteArray(is);
+                    int pictureIdx = workbook.addPicture(bytes, Workbook.PICTURE_TYPE_PNG);
+                    is.close();
+                    CreationHelper helper = workbook.getCreationHelper();
+                    Drawing<?> drawing = sheet.createDrawingPatriarch();
+                    ClientAnchor anchor = helper.createClientAnchor();
+                    anchor.setCol1(0);
+                    anchor.setRow1(rowIdx);
+                    Picture pict = drawing.createPicture(anchor, pictureIdx);
+                    pict.resize(1, 3); // 1 kolom, 3 baris
+                }
             }
         } catch (Exception e) { /* ignore logo if error */ }
         // Company info

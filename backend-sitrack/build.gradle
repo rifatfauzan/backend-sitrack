@@ -23,6 +23,28 @@ repositories {
 	mavenCentral()
 }
 
+sourceSets {
+	main {
+		resources {
+			srcDirs = ['src/main/resources']
+			includes = ['**/*']
+		}
+	}
+}
+
+task verifyResources {
+	doLast {
+		def resourceDir = sourceSets.main.resources.srcDirs.first()
+		def logoFile = new File(resourceDir, 'static/GIB.png')
+		if (!logoFile.exists()) {
+			throw new RuntimeException("Logo file not found at: ${logoFile.absolutePath}")
+		}
+		println "Logo file found at: ${logoFile.absolutePath}"
+	}
+}
+
+processResources.dependsOn verifyResources
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter'
