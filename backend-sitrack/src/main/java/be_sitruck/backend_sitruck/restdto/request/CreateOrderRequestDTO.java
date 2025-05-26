@@ -37,5 +37,9 @@ public class CreateOrderRequestDTO {
     private Integer qtyCh120fl = 0;
     private Integer qtyCh220fl = 0;
     private Integer qtyCh140fl = 0;
+
     private Integer qty120mt140fl = 0;
+    private Integer qty145mt = 0;
+    private Integer qty145fl = 0; 
+    private Integer qty145mtfl = 0;
 }

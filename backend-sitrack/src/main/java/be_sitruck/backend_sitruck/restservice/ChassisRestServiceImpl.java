@@ -182,5 +182,11 @@ public class ChassisRestServiceImpl implements ChassisRestService {
             if (updated) chassisDb.save(chassis);
         }
     }
+
+    // Menghitung jumlah chassis yang ada
+    @Override
+    public long countChassis(){
+        return chassisDb.count();
+    }
     
 }
