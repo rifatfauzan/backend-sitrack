@@ -14,4 +14,5 @@ public interface SopirRestService {
     CreateSopirResponseDTO updateSopir(String driverId, CreateSopirRequestDTO sopirDTO);
     String generateId (CreateSopirRequestDTO sopirDTO);
     void checkExpiringDriver();
+    long countSopir();
 }

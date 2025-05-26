@@ -57,7 +57,7 @@ public class NotificationRestController {
 
     @PutMapping("/{id}/read")
     public ResponseEntity<BaseResponseDTO<Notification>> markAsRead(
-        @PathVariable Long id,
+        @PathVariable("id") Long id,
         @RequestHeader("Authorization") String token
     ) {
         UserModel currentUser = getUserFromToken(token);

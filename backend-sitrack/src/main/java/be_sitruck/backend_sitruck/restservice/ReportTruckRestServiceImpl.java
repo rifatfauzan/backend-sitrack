@@ -103,6 +103,13 @@ public class ReportTruckRestServiceImpl implements ReportTruckRestService {
             .collect(Collectors.toList());
     }
 
+    @Override
+    public ReportTruck getReportTruckById(String reportTruckId) {
+        ReportTruck report = reportTruckDb.findByReportTruckId(reportTruckId);
+        if (report == null) throw new ValidationException("Report Truck tidak ditemukan");
+        return report;
+    }
+
     private ReportTruckRequestDTO convertToReportTruckDTO(ReportTruck report) {
         ReportTruckRequestDTO dto = new ReportTruckRequestDTO();
         dto.setReportTruckId(report.getReportTruckId());

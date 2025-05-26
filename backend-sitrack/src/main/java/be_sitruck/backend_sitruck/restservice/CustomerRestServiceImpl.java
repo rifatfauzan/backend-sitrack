@@ -253,32 +253,37 @@ public class CustomerRestServiceImpl implements CustomerRestService{
 
     // Tambahkan di CustomerRestServiceImpl.java
 
-@Override
-public List<Map<String, Object>> getCustomerTransactionStats(int year) {
-    List<Order> doneOrders = orderDb.findByOrderStatus(4); // 4 = Done
+    @Override
+    public List<Map<String, Object>> getCustomerTransactionStats(int year) {
+        List<Order> doneOrders = orderDb.findByOrderStatus(4); // 4 = Done
 
-    Map<String, Integer> customerCountMap = new HashMap<>();
+        Map<String, Integer> customerCountMap = new HashMap<>();
 
-    for (Order order : doneOrders) {
-        if (order.getOrderDate() != null) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(order.getOrderDate());
-            if (cal.get(Calendar.YEAR) == year) {
-                String customerName = order.getCustomer().getName();
-                customerCountMap.put(customerName, customerCountMap.getOrDefault(customerName, 0) + 1);
+        for (Order order : doneOrders) {
+            if (order.getOrderDate() != null) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(order.getOrderDate());
+                if (cal.get(Calendar.YEAR) == year) {
+                    String customerName = order.getCustomer().getName();
+                    customerCountMap.put(customerName, customerCountMap.getOrDefault(customerName, 0) + 1);
+                }
             }
         }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (var entry : customerCountMap.entrySet()) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", entry.getKey());
+            map.put("value", entry.getValue());
+            result.add(map);
+        }
+
+        return result;
     }
 
-    List<Map<String, Object>> result = new ArrayList<>();
-    for (var entry : customerCountMap.entrySet()) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("name", entry.getKey());
-        map.put("value", entry.getValue());
-        result.add(map);
+    // Menghitung customer yang ada
+    @Override
+    public long countCustomer(){
+        return customerDb.count();
     }
-
-    return result;
-}
-
 }

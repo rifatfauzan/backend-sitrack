@@ -16,4 +16,5 @@ public interface OrderRestService {
     CreateOrderRequestDTO updateOrder (String orderId, CreateOrderRequestDTO request);
     void markOrderAsDone(String orderId);
     List<Map<String, Object>> getMonthlyOrderStats(int year);
+    List<Map<String, Object>> getDestinationDistribution(int year); 
 }

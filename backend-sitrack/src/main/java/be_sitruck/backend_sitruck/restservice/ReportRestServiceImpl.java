@@ -29,6 +29,9 @@ public class ReportRestServiceImpl implements ReportRestService {
     @Autowired
     private SpjDb spjDb;
 
+    @Autowired
+    private KomisiDb komisiDb;
+
     @Override
     public List<Customer> getAllCustomers() {
         return customerDb.findAll();
@@ -44,6 +47,11 @@ public class ReportRestServiceImpl implements ReportRestService {
     @Override
     public List<SopirModel> getAllDrivers() {
         return sopirDb.findAll();
+    }
+
+    @Override
+    public List<Komisi> getAllKomisi() {
+        return komisiDb.findAll();
     }
     @Override
     public List<Order> getOrdersByDateRange(Date fromDate, Date endDate) {
@@ -70,6 +78,8 @@ public class ReportRestServiceImpl implements ReportRestService {
                 return getAllChassis();
             case "ALL_DRIVERS":
                 return getAllDrivers();
+            case "ALL_COMMISSIONS":
+                return getAllKomisi();
             case "ALL_ORDERS":
                 return getOrdersByDateRange(filter.getFromDate(), filter.getEndDate());
             case "ALL_SPJ":

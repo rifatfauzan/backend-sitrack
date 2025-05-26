@@ -13,5 +13,5 @@ public interface CustomerRestService {
     CustomerResponseDTO addCustomer(CreateCustomerRequestDTO customer);
     CustomerResponseDTO updateCustomer(String id, UpdateCustomerRequestDTO customer);
     List<Map<String, Object>> getCustomerTransactionStats(int year);
-
+    long countCustomer();
 }
