@@ -260,18 +260,28 @@ public class SpjRestServiceImpl implements SpjRestService {
         return SpjToSpjResponseDTO(spj);
     }
 
-    @Override
     @Transactional
+    @Override
     public SpjResponseDTO approveSpj(ApproveSpjRequestDTO approveRequestDTO) {
         var spj = spjDb.findById(approveRequestDTO.getSpjId())
             .orElseThrow(() -> new ValidationException("SPJ tidak ditemukan!"));
 
         String currentUser = jwtUtils.getCurrentUsername();
+        int newStatus = approveRequestDTO.getStatus();
 
-        spj.setStatus(approveRequestDTO.getStatus());
+        spj.setStatus(newStatus);
         spj.setRemarksSupervisor(approveRequestDTO.getRemarksSupervisor());
         spj.setApprovedBy(currentUser);
         spj.setApprovedDate(new Date());
+
+        if (newStatus == 0) {
+            Order order = spj.getOrder();
+
+            order.getSpjList().removeIf(s -> s.getId().equals(spj.getId()));
+            orderDb.save(order);
+    
+            spj.setOrder(null);
+        }
 
         String moveType = spj.getOrder().getMoveType().toUpperCase();
         var driver = spj.getDriver();
