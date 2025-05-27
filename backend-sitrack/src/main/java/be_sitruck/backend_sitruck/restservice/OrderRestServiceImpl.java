@@ -104,6 +104,12 @@ public class OrderRestServiceImpl implements OrderRestService {
         order.setQtyCh220fl(request.getQtyCh220fl());
         order.setQtyCh140fl(request.getQtyCh140fl());
 
+        order.setQty120mt140fl(request.getQty120mt140fl());
+        order.setQty145mt(request.getQty145mt());
+        order.setQty145fl(request.getQty145fl());
+        order.setQty145mtfl(request.getQty145mtfl());
+
+
         orderDb.save(order);
 
         notificationRestService.createOrderApprovalNotification(orderId, Arrays.asList(1L, 2L, 3L));;
@@ -122,6 +128,9 @@ public class OrderRestServiceImpl implements OrderRestService {
     public OrderDetailResponseDTO getOrderById(String orderId) {
         Order order = orderDb.findById(orderId)
                 .orElseThrow(() -> new ValidationException("Order tidak ditemukan!"));
+
+
+                order.getSpjList().removeIf(spj -> spj.getStatus() == 0);
 
         return toDTO(order);
     }
@@ -177,6 +186,7 @@ public class OrderRestServiceImpl implements OrderRestService {
             order.getQty220mt(),
             order.getQty140mtfl(),
             order.getQty140mt(),
+            // order.getQty120mt140fl(),
             order.getQty120mt120fl(),
             order.getQty120mt220fl(),
             order.getQty220mt120fl(),
@@ -184,6 +194,11 @@ public class OrderRestServiceImpl implements OrderRestService {
             order.getQtyCh120fl(),
             order.getQtyCh220fl(),
             order.getQtyCh140fl(),
+
+            order.getQty120mt140fl(),
+            order.getQty145mt(),
+            order.getQty145fl(),
+            order.getQty145mtfl(),
 
             order.getTariffChassis20(),
             order.getTariffChassis40(),
@@ -267,12 +282,20 @@ public class OrderRestServiceImpl implements OrderRestService {
         existingOrder.setQty140mtfl(request.getQty140mtfl());
         existingOrder.setQty140mt(request.getQty140mt());
         existingOrder.setQty120mt120fl(request.getQty120mt120fl());
+        existingOrder.setQty120mt140fl(request.getQty120mt140fl());
+
         existingOrder.setQty120mt220fl(request.getQty120mt220fl());
         existingOrder.setQty220mt120fl(request.getQty220mt120fl());
         existingOrder.setQty220mt220fl(request.getQty220mt220fl());
         existingOrder.setQtyCh120fl(request.getQtyCh120fl());
         existingOrder.setQtyCh220fl(request.getQtyCh220fl());
         existingOrder.setQtyCh140fl(request.getQtyCh140fl());
+
+        existingOrder.setQty120mt140fl(request.getQty120mt140fl());
+        existingOrder.setQty145mt(request.getQty145mt());
+        existingOrder.setQty145fl(request.getQty145fl());
+        existingOrder.setQty145mtfl(request.getQty145mtfl());
+
         existingOrder.setRemarksOperasional(request.getRemarksOperasional());
         existingOrder.setOrderStatus(1);
 

@@ -17,6 +17,8 @@ import java.util.Locale;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
 
 @Component
 public class PDFExporter {
@@ -31,14 +33,23 @@ public class PDFExporter {
         headerTable.setWidthPercentage(100);
         headerTable.setWidths(new int[]{1, 10});
         try {
-            String logoPath = ResourceUtils.getFile("classpath:static/GIB.png").getAbsolutePath();
-            Image logo = Image.getInstance(logoPath);
-            logo.scaleToFit(110, 110);
-            PdfPCell logoCell = new PdfPCell(logo, false);
-            logoCell.setBorder(Rectangle.NO_BORDER);
-            logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            logoCell.setPadding(0f);
-            headerTable.addCell(logoCell);
+            InputStream logoStream = getClass().getResourceAsStream("/static/GIB.png");
+            if (logoStream != null) {
+                Image logo = Image.getInstance(IOUtils.toByteArray(logoStream));
+                logo.scaleToFit(110, 110);
+                PdfPCell logoCell = new PdfPCell(logo, false);
+                logoCell.setBorder(Rectangle.NO_BORDER);
+                logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                logoCell.setPadding(0f);
+                headerTable.addCell(logoCell);
+                logoStream.close();
+            } else {
+                PdfPCell logoCell = new PdfPCell(new Phrase("[LOGO]"));
+                logoCell.setBorder(Rectangle.NO_BORDER);
+                logoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                logoCell.setPadding(0f);
+                headerTable.addCell(logoCell);
+            }
         } catch (Exception e) {
             PdfPCell logoCell = new PdfPCell(new Phrase("[LOGO]"));
             logoCell.setBorder(Rectangle.NO_BORDER);
