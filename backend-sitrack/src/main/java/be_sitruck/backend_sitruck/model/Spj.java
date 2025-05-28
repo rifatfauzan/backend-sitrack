@@ -18,8 +18,8 @@ public class Spj {
     @Column(name = "spj_id", nullable = false)
     private String id;
     
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false, referencedColumnName = "order_id")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "order_id", nullable = true, referencedColumnName = "order_id")
     private Order order;
     
     @ManyToOne
