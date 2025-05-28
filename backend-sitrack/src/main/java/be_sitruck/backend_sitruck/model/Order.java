@@ -34,7 +34,7 @@ public class Order implements Serializable{
     // @Column(name = "customer_id")
     // private String customer.getId();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<Spj> spjList = new ArrayList<>();
 
 
@@ -106,6 +106,9 @@ public class Order implements Serializable{
 
     @Column(name = "qty_120mt120fl")
     private Integer qty120mt120fl;
+
+    // @Column(name = "qty_120mt140fl")
+    // private Integer qty120mt140fl;
 
     @Column(name = "qty_120mt220fl")
     private Integer qty120mt220fl;
