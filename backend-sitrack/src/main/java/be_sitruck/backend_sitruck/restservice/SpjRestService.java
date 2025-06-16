@@ -6,6 +6,7 @@ import java.util.Map;
 import be_sitruck.backend_sitruck.restdto.request.ApproveSpjRequestDTO;
 import be_sitruck.backend_sitruck.restdto.request.CreateSpjRequestDTO;
 import be_sitruck.backend_sitruck.restdto.response.SpjResponseDTO;
+import be_sitruck.backend_sitruck.model.Spj;
 
 public interface SpjRestService {
     List<SpjResponseDTO> getAllSpj();
@@ -16,6 +17,6 @@ public interface SpjRestService {
     public Map<String, Integer> getAvailableChassisAndContainers(String orderId);
     SpjResponseDTO approveSpj(ApproveSpjRequestDTO approveRequestDTO);
     void markSpjAsDone(String id);
-    // SpjResponseDTO updateSpj(String id, UpdateSpjRequestDTO spj);
     SpjResponseDTO updateSPJ (String spjId, CreateSpjRequestDTO spjDTO);
+    Spj getSpjEntityById(String id);
 }

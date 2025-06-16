@@ -161,6 +161,11 @@ public class SpjRestServiceImpl implements SpjRestService {
     }
 
     @Override
+    public Spj getSpjEntityById(String id) {
+        return spjDb.findById(id).orElse(null);
+    }
+
+    @Override
     public SpjResponseDTO addSpj(CreateSpjRequestDTO spjDTO) {
         String currenUser = jwtUtils.getCurrentUsername();
 
@@ -274,14 +279,14 @@ public class SpjRestServiceImpl implements SpjRestService {
         spj.setApprovedBy(currentUser);
         spj.setApprovedDate(new Date());
 
-        if (newStatus == 0) {
-            Order order = spj.getOrder();
+        // if (newStatus == 0) {
+        //     Order order = spj.getOrder();
 
-            order.getSpjList().removeIf(s -> s.getId().equals(spj.getId()));
-            orderDb.save(order);
+        //     order.getSpjList().removeIf(s -> s.getId().equals(spj.getId()));
+        //     orderDb.save(order);
     
-            spj.setOrder(null);
-        }
+        //     spj.setOrder(null);
+        // }
 
         String moveType = spj.getOrder().getMoveType().toUpperCase();
         var driver = spj.getDriver();

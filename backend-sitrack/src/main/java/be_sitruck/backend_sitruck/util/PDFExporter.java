@@ -273,7 +273,7 @@ public class PDFExporter {
             PdfWriter.getInstance(document, out);
             document.open();
             addReportHeader(document, "SPJ Report", fromDate, endDate);
-            PdfPTable table = new PdfPTable(15);
+            PdfPTable table = new PdfPTable(14);
             table.setWidthPercentage(100);
 
             table.addCell("SPJ ID");
@@ -284,7 +284,6 @@ public class PDFExporter {
             table.addCell("Vehicle ID");
             table.addCell("Chassis ID");
             table.addCell("Chassis Size");
-            table.addCell("Chassis Type");
             table.addCell("Container Qty");
             table.addCell("Container Type");
             table.addCell("Commission");
@@ -301,7 +300,6 @@ public class PDFExporter {
                 table.addCell(spj.getVehicle().getVehicleId());
                 table.addCell(spj.getChassis().getChassisId());
                 table.addCell(String.valueOf(spj.getChassisSize()));
-                table.addCell(spj.getChassis().getChassisType());
                 table.addCell(String.valueOf(spj.getContainerQty()));
                 table.addCell(spj.getContainerType());
                 String comm = currencyFmt.format(spj.getCommission());
