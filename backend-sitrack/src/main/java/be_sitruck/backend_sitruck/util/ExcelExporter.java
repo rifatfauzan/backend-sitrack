@@ -171,7 +171,7 @@ public class ExcelExporter {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("SPJ");
             String companyInfo = "PT. GLORIOUS INTERBUANA\nKawasan Berikat Nusatara Marunda\nJl. Medan No. 4 Kav. C 18/2\nJakarta Utara - Indonesia";
-            String[] columns = {"SPJ ID", "Order ID", "Customer ID", "Customer Name", "Driver Name", "Vehicle ID", "Chassis ID", "Chassis Size", "Chassis Type", "Container Qty", "Container Type", "Commission", "Other Commission", "Date Out", "Date In"};
+            String[] columns = {"SPJ ID", "Order ID", "Customer ID", "Customer Name", "Driver Name", "Vehicle ID", "Chassis ID", "Chassis Size", "Container Qty", "Container Type", "Commission", "Other Commission", "Date Out", "Date In"};
             int startRow = addExcelHeader(workbook, sheet, logoPath, companyInfo, reportTitle, period, columns.length);
             Row headerRow = sheet.createRow(startRow);
             for (int i = 0; i < columns.length; i++) {
@@ -189,13 +189,12 @@ public class ExcelExporter {
                 row.createCell(5).setCellValue(spj.getVehicle().getVehicleId());
                 row.createCell(6).setCellValue(spj.getChassis().getChassisId());
                 row.createCell(7).setCellValue(spj.getChassisSize());
-                row.createCell(8).setCellValue(spj.getChassis().getChassisType());
-                row.createCell(9).setCellValue(spj.getContainerQty());
-                row.createCell(10).setCellValue(spj.getContainerType());
-                row.createCell(11).setCellValue(spj.getCommission());
-                row.createCell(12).setCellValue(spj.getOthersCommission());
-                row.createCell(13).setCellValue(spj.getDateOut().toString());
-                row.createCell(14).setCellValue(spj.getDateIn().toString());
+                row.createCell(8).setCellValue(spj.getContainerQty());
+                row.createCell(9).setCellValue(spj.getContainerType());
+                row.createCell(10).setCellValue(spj.getCommission());
+                row.createCell(11).setCellValue(spj.getOthersCommission());
+                row.createCell(12).setCellValue(spj.getDateOut().toString());
+                row.createCell(13).setCellValue(spj.getDateIn().toString());
             }
             for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
