@@ -1,6 +1,6 @@
 # SiTrack - Tracking Information System for PT. Glorious Interbuana
 
-![SiTrack Banner](../../FE/frontend-sitrack/sitrack-frontend/src/assets/SiTrack%20-%20README.png)
+![SiTrack Banner](backend-sitrack/src/main/resources/static/SiTrack%20-%20README.png)
 
 SiTrack is a comprehensive logistics management system designed specifically for PT. Glorious Interbuana. This backend API provides RESTful services for managing transportation operations, from vehicle management and customer bookings to reporting and analytics.
 
